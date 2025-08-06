@@ -4,24 +4,21 @@ FROM python:3.9-slim
 # Thiết lập thư mục làm việc bên trong container
 WORKDIR /app
 
-# Cài đặt các biến môi trường cần thiết cho Streamlit
-ENV STREAMLIT_SERVER_HEADLESS=true \
-    STREAMLIT_SERVER_ENABLE_CORS=false \
-    STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
-    STREAMLIT_SERVER_PORT=8080
-
 # Sao chép file requirements trước để tận dụng cache của Docker
 COPY requirements.txt .
 
 # Cài đặt các thư viện Python
+# Đảm bảo requirements.txt có đủ thư viện!
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Sao chép toàn bộ mã nguồn còn lại của ứng dụng
 COPY . .
 
-# Mở cổng 8080 để container có thể nhận kết nối từ bên ngoài
+# Mở cổng 8080 (chủ yếu mang tính thông báo cho người đọc Dockerfile)
+# Cloud Run sẽ tự động quản lý cổng này
 EXPOSE 8080
 
 # Lệnh để khởi chạy ứng dụng Streamlit
-# Streamlit sẽ tự động sử dụng các biến môi trường đã cài đặt ở trên
-CMD ["streamlit", "run", "app.py"]
+# Quan trọng: Lắng nghe trên cổng do biến $PORT cung cấp, và địa chỉ 0.0.0.0
+# Cách này linh hoạt hơn là dùng ENV để gán cứng cổng.
+CMD streamlit run app.py --server.port $PORT --server.address 0.0.0.0
