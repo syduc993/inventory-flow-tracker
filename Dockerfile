@@ -1,27 +1,27 @@
-# Sử dụng Python base
-FROM python:3.10-slim
+# Sử dụng một image Python chính thức, gọn nhẹ
+FROM python:3.9-slim
 
-# Cài đặt các gói cần thiết cho hệ điều hành
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
+# Thiết lập thư mục làm việc bên trong container
 WORKDIR /app
 
-# Copy code và requirements
+# Cài đặt các biến môi trường cần thiết cho Streamlit
+ENV STREAMLIT_SERVER_HEADLESS=true \
+    STREAMLIT_SERVER_ENABLE_CORS=false \
+    STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
+    STREAMLIT_SERVER_PORT=8080
+
+# Sao chép file requirements trước để tận dụng cache của Docker
 COPY requirements.txt .
 
-
-# Tạo thư mục src để copy code theo cấu trúc
-RUN mkdir -p src/styles src/utils
-
-# Copy toàn bộ code vào trong workdir
-COPY ./src ./src
-COPY app.py ./
-
-# Cài đặt các package pip
+# Cài đặt các thư viện Python
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Sao chép toàn bộ mã nguồn còn lại của ứng dụng
+COPY . .
+
+# Mở cổng 8080 để container có thể nhận kết nối từ bên ngoài
 EXPOSE 8080
 
-CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0"]
+# Lệnh để khởi chạy ứng dụng Streamlit
+# Streamlit sẽ tự động sử dụng các biến môi trường đã cài đặt ở trên
+CMD ["streamlit", "run", "app.py"]
