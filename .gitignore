@@ -1,0 +1,26 @@
+# Ignore Python compiled files
+__pycache__/
+*.pyc
+
+# Ignore virtual envs
+.venv/
+env/
+venv/
+
+# Ignore Streamlit secrets
+.streamlit/secrets.toml
+
+# Dataset and sensitive files
+src/data/
+*.db
+*.sqlite
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,993 @@
+================================================================================
+THÔNG TIN DỰ ÁN HOÀN CHỈNH
+================================================================================
+Thời gian tạo: 2025-08-06 11:29:21
+Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
+================================================================================
+
+📁 CẤU TRÚC THU MỤC
+--------------------------------------------------
+├── 📁 src/
+│   ├── 📁 styles/
+│   │   └── 📄 material_ui.py
+│   └── 📁 utils/
+│       ├── 📄 api.py
+│       ├── 📄 config.py
+│       └── 📄 larkbase.py
+├── 📄 .gitignore
+├── 📄 app.py
+├── 📄 docker-compose.yml
+├── 📄 Dockerfile
+├── 📄 Get detail code.ipynb
+├── 📄 project_complete_info.txt
+├── 📄 README.md
+└── 📄 requirements.txt
+
+
+📄 DANH SÁCH TẤT CẢ FILE
+--------------------------------------------------
+.gitignore (327 bytes)
+app.py (10698 bytes)
+docker-compose.yml (241 bytes)
+Dockerfile (654 bytes)
+Get detail code.ipynb (8697 bytes)
+project_complete_info.txt (0 bytes)
+README.md (260 bytes)
+requirements.txt (0 bytes)
+src\styles\material_ui.py (1932 bytes)
+src\utils\api.py (1940 bytes)
+src\utils\config.py (1673 bytes)
+src\utils\larkbase.py (6380 bytes)
+
+Tổng cộng: 12 file
+
+💻 NỘI DUNG TẤT CẢ FILE CODE
+================================================================================
+
+============================================================
+FILE: app.py
+============================================================
+# FILE: app.py
+
+import streamlit as st
+import datetime
+import time
+from src.styles.material_ui import load_material_ui_css
+from src.utils.api import fetch_imex_details
+from src.utils.larkbase import (
+    larkbase_find_by_field,
+    larkbase_write_data,
+    larkbase_update_data,
+    larkbase_delete_record,
+)
+from src.utils.config import (
+    LARKBASE_FIELDS, API_FIELDS,
+    CREATABLE_FIELDS, UPDATABLE_FIELDS, LOCK_FIELDS
+)
+
+APP_TOKEN = "Rm9PbvKLeaFFZcsSQpElnRjIgXg"
+TABLE_ID = "tblJJPUEFhsXHaxY"
+
+# --- Helper Functions (Không thay đổi) ---
+def get_current_timestamp_ms():
+    return int(time.time() * 1000)
+
+def convert_date_string_to_ms(date_string: str) -> int | None:
+    if not date_string or not isinstance(date_string, str):
+        return None
+    try:
+        dt_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+        return int(dt_obj.timestamp() * 1000)
+    except ValueError:
+        return None
+
+def format_timestamp_ms_to_string(ts_ms) -> str:
+    if not ts_ms:
+        return ""
+    try:
+        return datetime.datetime.fromtimestamp(int(ts_ms) / 1000).strftime("%Y-%m-%d %H:%M:%S")
+    except (ValueError, TypeError):
+        return str(ts_ms)
+
+# --- Callback functions để xử lý form submissions ---
+
+def handle_success(message: str):
+    """Đặt thông báo thành công và reset ô nhập liệu."""
+    st.session_state.last_success_message = message
+    # Gán lại giá trị cho widget trong session state, đây là cách làm đúng trong callback
+    st.session_state.bill_id_input = ""
+
+def handle_update(record_id, original_bill_id):
+    """Callback cho nút 'Lưu chỉnh sửa'."""
+    update_data = {}
+    date_fields = ["Ngày nhận hàng"]
+    numeric_fields = ["Số lượng bao/tải giao", "Số lượng bao tải nhận", "Thiếu thừa bao"]
+
+    # Lấy dữ liệu đã sửa từ các widget trong form thông qua st.session_state
+    for col in UPDATABLE_FIELDS:
+        key = f"update_{col}"
+        if key in st.session_state:
+            val = st.session_state[key]
+            if col in date_fields and val is not None:
+                dt_obj = datetime.datetime.combine(val, datetime.datetime.min.time())
+                update_data[col] = int(dt_obj.timestamp() * 1000)
+            elif val is not None:
+                 update_data[col] = val
+
+    if not update_data:
+        st.warning("Không có thay đổi nào để lưu.")
+        return
+
+    result = larkbase_update_data(APP_TOKEN, TABLE_ID, record_id, update_data)
+    if result:
+        handle_success(f"📝 Cập nhật thành công cho Bill ID: {original_bill_id}. Giao diện đã được reset.")
+    else:
+        st.error("❌ Lỗi khi cập nhật dữ liệu!")
+
+def handle_delete(record_id, original_bill_id):
+    """Callback cho nút 'Xóa Bill này'."""
+    result = larkbase_delete_record(APP_TOKEN, TABLE_ID, record_id)
+    if result:
+        handle_success(f"🗑️ Đã xóa thành công Bill ID: {original_bill_id}. Giao diện đã được reset.")
+    else:
+        st.error("❌ Xóa không thành công!")
+
+def handle_create(api_data, original_bill_id):
+    """Callback cho nút 'Thêm mới vào Larkbase'."""
+    new_fields = {}
+    # Lấy dữ liệu từ các widget trong form
+    for col in CREATABLE_FIELDS:
+        key = f"add_{col}"
+        if key in st.session_state:
+            new_fields[col] = st.session_state[key]
+
+    # Thêm các trường tự động tạo
+    new_fields["ID"] = api_data['ID']
+    new_fields["Ngày bàn giao"] = get_current_timestamp_ms()
+
+    record_data = {**new_fields, **api_data}
+    final_record_data = {k: v for k, v in record_data.items() if v is not None and str(v) != ""}
+
+    try:
+        ok = larkbase_write_data(APP_TOKEN, TABLE_ID, final_record_data)
+        if ok:
+            handle_success(f"✅ Đã thêm thành công Bill ID: {original_bill_id}. Giao diện đã được reset.")
+        else:
+            st.error("❌ Không thể thêm mới. Kiểm tra lại thông báo lỗi từ API bên trên nếu có.")
+    except Exception as e:
+        st.error(f"Lỗi khi ghi dữ liệu: {e}")
+
+
+# --- Streamlit App UI ---
+st.set_page_config(layout="centered")
+
+# Khởi tạo session state nếu chưa tồn tại
+if 'last_success_message' not in st.session_state:
+    st.session_state.last_success_message = None
+if 'bill_id_input' not in st.session_state:
+    st.session_state.bill_id_input = ""
+
+load_material_ui_css()
+st.markdown(
+    '<div style="text-align:center;"><h2>📦 Phân phối giao nhận IMEX</h2>'
+    '<p style="color:#1976d2"><b>Nhập Bill ID, tra cứu, thêm, sửa, xóa thông tin giao nhận</b></p></div>',
+    unsafe_allow_html=True,
+)
+
+# Hiển thị thông báo thành công (nếu có) và xóa đi
+if st.session_state.last_success_message:
+    st.success(st.session_state.last_success_message)
+    st.session_state.last_success_message = None
+
+# Giá trị của widget giờ sẽ được điều khiển bởi các hàm callback
+bill_id = st.text_input(
+    "Nhập Bill ID:",
+    placeholder="Nhập mã Bill ID giao nhận",
+    key="bill_id_input"
+).strip()
+
+if bill_id:
+    record = larkbase_find_by_field(APP_TOKEN, TABLE_ID, "ID", bill_id)
+
+    # --- RECORD EXISTS: VIEW / UPDATE / DELETE ---
+    if record:
+        fields = record.get("fields", {})
+        st.markdown(f"<b>Đã tồn tại thông tin Bill ID <span style='color: #1976d2'>{bill_id}</span>!</b>", unsafe_allow_html=True)
+
+        has_lock_values = any(fields.get(f) for f in LOCK_FIELDS)
+        numeric_fields = ["Số lượng bao/tải giao", "Số lượng bao tải nhận", "Thiếu thừa bao"]
+        date_fields = ["Ngày nhận hàng"]
+
+        with st.form("update_or_delete"):
+            for col in LARKBASE_FIELDS:
+                val = fields.get(col, "")
+                is_editable = (col in UPDATABLE_FIELDS) and not (col in LOCK_FIELDS and val)
+
+                if not is_editable:
+                    display_val = format_timestamp_ms_to_string(val) if col in date_fields or col == "Ngày bàn giao" else val
+                    st.text_input(col, display_val, key=f"readonly_{col}", disabled=True)
+                else:
+                    if col in numeric_fields:
+                        default_val = int(val) if val else 0
+                        st.number_input(col, key=f"update_{col}", step=1, value=default_val, format="%d")
+                    elif col in date_fields:
+                        default_val = datetime.datetime.fromtimestamp(int(val) / 1000).date() if val else None
+                        st.date_input(col, key=f"update_{col}", value=default_val)
+                    else:
+                        st.text_input(col, val, key=f"update_{col}")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.form_submit_button(
+                    "Lưu chỉnh sửa",
+                    on_click=handle_update,
+                    args=(record["record_id"], bill_id),
+                    use_container_width=True
+                )
+
+            can_delete = not has_lock_values
+            with col2:
+                st.form_submit_button(
+                    "Xóa Bill này",
+                    disabled=not can_delete,
+                    type="secondary",
+                    on_click=handle_delete,
+                    args=(record["record_id"], bill_id),
+                    use_container_width=True
+                )
+
+            if not can_delete:
+                st.info(f"Lưu ý: Bill này không thể xóa vì đã có thông tin ở một trong các trường sau: {', '.join(LOCK_FIELDS)}. Do đó, nút xóa đã được vô hiệu hóa.")
+
+    # --- RECORD NOT FOUND: CREATE NEW ---
+    else:
+        st.info(f"Đang tự động tra cứu và thêm mới Bill ID: {bill_id}...")
+
+        with st.spinner("Đang tải dữ liệu từ API..."):
+            imex_items = fetch_imex_details(bill_id)
+
+        if not imex_items:
+            st.error("❌ Không lấy được dữ liệu chi tiết, kiểm tra lại Bill ID.")
+        else:
+            example_item = imex_items[0]
+            api_data = {
+                "ID": bill_id, "Kho đi": example_item.get("fromDepotId", ""), "Kho đến": example_item.get("toDepotId", ""),
+                "Số lượng": int(example_item.get("realQuantity") or 0), "Số lượng sản phẩm yêu cầu": int(example_item.get("requiredQuantity") or 0),
+                "Số lượng sản phẩm hỏng": int(example_item.get("damagedQuantity") or 0), "Số lượng sản phẩm yêu cầu được duyệt": int(example_item.get("approvedQuantity") or 0),
+                "Số lượng sản phẩm yêu cầu được xác nhận": int(example_item.get("realQuantity") or 0), "Ngày tạo": convert_date_string_to_ms(example_item.get("requiredAt", "")),
+                "Ngày duyệt": convert_date_string_to_ms(example_item.get("approvedAt", "")), "Ngày xác nhận": convert_date_string_to_ms(example_item.get("confirmedAt", "")),
+                "Người xác nhận": example_item.get("approvedByUser", ""),
+            }
+
+            with st.form("create_new"):
+                numeric_fields = ["Số lượng bao/tải giao"]
+
+                for col in LARKBASE_FIELDS:
+                    is_creatable = col in CREATABLE_FIELDS
+                    if is_creatable:
+                        if col in numeric_fields:
+                            st.number_input(col, key=f"add_{col}", step=1, value=0, format="%d")
+                        else:
+                            st.text_input(col, "", key=f"add_{col}")
+                    else:
+                        if col == "ID":
+                            st.text_input(col, api_data['ID'], key=f"add_{col}_disabled", disabled=True)
+                        elif col == "Ngày bàn giao":
+                            ts_ms = get_current_timestamp_ms()
+                            st.text_input(col, format_timestamp_ms_to_string(ts_ms), key=f"add_{col}_disabled", disabled=True)
+                        else:
+                            st.text_input(col, "", key=f"add_{col}_disabled", disabled=True, help="Trường này sẽ được nhập ở bước cập nhật sau.")
+
+                st.form_submit_button(
+                    "Thêm mới vào Larkbase",
+                    on_click=handle_create,
+                    args=(api_data, bill_id),
+                    use_container_width=True
+                )
+
+============================================================
+
+============================================================
+FILE: docker-compose.yml
+============================================================
+vversion: '3.8'
+services:
+  imex-distribution-app:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_ENABLE_CORS=false
+
+============================================================
+
+============================================================
+FILE: project_complete_info.txt
+============================================================
+================================================================================
+THÔNG TIN DỰ ÁN HOÀN CHỈNH
+================================================================================
+Thời gian tạo: 2025-08-06 11:29:21
+Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
+================================================================================
+
+📁 CẤU TRÚC THU MỤC
+--------------------------------------------------
+├── 📁 src/
+│   ├── 📁 styles/
+│   │   └── 📄 material_ui.py
+│   └── 📁 utils/
+│       ├── 📄 api.py
+│       ├── 📄 config.py
+│       └── 📄 larkbase.py
+├── 📄 .gitignore
+├── 📄 app.py
+├── 📄 docker-compose.yml
+├── 📄 Dockerfile
+├── 📄 Get detail code.ipynb
+├── 📄 project_complete_info.txt
+├── 📄 README.md
+└── 📄 requirements.txt
+
+
+📄 DANH SÁCH TẤT CẢ FILE
+--------------------------------------------------
+.gitignore (327 bytes)
+app.py (10698 bytes)
+docker-compose.yml (241 bytes)
+Dockerfile (654 bytes)
+Get detail code.ipynb (8697 bytes)
+project_complete_info.txt (0 bytes)
+README.md (260 bytes)
+requirements.txt (0 bytes)
+src\styles\material_ui.py (1932 bytes)
+src\utils\api.py (1940 bytes)
+src\utils\config.py (1673 bytes)
+src\utils\larkbase.py (6380 bytes)
+
+Tổng cộng: 12 file
+
+💻 NỘI DUNG TẤT CẢ FILE CODE
+================================================================================
+
+============================================================
+FILE: app.py
+============================================================
+# FILE: app.py
+
+import streamlit as st
+import datetime
+import time
+from src.styles.material_ui import load_material_ui_css
+from src.utils.api import fetch_imex_details
+from src.utils.larkbase import (
+    larkbase_find_by_field,
+    larkbase_write_data,
+    larkbase_update_data,
+    larkbase_delete_record,
+)
+from src.utils.config import (
+    LARKBASE_FIELDS, API_FIELDS,
+    CREATABLE_FIELDS, UPDATABLE_FIELDS, LOCK_FIELDS
+)
+
+APP_TOKEN = "Rm9PbvKLeaFFZcsSQpElnRjIgXg"
+TABLE_ID = "tblJJPUEFhsXHaxY"
+
+# --- Helper Functions (Không thay đổi) ---
+def get_current_timestamp_ms():
+    return int(time.time() * 1000)
+
+def convert_date_string_to_ms(date_string: str) -> int | None:
+    if not date_string or not isinstance(date_string, str):
+        return None
+    try:
+        dt_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+        return int(dt_obj.timestamp() * 1000)
+    except ValueError:
+        return None
+
+def format_timestamp_ms_to_string(ts_ms) -> str:
+    if not ts_ms:
+        return ""
+    try:
+        return datetime.datetime.fromtimestamp(int(ts_ms) / 1000).strftime("%Y-%m-%d %H:%M:%S")
+    except (ValueError, TypeError):
+        return str(ts_ms)
+
+# --- Callback functions để xử lý form submissions ---
+
+def handle_success(message: str):
+    """Đặt thông báo thành công và reset ô nhập liệu."""
+    st.session_state.last_success_message = message
+    # Gán lại giá trị cho widget trong session state, đây là cách làm đúng trong callback
+    st.session_state.bill_id_input = ""
+
+def handle_update(record_id, original_bill_id):
+    """Callback cho nút 'Lưu chỉnh sửa'."""
+    update_data = {}
+    date_fields = ["Ngày nhận hàng"]
+    numeric_fields = ["Số lượng bao/tải giao", "Số lượng bao tải nhận", "Thiếu thừa bao"]
+
+    # Lấy dữ liệu đã sửa từ các widget trong form thông qua st.session_state
+    for col in UPDATABLE_FIELDS:
+        key = f"update_{col}"
+        if key in st.session_state:
+            val = st.session_state[key]
+            if col in date_fields and val is not None:
+                dt_obj = datetime.datetime.combine(val, datetime.datetime.min.time())
+                update_data[col] = int(dt_obj.timestamp() * 1000)
+            elif val is not None:
+                 update_data[col] = val
+
+    if not update_data:
+        st.warning("Không có thay đổi nào để lưu.")
+        return
+
+    result = larkbase_update_data(APP_TOKEN, TABLE_ID, record_id, update_data)
+    if result:
+        handle_success(f"📝 Cập nhật thành công cho Bill ID: {original_bill_id}. Giao diện đã được reset.")
+    else:
+        st.error("❌ Lỗi khi cập nhật dữ liệu!")
+
+def handle_delete(record_id, original_bill_id):
+    """Callback cho nút 'Xóa Bill này'."""
+    result = larkbase_delete_record(APP_TOKEN, TABLE_ID, record_id)
+    if result:
+        handle_success(f"🗑️ Đã xóa thành công Bill ID: {original_bill_id}. Giao diện đã được reset.")
+    else:
+        st.error("❌ Xóa không thành công!")
+
+def handle_create(api_data, original_bill_id):
+    """Callback cho nút 'Thêm mới vào Larkbase'."""
+    new_fields = {}
+    # Lấy dữ liệu từ các widget trong form
+    for col in CREATABLE_FIELDS:
+        key = f"add_{col}"
+        if key in st.session_state:
+            new_fields[col] = st.session_state[key]
+
+    # Thêm các trường tự động tạo
+    new_fields["ID"] = api_data['ID']
+    new_fields["Ngày bàn giao"] = get_current_timestamp_ms()
+
+    record_data = {**new_fields, **api_data}
+    final_record_data = {k: v for k, v in record_data.items() if v is not None and str(v) != ""}
+
+    try:
+        ok = larkbase_write_data(APP_TOKEN, TABLE_ID, final_record_data)
+        if ok:
+            handle_success(f"✅ Đã thêm thành công Bill ID: {original_bill_id}. Giao diện đã được reset.")
+        else:
+            st.error("❌ Không thể thêm mới. Kiểm tra lại thông báo lỗi từ API bên trên nếu có.")
+    except Exception as e:
+        st.error(f"Lỗi khi ghi dữ liệu: {e}")
+
+
+# --- Streamlit App UI ---
+st.set_page_config(layout="centered")
+
+# Khởi tạo session state nếu chưa tồn tại
+if 'last_success_message' not in st.session_state:
+    st.session_state.last_success_message = None
+if 'bill_id_input' not in st.session_state:
+    st.session_state.bill_id_input = ""
+
+load_material_ui_css()
+st.markdown(
+    '<div style="text-align:center;"><h2>📦 Phân phối giao nhận IMEX</h2>'
+    '<p style="color:#1976d2"><b>Nhập Bill ID, tra cứu, thêm, sửa, xóa thông tin giao nhận</b></p></div>',
+    unsafe_allow_html=True,
+)
+
+# Hiển thị thông báo thành công (nếu có) và xóa đi
+if st.session_state.last_success_message:
+    st.success(st.session_state.last_success_message)
+    st.session_state.last_success_message = None
+
+# Giá trị của widget giờ sẽ được điều khiển bởi các hàm callback
+bill_id = st.text_input(
+    "Nhập Bill ID:",
+    placeholder="Nhập mã Bill ID giao nhận",
+    key="bill_id_input"
+).strip()
+
+if bill_id:
+    record = larkbase_find_by_field(APP_TOKEN, TABLE_ID, "ID", bill_id)
+
+    # --- RECORD EXISTS: VIEW / UPDATE / DELETE ---
+    if record:
+        fields = record.get("fields", {})
+        st.markdown(f"<b>Đã tồn tại thông tin Bill ID <span style='color: #1976d2'>{bill_id}</span>!</b>", unsafe_allow_html=True)
+
+        has_lock_values = any(fields.get(f) for f in LOCK_FIELDS)
+        numeric_fields = ["Số lượng bao/tải giao", "Số lượng bao tải nhận", "Thiếu thừa bao"]
+        date_fields = ["Ngày nhận hàng"]
+
+        with st.form("update_or_delete"):
+            for col in LARKBASE_FIELDS:
+                val = fields.get(col, "")
+                is_editable = (col in UPDATABLE_FIELDS) and not (col in LOCK_FIELDS and val)
+
+                if not is_editable:
+                    display_val = format_timestamp_ms_to_string(val) if col in date_fields or col == "Ngày bàn giao" else val
+                    st.text_input(col, display_val, key=f"readonly_{col}", disabled=True)
+                else:
+                    if col in numeric_fields:
+                        default_val = int(val) if val else 0
+                        st.number_input(col, key=f"update_{col}", step=1, value=default_val, format="%d")
+                    elif col in date_fields:
+                        default_val = datetime.datetime.fromtimestamp(int(val) / 1000).date() if val else None
+                        st.date_input(col, key=f"update_{col}", value=default_val)
+                    else:
+                        st.text_input(col, val, key=f"update_{col}")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.form_submit_button(
+                    "Lưu chỉnh sửa",
+                    on_click=handle_update,
+                    args=(record["record_id"], bill_id),
+                    use_container_width=True
+                )
+
+            can_delete = not has_lock_values
+            with col2:
+                st.form_submit_button(
+                    "Xóa Bill này",
+                    disabled=not can_delete,
+                    type="secondary",
+                    on_click=handle_delete,
+                    args=(record["record_id"], bill_id),
+                    use_container_width=True
+                )
+
+            if not can_delete:
+                st.info(f"Lưu ý: Bill này không thể xóa vì đã có thông tin ở một trong các trường sau: {', '.join(LOCK_FIELDS)}. Do đó, nút xóa đã được vô hiệu hóa.")
+
+    # --- RECORD NOT FOUND: CREATE NEW ---
+    else:
+        st.info(f"Đang tự động tra cứu và thêm mới Bill ID: {bill_id}...")
+
+        with st.spinner("Đang tải dữ liệu từ API..."):
+            imex_items = fetch_imex_details(bill_id)
+
+        if not imex_items:
+            st.error("❌ Không lấy được dữ liệu chi tiết, kiểm tra lại Bill ID.")
+        else:
+            example_item = imex_items[0]
+            api_data = {
+                "ID": bill_id, "Kho đi": example_item.get("fromDepotId", ""), "Kho đến": example_item.get("toDepotId", ""),
+                "Số lượng": int(example_item.get("realQuantity") or 0), "Số lượng sản phẩm yêu cầu": int(example_item.get("requiredQuantity") or 0),
+                "Số lượng sản phẩm hỏng": int(example_item.get("damagedQuantity") or 0), "Số lượng sản phẩm yêu cầu được duyệt": int(example_item.get("approvedQuantity") or 0),
+                "Số lượng sản phẩm yêu cầu được xác nhận": int(example_item.get("realQuantity") or 0), "Ngày tạo": convert_date_string_to_ms(example_item.get("requiredAt", "")),
+                "Ngày duyệt": convert_date_string_to_ms(example_item.get("approvedAt", "")), "Ngày xác nhận": convert_date_string_to_ms(example_item.get("confirmedAt", "")),
+                "Người xác nhận": example_item.get("approvedByUser", ""),
+            }
+
+            with st.form("create_new"):
+                numeric_fields = ["Số lượng bao/tải giao"]
+
+                for col in LARKBASE_FIELDS:
+                    is_creatable = col in CREATABLE_FIELDS
+                    if is_creatable:
+                        if col in numeric_fields:
+                            st.number_input(col, key=f"add_{col}", step=1, value=0, format="%d")
+                        else:
+                            st.text_input(col, "", key=f"add_{col}")
+                    else:
+                        if col == "ID":
+                            st.text_input(col, api_data['ID'], key=f"add_{col}_disabled", disabled=True)
+                        elif col == "Ngày bàn giao":
+                            ts_ms = get_current_timestamp_ms()
+                            st.text_input(col, format_timestamp_ms_to_string(ts_ms), key=f"add_{col}_disabled", disabled=True)
+                        else:
+                            st.text_input(col, "", key=f"add_{col}_disabled", disabled=True, help="Trường này sẽ được nhập ở bước cập nhật sau.")
+
+                st.form_submit_button(
+                    "Thêm mới vào Larkbase",
+                    on_click=handle_create,
+                    args=(api_data, bill_id),
+                    use_container_width=True
+                )
+
+============================================================
+
+============================================================
+FILE: README.md
+============================================================
+# 📦 IMEX Distribution App
+
+Ứng dụng Streamlit giúp kiểm tra tổng requiredQuantity của 1 Bill ID IMEX từ API, nhập các thông tin giao nhận và lưu kết quả lên Larkbase.
+
+## 🚀 Hướng dẫn chạy nhanh
+
+**Bằng Python:**
+
+============================================================
+
+============================================================
+FILE: requirements.txt
+============================================================
+
+============================================================
+
+============================================================
+FILE: src\styles\material_ui.py
+============================================================
+import streamlit as st
+
+def load_material_ui_css():
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+    html, body, .main {font-family: 'Roboto', Arial, sans-serif;}
+    .material-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(33,150,243,.08);
+        padding: 2rem 2rem 1.5rem 2rem;
+        margin: 32px 0 16px 0;
+        border: 1px solid #eee;
+    }
+    .material-header {
+        color: #1976d2;
+        margin-bottom: 18px;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+    .stButton>button {
+        width: 100%;
+        background: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 0;
+        font-weight: 600;
+        font-size: 16px;
+        margin-top: 8px;
+    }
+    .stButton>button:hover {background: #125ca0;}
+    .material-success {
+        background: #e8f5e9;
+        border-left: 4px solid #43a047;
+        padding: 12px; margin-bottom: 12px; border-radius: 8px;
+        color: #256029;
+    }
+    .material-error {
+        background: #ffebee;
+        border-left: 4px solid #e53935;
+        padding: 12px; margin-bottom: 12px; border-radius: 8px;
+        color: #b71c1c;
+    }
+    .material-info {
+        background: #e3f2fd;
+        color: #0d47a1;
+        padding: 12px; margin-bottom: 12px; border-radius: 8px;
+        border-left: 4px solid #2196f3;
+    }
+    .material-table th {
+        background: #e3f2fd;
+        color: #1976d2;
+        font-weight: 600 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+def material_card(title: str, body: str):
+    st.markdown(f"""
+    <div class="material-card">
+        <div class="material-header">{title}</div>
+        <div>{body}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+============================================================
+
+============================================================
+FILE: src\utils\api.py
+============================================================
+import requests
+import json
+
+def fetch_imex_details(bill_id: int) -> list[dict] | None:
+    """
+    Gọi API lấy chi tiết danh sách imex cho bill_id.
+    Trả về list dict, mỗi dict có các trường:
+        requiredQuantity, damagedQuantity, approvedQuantity, realQuantity
+    Hoặc None nếu lỗi.
+    """
+    url = "https://open.nhanh.vn/api/bill/imexrequirements"
+    payload = {
+        "version": "2.0",
+        "appId": "74951",
+        "businessId": "8901",
+        "accessToken": "twf9P1xFZCUUgwt8zR0XgNeB6V5jsbq2KHb14bxovqK1ppCxyADwOK8FzQlCEeEGABRZINXoUCSzM50kjhwcrUSBWTY5nSvyhfnH2X2cI0pC7pNczSVxc1ratdDmxF85q7hUTUNCrUnpPTG5ZwLNO7bkMlEEJTCdPhgYaC",
+        "data": json.dumps({"billId": int(bill_id)})
+    }
+    res = requests.post(url, data=payload)
+    if res.status_code == 200:
+        try:
+            res_json = res.json()
+            if res_json.get("code") == 1:
+                imexs = res_json.get("data", {}).get("imexs", {})
+                result = []
+                for item in imexs.values():
+                    result.append({
+                        "requiredQuantity": item.get("requiredQuantity", ""),
+                        "damagedQuantity": item.get("damagedQuantity", ""),
+                        "approvedQuantity": item.get("approvedQuantity", ""),
+                        "realQuantity": item.get("realQuantity", ""),
+                        "approvedByUser": item.get("approvedByUser", ""),
+                        "requiredAt": item.get("requiredAt", ""),
+                        "approvedAt": item.get("approvedAt", ""),
+                        "confirmedAt": item.get("confirmedAt", ""),
+                        "fromDepotId": item.get("fromDepotId", ""),
+                        "toDepotId": item.get("toDepotId", ""),
+                    })
+                return result
+        except Exception:
+            return None
+    return None
+
+============================================================
+
+============================================================
+FILE: src\utils\config.py
+============================================================
+# src/utils/config.py
+
+# Danh sách cột hiển thị trong form (theo thứ tự mong muốn)
+LARKBASE_FIELDS = [
+    "ID",
+    "Số lượng bao/tải giao", 
+    "Người bàn giao",
+    "Ngày bàn giao",
+    "Số lượng bao tải nhận",
+    "Người nhận", 
+    "Ngày nhận hàng",
+    "Thiếu thừa bao"
+]
+
+# === QUY TẮC NHẬP LIỆU ===
+
+# Các trường người dùng có thể nhập liệu khi TẠO MỚI bản ghi.
+CREATABLE_FIELDS = [
+    "Số lượng bao/tải giao",
+    "Người bàn giao",
+]
+
+# Các trường người dùng có thể nhập liệu khi CẬP NHẬT bản ghi.
+UPDATABLE_FIELDS = [
+    "Số lượng bao/tải giao",
+    "Người bàn giao"
+]
+
+# Các trường khi đã có dữ liệu sẽ:
+# 1. Tự khóa chính nó, không cho sửa nữa.
+# 2. Khóa không cho xóa toàn bộ bản ghi.
+# *** FIX: Thêm "Thiếu thừa bao" vào danh sách khóa ***
+LOCK_FIELDS = [
+    "Số lượng bao tải nhận",
+    "Người nhận",
+    "Ngày nhận hàng"
+]
+
+# === DỮ LIỆU NỀN ===
+
+# Các cột lấy từ API (không hiển thị trong form nhưng vẫn lưu vào database)
+API_FIELDS = [
+    "Kho đi", "Kho đến", "Số lượng", "Số lượng sản phẩm yêu cầu",
+    "Số lượng sản phẩm hỏng", "Số lượng sản phẩm yêu cầu được duyệt",
+    "Số lượng sản phẩm yêu cầu được xác nhận", "Ngày tạo", "Ngày duyệt", 
+    "Ngày xác nhận", "Người xác nhận"
+]
+
+# Toàn bộ fields để lưu vào Larkbase (hiện không dùng trong app.py)
+ALL_LARKBASE_FIELDS = LARKBASE_FIELDS + API_FIELDS
+
+============================================================
+
+============================================================
+FILE: src\utils\larkbase.py
+============================================================
+import requests
+import streamlit as st
+
+API_ENDPOINT = 'https://open.larksuite.com/open-apis'
+API_HOST = "https://open.larksuite.com/open-apis/bitable/v1/apps"
+
+# Lấy access token (tự động lấy lại nếu có sẵn trong session)
+def larkbase_get_token(app_id=None, app_secret=None, endpoint=API_ENDPOINT):
+    APP_ID = app_id or 'cli_a7fab27260385010'
+    APP_SECRET = app_secret or 'Zg4MVcFfiOu0g09voTcpfd4WGDpA0Ly5'
+    url = f"{endpoint}/auth/v3/tenant_access_token/internal"
+    try:
+        resp = requests.post(url, json={'app_id': APP_ID, 'app_secret': APP_SECRET})
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get('code') == 0:
+                return data['tenant_access_token']
+    except Exception as e:
+        st.error(f"❌ Lỗi khi lấy token: {e}")
+    return None
+
+def get_headers(token):
+    return {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+
+# --- READ ---
+
+# Lấy toàn bộ record (với phân trang)
+def larkbase_get_all(app_token, table_id):
+    token = larkbase_get_token()
+    if not token:
+        st.error("❌ Không xác thực được với Larkbase.")
+        return []
+
+    all_records = []
+    page_token = ""
+    
+    while True:
+        try:
+            url = f"{API_HOST}/{app_token}/tables/{table_id}/records?page_size=500"
+            if page_token:
+                url += f"&page_token={page_token}"
+            
+            resp = requests.get(url, headers=get_headers(token))
+            
+            # Kiểm tra status code trước
+            if resp.status_code != 200:
+                st.error(f"❌ API trả về status code: {resp.status_code}")
+                break
+            
+            # Kiểm tra và parse JSON response
+            try:
+                res_data = resp.json()
+            except Exception as e:
+                st.error(f"❌ Lỗi parse JSON response: {e}")
+                break
+            
+            # Kiểm tra response code
+            if res_data.get("code") != 0:
+                st.error(f"❌ API trả về code: {res_data.get('code')}, msg: {res_data.get('msg', '')}")
+                break
+            
+            # Lấy data và items
+            data = res_data.get("data", {})
+            if data is None:
+                st.error("❌ Response data is None")
+                break
+                
+            items = data.get("items", [])
+            if items is None:
+                items = []
+            
+            # Extend records
+            all_records.extend(items)
+            
+            # Kiểm tra page_token cho trang tiếp theo
+            page_token = data.get("page_token", "")
+            if not page_token or not items:
+                break
+                
+        except Exception as e:
+            st.error(f"❌ Lỗi khi lấy dữ liệu: {e}")
+            break
+    
+    return all_records
+
+# Tìm record theo (giá trị cột ID)
+def larkbase_find_by_field(app_token, table_id, field, value):
+    all_records = larkbase_get_all(app_token, table_id)
+    if not all_records:
+        return None
+        
+    # Nên kiểm tra field trùng tên cột đúng như Larkbase
+    for record in all_records:
+        fields = record.get('fields', {})
+        if str(fields.get(field, '')).strip() == str(value).strip():
+            return record
+    return None
+
+# --- CREATE ---
+def larkbase_write_data(app_token, table_id, data):
+    token = larkbase_get_token()
+    if not token:
+        st.error("❌ Không xác thực được với Larkbase.")
+        return False
+
+    try:
+        url = f"{API_HOST}/{app_token}/tables/{table_id}/records"
+        headers = get_headers(token)
+        fields = {"fields": data}
+        resp = requests.post(url, headers=headers, json=fields)
+        
+        if resp.status_code == 200:
+            try:
+                result = resp.json()
+                if result.get('code') == 0:
+                    return True
+                else:
+                    st.error(f"❌ Lỗi API: {result.get('msg', '')}")
+            except Exception as e:
+                st.error(f"❌ Lỗi parse response: {e}")
+        else:
+            st.error(f"❌ HTTP Error: {resp.status_code}")
+    except Exception as e:
+        st.error(f"❌ Lỗi khi ghi dữ liệu: {e}")
+    
+    return False
+
+# --- UPDATE ---
+def larkbase_update_data(app_token, table_id, record_id, data):
+    token = larkbase_get_token()
+    if not token:
+        st.error("❌ Không xác thực được với Larkbase.")
+        return False
+    
+    try:
+        url = f"{API_HOST}/{app_token}/tables/{table_id}/records/{record_id}"
+        resp = requests.put(url, headers=get_headers(token), json={"fields": data})
+        
+        if resp.status_code == 200:
+            try:
+                result = resp.json()
+                if result.get('code') == 0:
+                    return True
+                else:
+                    st.error(f"❌ Lỗi API: {result.get('msg', '')}")
+            except Exception as e:
+                st.error(f"❌ Lỗi parse response: {e}")
+        else:
+            st.error(f"❌ HTTP Error: {resp.status_code}")
+    except Exception as e:
+        st.error(f"❌ Lỗi khi cập nhật: {e}")
+    
+    return False
+
+# --- DELETE ---
+def larkbase_delete_record(app_token, table_id, record_id):
+    token = larkbase_get_token()
+    if not token:
+        st.error("❌ Không xác thực được với Larkbase.")
+        return False
+    
+    try:
+        url = f"{API_HOST}/{app_token}/tables/{table_id}/records/{record_id}"
+        resp = requests.delete(url, headers=get_headers(token))
+        
+        if resp.status_code == 200:
+            try:
+                result = resp.json()
+                if result.get('code') == 0:
+                    return True
+                else:
+                    st.error(f"❌ Lỗi API: {result.get('msg', '')}")
+            except Exception as e:
+                st.error(f"❌ Lỗi parse response: {e}")
+        else:
+            st.error(f"❌ HTTP Error: {resp.status_code}")
+    except Exception as e:
+        st.error(f"❌ Lỗi khi xóa: {e}")
+    
+    return False
+
+============================================================
+
+
+📊 THỐNG KÊ
+------------------------------
+Tổng số file: 12
+File code: 9
+Các loại file code:
+  .md: 1 file
+  .py: 5 file
+  .txt: 2 file
+  .yml: 1 file
