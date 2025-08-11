@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-11 16:42:31
+Thời gian tạo: 2025-08-11 16:54:33
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -42,7 +42,7 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 docker-compose.yml (349 bytes)
 Dockerfile (523 bytes)
 Get detail code.ipynb (9290 bytes)
-main.py (8957 bytes)
+main.py (9020 bytes)
 project_complete_info.txt (0 bytes)
 README.md (260 bytes)
 requirements.txt (64 bytes)
@@ -289,7 +289,10 @@ async def refresh_transport_providers_endpoint():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
 
 ============================================================
 
@@ -299,7 +302,7 @@ FILE: project_complete_info.txt
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-11 16:42:31
+Thời gian tạo: 2025-08-11 16:54:33
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -340,7 +343,7 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 docker-compose.yml (349 bytes)
 Dockerfile (523 bytes)
 Get detail code.ipynb (9290 bytes)
-main.py (8957 bytes)
+main.py (9020 bytes)
 project_complete_info.txt (0 bytes)
 README.md (260 bytes)
 requirements.txt (64 bytes)
@@ -587,7 +590,10 @@ async def refresh_transport_providers_endpoint():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
 
 ============================================================
 
