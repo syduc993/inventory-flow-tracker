@@ -1,13 +1,8 @@
 import requests
 import json
+import logging
 
 def fetch_imex_details(bill_id: int) -> list[dict] | None:
-    """
-    Gọi API lấy chi tiết danh sách imex cho bill_id.
-    Trả về list dict, mỗi dict có các trường:
-        requiredQuantity, damagedQuantity, approvedQuantity, realQuantity
-    Hoặc None nếu lỗi.
-    """
     url = "https://open.nhanh.vn/api/bill/imexrequirements"
     payload = {
         "version": "2.0",
@@ -21,7 +16,14 @@ def fetch_imex_details(bill_id: int) -> list[dict] | None:
         try:
             res_json = res.json()
             if res_json.get("code") == 1:
-                imexs = res_json.get("data", {}).get("imexs", {})
+                data = res_json.get("data")
+                if not data:
+                    return None
+                    
+                imexs = data.get("imexs")
+                if not imexs:
+                    return None
+                    
                 result = []
                 for item in imexs.values():
                     result.append({
@@ -34,9 +36,12 @@ def fetch_imex_details(bill_id: int) -> list[dict] | None:
                         "approvedAt": item.get("approvedAt", ""),
                         "confirmedAt": item.get("confirmedAt", ""),
                         "fromDepotId": item.get("fromDepotId", ""),
+                        "fromDepotName": item.get("fromDepotName", ""),
                         "toDepotId": item.get("toDepotId", ""),
+                        "toDepotName": item.get("toDepotName", "")
                     })
                 return result
-        except Exception:
+        except Exception as e:
+            logging.error(f"Lỗi khi parse JSON: {e}")
             return None
     return None

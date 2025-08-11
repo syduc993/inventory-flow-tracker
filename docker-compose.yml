@@ -1,11 +1,12 @@
-vversion: '3.8'
+version: '3.8'
 services:
-  imex-distribution-app:
+  imex-app-fastapi:
     build: .
-    ports:
-      - "8080:8080"
+    ports:` 
+      - "8000:8000"
     volumes:
       - ./src:/app/src
-    environment:
-      - STREAMLIT_SERVER_HEADLESS=true
-      - STREAMLIT_SERVER_ENABLE_CORS=false
+      - ./templates:/app/templates
+      - ./main.py:/app/main.py
+    # Để tự động reload khi code thay đổi trong lúc phát triển
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload

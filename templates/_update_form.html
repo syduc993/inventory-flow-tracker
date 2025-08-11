@@ -1,0 +1,275 @@
+<!-- FILE: templates/_update_form.html -->
+{% set fields = record.fields %}
+{% set has_lock_values = (fields.get('Số lượng bao tải nhận') or fields.get('Người nhận') or fields.get('Ngày nhận hàng')) %}
+
+<div class="elevation-1" style="padding: 24px; border-radius: 8px; margin: 16px 0;">
+    <h3 style="color: #1976d2; margin-bottom: 16px;">📄 Cập nhật Bill ID: {{ fields.ID }}</h3>
+
+    {% if has_lock_values %}
+    <div class="info" style="background-color: #fff3cd; color: #856404; border-left: 4px solid #ffc107;">
+        🔒 <strong>Bản ghi đã bị khóa.</strong><br>
+        Không thể chỉnh sửa thông tin giao hàng hoặc xóa vì đã có dữ liệu ở các trường: {{ lock_fields }}.
+    </div>
+    {% endif %}
+
+    <form hx-put="/records/{{ record.record_id }}" hx-target="#form-container" hx-swap="outerHTML">
+        
+        <!-- PHẦN THÔNG TIN GIAO HÀNG -->
+        <h4 style="color: #1976d2; margin: 24px 0 16px 0; font-size: 18px;">Thông tin bàn giao</h4>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+            <div class="form-group">
+                <label for="so-luong-giao" class="form-label">Số lượng bao/tải giao</label>
+                <input type="number" 
+                       name="Số lượng bao/tải giao" 
+                       id="so-luong-giao" 
+                       class="form-control" 
+                       value="{{ fields.get('Số lượng bao/tải giao', '') }}"
+                       {% if has_lock_values %}disabled{% endif %}>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Người bàn giao</label>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <div class="employee-search" style="flex: 1;">
+                        <input type="text" 
+                               id="employee-search-giao" 
+                               class="form-control employee-input" 
+                               placeholder="🔍 Gõ tên để tìm nhân viên..."
+                               autocomplete="off"
+                               value="{{ fields.get('Người bàn giao', '') }}"
+                               {% if has_lock_values %}disabled{% endif %}>
+                        <div id="employee-dropdown-giao" class="employee-dropdown">
+                            {% for employee in employees %}
+                            <div class="employee-option" 
+                                 data-value="{{ employee.id }}" 
+                                 data-name="{{ employee.name }}"
+                                 data-department="{{ employee.department }}">
+                                <div>
+                                    <strong>{{ employee.name }}</strong> 
+                                    <span style="color: #666; font-size: 12px;">({{ employee.id }})</span>
+                                </div>
+                                {% if employee.department and employee.department != "N/A" %}
+                                    <small style="color: #888; display: block; margin-top: 2px;">
+                                        📍 {{ employee.department }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" 
+                               name="Người bàn giao" 
+                               id="nguoi-ban-giao-hidden"
+                               value="{{ fields.get('Người bàn giao', '') }}">
+                    </div>
+                    <!-- Nút làm mới nhỏ -->
+                    <button type="button" class="btn-refresh" 
+                            hx-post="/refresh-employees" 
+                            hx-target="#refresh-result-giao" 
+                            hx-indicator="#refresh-loading-giao"
+                            title="Làm mới danh sách nhân viên"
+                            {% if has_lock_values %}disabled{% endif %}>
+                        🔄
+                    </button>
+                </div>
+                <div id="refresh-result-giao"></div>
+                <div id="refresh-loading-giao" class="htmx-indicator">Đang cập nhật danh sách nhân viên...</div>
+            </div>
+        </div>
+        
+        <!-- PHẦN THÔNG TIN NHẬN HÀNG -->
+        <h4 style="color: #1976d2; margin: 24px 0 16px 0; font-size: 18px;">Thông tin nhận hàng</h4>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+            <div class="form-group">
+                <label for="so-luong-nhan" class="form-label">Số lượng bao tải nhận</label>
+                <input type="number" 
+                       name="Số lượng bao tải nhận" 
+                       id="so-luong-nhan" 
+                       class="form-control" 
+                       value="{{ fields.get('Số lượng bao tải nhận', '') }}" 
+                       {% if fields.get('Số lượng bao tải nhận') %}disabled{% endif %}>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Người nhận</label>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <div class="employee-search" style="flex: 1;">
+                        <input type="text" 
+                               id="employee-search-nhan" 
+                               class="form-control employee-input" 
+                               placeholder="🔍 Gõ tên để tìm nhân viên..."
+                               autocomplete="off"
+                               value="{{ fields.get('Người nhận', '') }}"
+                               {% if fields.get('Người nhận') %}disabled{% endif %}>
+                        <div id="employee-dropdown-nhan" class="employee-dropdown">
+                            {% for employee in employees %}
+                            <div class="employee-option" 
+                                 data-value="{{ employee.id }}" 
+                                 data-name="{{ employee.name }}"
+                                 data-department="{{ employee.department }}">
+                                <div>
+                                    <strong>{{ employee.name }}</strong> 
+                                    <span style="color: #666; font-size: 12px;">({{ employee.id }})</span>
+                                </div>
+                                {% if employee.department and employee.department != "N/A" %}
+                                    <small style="color: #888; display: block; margin-top: 2px;">
+                                        📍 {{ employee.department }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" 
+                               name="Người nhận" 
+                               id="nguoi-nhan-hidden"
+                               value="{{ fields.get('Người nhận', '') }}">
+                    </div>
+                    <!-- Nút làm mới nhỏ -->
+                    <button type="button" class="btn-refresh" 
+                            hx-post="/refresh-employees" 
+                            hx-target="#refresh-result-nhan" 
+                            hx-indicator="#refresh-loading-nhan"
+                            title="Làm mới danh sách nhân viên"
+                            {% if fields.get('Người nhận') %}disabled{% endif %}>
+                        🔄
+                    </button>
+                </div>
+                <div id="refresh-result-nhan"></div>
+                <div id="refresh-loading-nhan" class="htmx-indicator">Đang cập nhật danh sách nhân viên...</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="ngay-nhan-hang" class="form-label">Ngày nhận hàng</label>
+                <input type="date" 
+                       name="Ngày nhận hàng" 
+                       id="ngay-nhan-hang" 
+                       class="form-control" 
+                       value="{{ format_ts(fields.get('Ngày nhận hàng')) | slice(0, 10) if fields.get('Ngày nhận hàng') else '' }}"
+                       {% if fields.get('Ngày nhận hàng') %}disabled{% endif %}>
+            </div>
+        </div>
+        
+        <!-- PHẦN THÔNG TIN THAM CHIẾU -->
+        <h4 style="color: #1976d2; margin: 24px 0 16px 0; font-size: 18px;">Thông tin tham chiếu (chỉ đọc)</h4>
+        
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 4px; margin-bottom: 24px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div>
+                    <strong>Ngày bàn giao:</strong><br>
+                    {{ format_ts(fields.get('Ngày bàn giao')) if fields.get('Ngày bàn giao') else 'Chưa có' }}
+                </div>
+                <div>
+                    <strong>Kho đi:</strong><br>
+                    {{ fields.get('Kho đi', 'N/A') }}
+                </div>
+                <div>
+                    <strong>Kho đến:</strong><br>
+                    {{ fields.get('Kho đến', 'N/A') }}
+                </div>
+                <div>
+                    <strong>Số lượng SP (API):</strong><br>
+                    {{ fields.get('Số lượng', 'N/A') }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- CÁC NÚT HÀNH ĐỘNG -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                {% if can_delete %}
+                    <button type="button" class="btn btn-danger" 
+                            hx-delete="/records/{{ record.record_id }}" 
+                            hx-target="#form-container"
+                            hx-swap="outerHTML"
+                            hx-confirm="Bạn có chắc chắn muốn xóa bản ghi này?">
+                        🗑️ Xóa
+                    </button>
+                {% endif %}
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary" {% if has_lock_values %}disabled{% endif %}>
+                    💾 Lưu chỉnh sửa
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// Employee search functionality cho form update
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý cho cả 2 trường: giao và nhận
+    ['giao', 'nhan'].forEach(function(type) {
+        const searchInput = document.getElementById('employee-search-' + type);
+        const dropdown = document.getElementById('employee-dropdown-' + type);
+        const hiddenInput = document.getElementById('nguoi-' + (type === 'giao' ? 'ban-giao' : 'nhan') + '-hidden');
+        
+        if (!searchInput || !dropdown || !hiddenInput) return;
+
+        // Show dropdown when input is focused
+        searchInput.addEventListener('focus', function() {
+            if (!this.disabled) {
+                dropdown.style.display = 'block';
+            }
+        });
+
+        // Enhanced search function - tìm cả tên và phòng ban
+        searchInput.addEventListener('input', function() {
+            if (this.disabled) return;
+            
+            const query = this.value.toLowerCase();
+            const options = dropdown.querySelectorAll('.employee-option');
+            let hasResults = false;
+            
+            options.forEach(option => {
+                const name = option.dataset.name.toLowerCase();
+                const id = option.dataset.value.toLowerCase();
+                const department = option.dataset.department.toLowerCase();
+                
+                if (query === '' || name.includes(query) || id.includes(query) || department.includes(query)) {
+                    option.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            dropdown.style.display = hasResults && query.length > 0 ? 'block' : 'none';
+            
+            // Clear hidden value if input is manually cleared
+            if (this.value === '') {
+                hiddenInput.value = '';
+            }
+        });
+
+        // Handle option selection
+        dropdown.addEventListener('click', function(e) {
+            const option = e.target.closest('.employee-option');
+            if (option && !searchInput.disabled) {
+                const employeeId = option.dataset.value;
+                const employeeName = option.dataset.name;
+                const employeeDepartment = option.dataset.department;
+                
+                // Hiển thị tên + phòng ban trong input
+                if (employeeDepartment && employeeDepartment !== "N/A") {
+                    searchInput.value = `${employeeName} - ${employeeDepartment}`;
+                } else {
+                    searchInput.value = `${employeeName} (${employeeId})`;
+                }
+                hiddenInput.value = employeeId;
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#employee-search-' + type) && 
+                !e.target.closest('#employee-dropdown-' + type) && 
+                !e.target.closest('.btn-refresh')) {
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+});
+</script>

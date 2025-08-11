@@ -1,24 +1,19 @@
-# Sử dụng một image Python chính thức, gọn nhẹ
+# Sử dụng Python 3.10 làm base image
 FROM python:3.10-slim
 
-# Thiết lập thư mục làm việc bên trong container
+# Đặt thư mục làm việc
 WORKDIR /app
 
-# Sao chép file requirements trước để tận dụng cache của Docker
+# Sao chép file requirements và cài đặt thư viện
 COPY requirements.txt .
-
-# Cài đặt các thư viện Python
-# Đảm bảo requirements.txt có đủ thư viện!
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Sao chép toàn bộ mã nguồn còn lại của ứng dụng
+# Sao chép toàn bộ mã nguồn
 COPY . .
 
-# Mở cổng 8080 (chủ yếu mang tính thông báo cho người đọc Dockerfile)
-# Cloud Run sẽ tự động quản lý cổng này
-EXPOSE 8080
+# Mở cổng 8000 cho Uvicorn
+EXPOSE 8000
 
-# Lệnh để khởi chạy ứng dụng Streamlit
-# Quan trọng: Lắng nghe trên cổng do biến $PORT cung cấp, và địa chỉ 0.0.0.0
-# Cách này linh hoạt hơn là dùng ENV để gán cứng cổng.
-CMD streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+# Lệnh chạy ứng dụng với Uvicorn
+# main:app -> file main.py, đối tượng app = FastAPI()
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

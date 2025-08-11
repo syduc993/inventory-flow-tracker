@@ -1,360 +1,295 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-06 13:48:26
+Thời gian tạo: 2025-08-11 16:31:02
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
 📁 CẤU TRÚC THU MỤC
 --------------------------------------------------
 ├── 📁 src/
-│   ├── 📁 styles/
-│   │   └── 📄 material_ui.py
 │   └── 📁 utils/
 │       ├── 📄 api.py
+│       ├── 📄 cache.py
 │       ├── 📄 config.py
-│       └── 📄 larkbase.py
+│       ├── 📄 larkbase.py
+│       └── 📄 transport_provider.py
+├── 📁 static/
+│   ├── 📄 app.js
+│   └── 📄 style.css
+├── 📁 templates/
+│   ├── 📄 _create_form.html
+│   ├── 📄 _employee_dropdown.html
+│   ├── 📄 _transport_dropdown.html
+│   ├── 📄 _update_form.html
+│   ├── 📄 _view_only.html
+│   └── 📄 index.html
 ├── 📄 .gitignore
-├── 📄 app.py
 ├── 📄 docker-compose.yml
 ├── 📄 Dockerfile
 ├── 📄 Get detail code.ipynb
+├── 📄 main.py
 ├── 📄 project_complete_info.txt
 ├── 📄 README.md
-└── 📄 requirements.txt
+├── 📄 requirements.txt
+├── 📄 services.py
+└── 📄 transport_providers.json
 
 
 📄 DANH SÁCH TẤT CẢ FILE
 --------------------------------------------------
 .gitignore (327 bytes)
-app.py (12486 bytes)
-docker-compose.yml (241 bytes)
-Dockerfile (945 bytes)
-Get detail code.ipynb (8697 bytes)
+docker-compose.yml (349 bytes)
+Dockerfile (523 bytes)
+Get detail code.ipynb (9290 bytes)
+main.py (8957 bytes)
 project_complete_info.txt (0 bytes)
 README.md (260 bytes)
-requirements.txt (0 bytes)
-src\styles\material_ui.py (1932 bytes)
-src\utils\api.py (1940 bytes)
-src\utils\config.py (1673 bytes)
-src\utils\larkbase.py (6380 bytes)
+requirements.txt (64 bytes)
+services.py (7612 bytes)
+src\utils\api.py (2109 bytes)
+src\utils\cache.py (3906 bytes)
+src\utils\config.py (1849 bytes)
+src\utils\larkbase.py (5641 bytes)
+src\utils\transport_provider.py (3208 bytes)
+static\app.js (11823 bytes)
+static\style.css (10159 bytes)
+templates\_create_form.html (13085 bytes)
+templates\_employee_dropdown.html (2596 bytes)
+templates\_transport_dropdown.html (1201 bytes)
+templates\_update_form.html (14270 bytes)
+templates\_view_only.html (3359 bytes)
+templates\index.html (2169 bytes)
+transport_providers.json (535 bytes)
 
-Tổng cộng: 12 file
+Tổng cộng: 23 file
 
 💻 NỘI DUNG TẤT CẢ FILE CODE
 ================================================================================
 
 ============================================================
-FILE: app.py
+FILE: docker-compose.yml
 ============================================================
-# FILE: app.py
+version: '3.8'
+services:
+  imex-app-fastapi:
+    build: .
+    ports:` 
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./templates:/app/templates
+      - ./main.py:/app/main.py
+    # Để tự động reload khi code thay đổi trong lúc phát triển
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
+============================================================
 
-import streamlit as st
-import datetime
-import time
-from src.styles.material_ui import load_material_ui_css
-from src.utils.api import fetch_imex_details
-from src.utils.larkbase import (
-    larkbase_find_by_field,
-    larkbase_write_data,
-    larkbase_update_data,
-    larkbase_delete_record,
-)
-from src.utils.config import (
-    LARKBASE_FIELDS, API_FIELDS,
-    CREATABLE_FIELDS, UPDATABLE_FIELDS, LOCK_FIELDS
-)
+============================================================
+FILE: main.py
+============================================================
+from fastapi import FastAPI, Request, Form, Response
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from services import RecordService, EmployeeService, TransportProviderService
 
+app = FastAPI(title="IMEX Distribution API")
 
+# Static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+# Services
 APP_TOKEN = "Rm9PbvKLeaFFZcsSQpElnRjIgXg"
 TABLE_ID = "tblJJPUEFhsXHaxY"
+record_service = RecordService(APP_TOKEN, TABLE_ID)
+employee_service = EmployeeService()
+transport_provider_service = TransportProviderService(APP_TOKEN)
 
-
-# --- Helper Functions (Không thay đổi) ---
-def get_current_timestamp_ms():
-    return int(time.time() * 1000)
-
-
-def convert_date_string_to_ms(date_string: str) -> int | None:
-    if not date_string or not isinstance(date_string, str):
-        return None
+def format_timestamp_ms_to_dt_string(ts_ms):
+    if not ts_ms: return ""
     try:
-        dt_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
-        return int(dt_obj.timestamp() * 1000)
-    except ValueError:
-        return None
-
-
-def format_timestamp_ms_to_string(ts_ms) -> str:
-    if not ts_ms:
-        return ""
-    try:
-        return datetime.datetime.fromtimestamp(int(ts_ms) / 1000).strftime("%Y-%m-%d %H:%M:%S")
+        import datetime
+        return datetime.datetime.fromtimestamp(int(ts_ms) / 1000).strftime('%Y-%m-%d %H:%M:%S')
     except (ValueError, TypeError):
         return str(ts_ms)
 
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# --- Callback functions để xử lý form submissions ---
+# @app.post("/search", response_class=HTMLResponse)
+# async def search_bill(request: Request, bill_id: str = Form(...)):
+#     if not bill_id:
+#         return HTMLResponse("<div class='error'>Vui lòng nhập Bill ID.</div>")
 
+#     found, record = record_service.search_record(bill_id)
+#     context = {
+#         "request": request,
+#         "employees": employee_service.get_employees(),
+#         "transport_providers": transport_provider_service.get_transport_providers()  # ← THÊM MỚI
+#     }
 
-def handle_success(message: str):
-    """Đặt thông báo thành công và reset ô nhập liệu."""
-    st.session_state.last_success_message = message
-    # Gán lại giá trị cho widget trong session state, đây là cách làm đúng trong callback
-    st.session_state.bill_id_input = ""
+#     if found and record:
+#         from src.utils.config import LOCK_FIELDS
+#         has_lock_values = any(record.get("fields", {}).get(f) for f in LOCK_FIELDS)
+#         context.update({
+#             "record": record,
+#             "can_delete": not has_lock_values,
+#             "lock_fields": ', '.join(LOCK_FIELDS),
+#             "format_ts": format_timestamp_ms_to_dt_string
+#         })
+#         return templates.TemplateResponse("_update_form.html", context)
+#     else:
+#         imex_items = record_service.get_api_data(bill_id)
+#         if not imex_items:
+#             return HTMLResponse("<div class='error'>❌ Không lấy được dữ liệu, kiểm tra lại Bill ID.</div>")
 
+#         example_item = imex_items[0]
+#         context["api_data"] = {
+#             "ID": bill_id,
+#             "ID kho đi": example_item.get("fromDepotId", ""),
+#             "Kho đi": example_item.get("fromDepotName", ""),
+#             "ID kho đến": example_item.get("toDepotId", ""),
+#             "Kho đến": example_item.get("toDepotName", ""),
+#             "Số lượng": int(example_item.get("realQuantity") or 0),
+#         }
+#         from src.utils.config import CREATABLE_FIELDS
+#         context["creatable_fields"] = CREATABLE_FIELDS
+#         return templates.TemplateResponse("_create_form.html", context)
 
-def handle_update(record_id, original_bill_id):
-    """Callback cho nút 'Lưu chỉnh sửa'."""
-    update_data = {}
-    date_fields = ["Ngày nhận hàng"]
-    numeric_fields = ["Số lượng bao/tải giao", "Số lượng bao tải nhận", "Thiếu thừa bao"]
+@app.post("/search", response_class=HTMLResponse)
+async def search_bill(request: Request, bill_id: str = Form(...)):
+    if not bill_id:
+        return HTMLResponse("<div class='error'>Vui lòng nhập Bill ID.</div>")
 
-    # Lấy dữ liệu đã sửa từ các widget trong form thông qua st.session_state
-    for col in UPDATABLE_FIELDS:
-        key = f"update_{col}"
-        if key in st.session_state:
-            val = st.session_state[key]
-            if col in date_fields and val is not None:
-                dt_obj = datetime.datetime.combine(val, datetime.datetime.min.time())
-                update_data[col] = int(dt_obj.timestamp() * 1000)
-            elif val is not None:
-                 update_data[col] = val
+    found, record = record_service.search_record(bill_id)
+    context = {
+        "request": request,
+        "employees": employee_service.get_employees(),
+        "transport_providers": transport_provider_service.get_transport_providers()
+    }
 
-    if not update_data:
-        st.warning("Không có thay đổi nào để lưu.")
-        return
-
-    result = larkbase_update_data(APP_TOKEN, TABLE_ID, record_id, update_data)
-    if result:
-        handle_success(f"📝 Cập nhật thành công cho Bill ID: {original_bill_id}. Giao diện đã được reset.")
+    if found and record:
+        # ← SỬA: Chỉ hiển thị thông tin, không cho edit
+        context.update({
+            "record": record,
+            "format_ts": format_timestamp_ms_to_dt_string
+        })
+        # ← SỬA: Tạo template mới hoặc sửa template để chỉ hiển thị
+        return templates.TemplateResponse("_view_only.html", context)
     else:
-        st.error("❌ Lỗi khi cập nhật dữ liệu!")
-
-
-def handle_delete(record_id, original_bill_id):
-    """Callback cho nút 'Xóa Bill này' với logic kiểm tra lại trước khi xóa."""
-    # 1. Tải lại dữ liệu mới nhất của record từ Larkbase để đảm bảo không có gì thay đổi
-    st.info("Đang kiểm tra lại trạng thái record trước khi xóa...")
-    latest_record = larkbase_find_by_field(APP_TOKEN, TABLE_ID, "ID", original_bill_id)
-
-    if not latest_record:
-        st.error(f"❌ Không tìm thấy record với Bill ID: {original_bill_id}. Có thể đã bị người khác xóa.")
-        # Xóa thông báo info
-        st.empty()
-        return
-
-    # 2. Kiểm tra lại điều kiện khóa trên dữ liệu mới nhất
-    fields = latest_record.get("fields", {})
-    has_lock_values = any(fields.get(f) for f in LOCK_FIELDS)
-
-    # 3. Nếu bị khóa, báo lỗi và dừng lại
-    if has_lock_values:
-        locked_fields_found = [f for f in LOCK_FIELDS if fields.get(f)]
-        st.error(
-            f"❌ Không thể xóa! Record đã được cập nhật bởi người khác và bị khóa bởi các trường: "
-            f"{', '.join(locked_fields_found)}. Vui lòng tải lại trang."
-        )
-        # Xóa thông báo info
-        st.empty()
-        return
-
-    # 4. Nếu không bị khóa, tiến hành xóa
-    result = larkbase_delete_record(APP_TOKEN, TABLE_ID, record_id)
-    if result:
-        handle_success(f"🗑️ Đã xóa thành công Bill ID: {original_bill_id}. Giao diện đã được reset.")
-    else:
-        st.error("❌ Xóa không thành công!")
-
-
-def handle_create(api_data, original_bill_id):
-    """Callback cho nút 'Thêm mới vào Larkbase'."""
-    new_fields = {}
-    # Lấy dữ liệu từ các widget trong form
-    for col in CREATABLE_FIELDS:
-        key = f"add_{col}"
-        if key in st.session_state:
-            new_fields[col] = st.session_state[key]
-
-    # Thêm các trường tự động tạo
-    new_fields["ID"] = api_data['ID']
-    new_fields["Ngày bàn giao"] = get_current_timestamp_ms()
-
-    record_data = {**new_fields, **api_data}
-    final_record_data = {k: v for k, v in record_data.items() if v is not None and str(v) != ""}
-
-    try:
-        ok = larkbase_write_data(APP_TOKEN, TABLE_ID, final_record_data)
-        if ok:
-            # Lấy thông tin đã nhập để hiển thị trong thông báo
-            so_luong_giao = new_fields.get("Số lượng bao/tải giao", "không có")
-            nguoi_ban_giao = new_fields.get("Người bàn giao", "không có")
-
-            # Tạo chuỗi thông báo mới
-            success_message = (
-                f"✅ Đã thêm thành công Bill ID: {original_bill_id}. "
-                f"Số lượng bao/tải giao: {so_luong_giao}. "
-                f"Người bàn giao: '{nguoi_ban_giao}'."
-            )
-            handle_success(success_message)
-        else:
-            st.error("❌ Không thể thêm mới. Kiểm tra lại thông báo lỗi từ API bên trên nếu có.")
-    except Exception as e:
-        st.error(f"Lỗi khi ghi dữ liệu: {e}")
-
-
-
-# --- Streamlit App UI ---
-st.set_page_config(layout="centered")
-
-
-# Khởi tạo session state nếu chưa tồn tại
-if 'last_success_message' not in st.session_state:
-    st.session_state.last_success_message = None
-if 'bill_id_input' not in st.session_state:
-    st.session_state.bill_id_input = ""
-
-
-load_material_ui_css()
-st.markdown(
-    '<div style="text-align:center;"><h2>📦 Phân phối giao nhận IMEX</h2>'
-    '<p style="color:#1976d2"><b>Nhập Bill ID, tra cứu, thêm, sửa, xóa thông tin giao nhận</b></p></div>',
-    unsafe_allow_html=True,
-)
-
-
-# Hiển thị thông báo thành công (nếu có) và xóa đi
-if st.session_state.last_success_message:
-    st.success(st.session_state.last_success_message)
-    st.session_state.last_success_message = None
-
-
-# Giá trị của widget giờ sẽ được điều khiển bởi các hàm callback
-bill_id = st.text_input(
-    "Nhập Bill ID:",
-    placeholder="Nhập mã Bill ID giao nhận",
-    key="bill_id_input"
-).strip()
-
-
-if bill_id:
-    record = larkbase_find_by_field(APP_TOKEN, TABLE_ID, "ID", bill_id)
-
-
-    # --- RECORD EXISTS: VIEW / UPDATE / DELETE ---
-    if record:
-        fields = record.get("fields", {})
-        st.markdown(f"<b>Đã tồn tại thông tin Bill ID <span style='color: #1976d2'>{bill_id}</span>!</b>", unsafe_allow_html=True)
-
-        has_lock_values = any(fields.get(f) for f in LOCK_FIELDS)
-        numeric_fields = ["Số lượng bao/tải giao", "Số lượng bao tải nhận", "Thiếu thừa bao"]
-        date_fields = ["Ngày nhận hàng"]
-
-        with st.form("update_or_delete"):
-            for col in LARKBASE_FIELDS:
-                val = fields.get(col, "")
-                is_editable = (col in UPDATABLE_FIELDS) and not (col in LOCK_FIELDS and val)
-
-                if not is_editable:
-                    display_val = format_timestamp_ms_to_string(val) if col in date_fields or col == "Ngày bàn giao" else val
-                    st.text_input(col, display_val, key=f"readonly_{col}", disabled=True)
-                else:
-                    if col in numeric_fields:
-                        default_val = int(val) if val else 0
-                        st.number_input(col, key=f"update_{col}", step=1, value=default_val, format="%d")
-                    elif col in date_fields:
-                        default_val = datetime.datetime.fromtimestamp(int(val) / 1000).date() if val else None
-                        st.date_input(col, key=f"update_{col}", value=default_val)
-                    else:
-                        st.text_input(col, val, key=f"update_{col}")
-
-            col1, col2 = st.columns(2)
-            with col1:
-                st.form_submit_button(
-                    "Lưu chỉnh sửa",
-                    on_click=handle_update,
-                    args=(record["record_id"], bill_id),
-                    use_container_width=True
-                )
-
-            can_delete = not has_lock_values
-            with col2:
-                st.form_submit_button(
-                    "Xóa Bill này",
-                    disabled=not can_delete,
-                    type="secondary",
-                    on_click=handle_delete,
-                    args=(record["record_id"], bill_id),
-                    use_container_width=True
-                )
-
-            if not can_delete:
-                st.info(f"Lưu ý: Bill này không thể xóa vì đã có thông tin ở một trong các trường sau: {', '.join(LOCK_FIELDS)}. Do đó, nút xóa đã được vô hiệu hóa.")
-
-
-    # --- RECORD NOT FOUND: CREATE NEW ---
-    else:
-        st.info(f"Đang tự động tra cứu và thêm mới Bill ID: {bill_id}...")
-
-        with st.spinner("Đang tải dữ liệu từ API..."):
-            imex_items = fetch_imex_details(bill_id)
-
+        # Phần tạo mới vẫn giữ nguyên
+        imex_items = record_service.get_api_data(bill_id)
         if not imex_items:
-            st.error("❌ Không lấy được dữ liệu chi tiết, kiểm tra lại Bill ID.")
+            return HTMLResponse("<div class='error'>❌ Không lấy được dữ liệu, kiểm tra lại Bill ID.</div>")
+
+        example_item = imex_items[0]
+        context["api_data"] = {
+            "ID": bill_id,
+            "ID kho đi": example_item.get("fromDepotId", ""),
+            "Kho đi": example_item.get("fromDepotName", ""),
+            "ID kho đến": example_item.get("toDepotId", ""),
+            "Kho đến": example_item.get("toDepotName", ""),
+            "Số lượng": int(example_item.get("realQuantity") or 0),
+        }
+        from src.utils.config import CREATABLE_FIELDS
+        context["creatable_fields"] = CREATABLE_FIELDS
+        return templates.TemplateResponse("_create_form.html", context)
+
+
+@app.post("/records", response_class=HTMLResponse)
+async def create_record(request: Request):
+    form_data = await request.form()
+    bill_id = form_data.get("ID", "Không rõ")
+    success, message = record_service.create_record(form_data)
+
+    if success:
+        return HTMLResponse(f"<div class='success'>✅ Đã thêm thành công Bill ID: {bill_id}</div>")
+    else:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi khi thêm mới: {message}</div>")
+
+@app.put("/records/{record_id}", response_class=HTMLResponse)
+async def update_record(record_id: str, request: Request):
+    form_data = await request.form()
+    success, message = record_service.update_record(record_id, form_data)
+    
+    if success:
+        return HTMLResponse("<div class='success'>📝 Cập nhật thành công. Form đã được reset.</div>")
+    else:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi khi cập nhật: {message}</div>")
+
+@app.delete("/records/{record_id}", response_class=Response)
+async def delete_record_endpoint(record_id: str):
+    success, message = record_service.delete_record(record_id)
+    if success:
+        return Response(status_code=200, content="<div class='success'>🗑️ Đã xóa thành công.</div>")
+    else:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi khi xóa: {message}</div>", status_code=400)
+
+def get_employee_display(employee_id, employees):
+    """Tìm và trả về chuỗi 'Tên (ID)' từ danh sách nhân viên."""
+    if not employee_id or not employees:
+        return ""
+    for emp in employees:
+        if emp.get('id') == employee_id:
+            return f"{emp.get('name', '')} ({emp.get('id', '')})"
+    return employee_id # Trả về ID nếu không tìm thấy
+
+# ← THÊM MỚI: Filter cho hiển thị tên nhà cung cấp
+def get_transport_provider_display(provider_id, transport_providers):
+    """Tìm và trả về tên nhà cung cấp từ ID."""
+    if not provider_id or not transport_providers:
+        return provider_id
+    for provider in transport_providers:
+        if provider.get('id') == provider_id:
+            return provider.get('name', provider_id)
+    return provider_id # Trả về ID nếu không tìm thấy
+
+templates.env.filters['get_employee_display'] = get_employee_display
+templates.env.filters['get_transport_provider_display'] = get_transport_provider_display  # ← THÊM MỚI
+
+@app.post("/refresh-employees", response_class=HTMLResponse)
+async def refresh_employees_endpoint():
+    """Endpoint để làm mới danh sách nhân viên"""
+    try:
+        import time
+        time.sleep(0.5)  # Tạo cảm giác xử lý
+        
+        success, message = employee_service.refresh_employees()
+        
+        if success:
+            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
         else:
-            example_item = imex_items[0]
-            api_data = {
-                "ID": bill_id, "Kho đi": example_item.get("fromDepotId", ""), "Kho đến": example_item.get("toDepotId", ""),
-                "Số lượng": int(example_item.get("realQuantity") or 0), "Số lượng sản phẩm yêu cầu": int(example_item.get("requiredQuantity") or 0),
-                "Số lượng sản phẩm hỏng": int(example_item.get("damagedQuantity") or 0), "Số lượng sản phẩm yêu cầu được duyệt": int(example_item.get("approvedQuantity") or 0),
-                "Số lượng sản phẩm yêu cầu được xác nhận": int(example_item.get("realQuantity") or 0), "Ngày tạo": convert_date_string_to_ms(example_item.get("requiredAt", "")),
-                "Ngày duyệt": convert_date_string_to_ms(example_item.get("approvedAt", "")), "Ngày xác nhận": convert_date_string_to_ms(example_item.get("confirmedAt", "")),
-                "Người xác nhận": example_item.get("approvedByUser", ""),
-            }
+            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
+            
+    except Exception as e:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
 
-            with st.form("create_new"):
-                numeric_fields = ["Số lượng bao/tải giao"]
+# ← THÊM MỚI: Endpoint để refresh transport providers
+@app.post("/refresh-transport-providers", response_class=HTMLResponse)
+async def refresh_transport_providers_endpoint():
+    """Endpoint để làm mới danh sách đơn vị vận chuyển"""
+    try:
+        import time
+        time.sleep(0.5)  # Tạo cảm giác xử lý
+        
+        # Bạn cần thay "tblDefault" bằng table ID thực tế chứa nhà cung cấp
+        # Ví dụ: "tblXXXXXXXXXXXXXXX"
+        success, message = transport_provider_service.refresh_transport_providers("tblyiELQIi6M1j1r")
+        
+        if success:
+            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
+        else:
+            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
+            
+    except Exception as e:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
 
-                for col in LARKBASE_FIELDS:
-                    is_creatable = col in CREATABLE_FIELDS
-                    if is_creatable:
-                        if col in numeric_fields:
-                            st.number_input(col, key=f"add_{col}", step=1, value=0, format="%d")
-                        else:
-                            st.text_input(col, "", key=f"add_{col}")
-                    else:
-                        if col == "ID":
-                            st.text_input(col, api_data['ID'], key=f"add_{col}_disabled", disabled=True)
-                        elif col == "Ngày bàn giao":
-                            ts_ms = get_current_timestamp_ms()
-                            st.text_input(col, format_timestamp_ms_to_string(ts_ms), key=f"add_{col}_disabled", disabled=True)
-                        else:
-                            st.text_input(col, "", key=f"add_{col}_disabled", disabled=True, help="Trường này sẽ được nhập ở bước cập nhật sau.")
-
-                st.form_submit_button(
-                    "Thêm mới vào Larkbase",
-                    on_click=handle_create,
-                    args=(api_data, bill_id),
-                    use_container_width=True
-                )
-
-============================================================
-
-============================================================
-FILE: docker-compose.yml
-============================================================
-vversion: '3.8'
-services:
-  imex-distribution-app:
-    build: .
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./src:/app/src
-    environment:
-      - STREAMLIT_SERVER_HEADLESS=true
-      - STREAMLIT_SERVER_ENABLE_CORS=false
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 ============================================================
 
@@ -364,343 +299,295 @@ FILE: project_complete_info.txt
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-06 13:48:26
+Thời gian tạo: 2025-08-11 16:31:02
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
 📁 CẤU TRÚC THU MỤC
 --------------------------------------------------
 ├── 📁 src/
-│   ├── 📁 styles/
-│   │   └── 📄 material_ui.py
 │   └── 📁 utils/
 │       ├── 📄 api.py
+│       ├── 📄 cache.py
 │       ├── 📄 config.py
-│       └── 📄 larkbase.py
+│       ├── 📄 larkbase.py
+│       └── 📄 transport_provider.py
+├── 📁 static/
+│   ├── 📄 app.js
+│   └── 📄 style.css
+├── 📁 templates/
+│   ├── 📄 _create_form.html
+│   ├── 📄 _employee_dropdown.html
+│   ├── 📄 _transport_dropdown.html
+│   ├── 📄 _update_form.html
+│   ├── 📄 _view_only.html
+│   └── 📄 index.html
 ├── 📄 .gitignore
-├── 📄 app.py
 ├── 📄 docker-compose.yml
 ├── 📄 Dockerfile
 ├── 📄 Get detail code.ipynb
+├── 📄 main.py
 ├── 📄 project_complete_info.txt
 ├── 📄 README.md
-└── 📄 requirements.txt
+├── 📄 requirements.txt
+├── 📄 services.py
+└── 📄 transport_providers.json
 
 
 📄 DANH SÁCH TẤT CẢ FILE
 --------------------------------------------------
 .gitignore (327 bytes)
-app.py (12486 bytes)
-docker-compose.yml (241 bytes)
-Dockerfile (945 bytes)
-Get detail code.ipynb (8697 bytes)
+docker-compose.yml (349 bytes)
+Dockerfile (523 bytes)
+Get detail code.ipynb (9290 bytes)
+main.py (8957 bytes)
 project_complete_info.txt (0 bytes)
 README.md (260 bytes)
-requirements.txt (0 bytes)
-src\styles\material_ui.py (1932 bytes)
-src\utils\api.py (1940 bytes)
-src\utils\config.py (1673 bytes)
-src\utils\larkbase.py (6380 bytes)
+requirements.txt (64 bytes)
+services.py (7612 bytes)
+src\utils\api.py (2109 bytes)
+src\utils\cache.py (3906 bytes)
+src\utils\config.py (1849 bytes)
+src\utils\larkbase.py (5641 bytes)
+src\utils\transport_provider.py (3208 bytes)
+static\app.js (11823 bytes)
+static\style.css (10159 bytes)
+templates\_create_form.html (13085 bytes)
+templates\_employee_dropdown.html (2596 bytes)
+templates\_transport_dropdown.html (1201 bytes)
+templates\_update_form.html (14270 bytes)
+templates\_view_only.html (3359 bytes)
+templates\index.html (2169 bytes)
+transport_providers.json (535 bytes)
 
-Tổng cộng: 12 file
+Tổng cộng: 23 file
 
 💻 NỘI DUNG TẤT CẢ FILE CODE
 ================================================================================
 
 ============================================================
-FILE: app.py
+FILE: docker-compose.yml
 ============================================================
-# FILE: app.py
+version: '3.8'
+services:
+  imex-app-fastapi:
+    build: .
+    ports:` 
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./templates:/app/templates
+      - ./main.py:/app/main.py
+    # Để tự động reload khi code thay đổi trong lúc phát triển
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
+============================================================
 
-import streamlit as st
-import datetime
-import time
-from src.styles.material_ui import load_material_ui_css
-from src.utils.api import fetch_imex_details
-from src.utils.larkbase import (
-    larkbase_find_by_field,
-    larkbase_write_data,
-    larkbase_update_data,
-    larkbase_delete_record,
-)
-from src.utils.config import (
-    LARKBASE_FIELDS, API_FIELDS,
-    CREATABLE_FIELDS, UPDATABLE_FIELDS, LOCK_FIELDS
-)
+============================================================
+FILE: main.py
+============================================================
+from fastapi import FastAPI, Request, Form, Response
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from services import RecordService, EmployeeService, TransportProviderService
 
+app = FastAPI(title="IMEX Distribution API")
 
+# Static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+# Services
 APP_TOKEN = "Rm9PbvKLeaFFZcsSQpElnRjIgXg"
 TABLE_ID = "tblJJPUEFhsXHaxY"
+record_service = RecordService(APP_TOKEN, TABLE_ID)
+employee_service = EmployeeService()
+transport_provider_service = TransportProviderService(APP_TOKEN)
 
-
-# --- Helper Functions (Không thay đổi) ---
-def get_current_timestamp_ms():
-    return int(time.time() * 1000)
-
-
-def convert_date_string_to_ms(date_string: str) -> int | None:
-    if not date_string or not isinstance(date_string, str):
-        return None
+def format_timestamp_ms_to_dt_string(ts_ms):
+    if not ts_ms: return ""
     try:
-        dt_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
-        return int(dt_obj.timestamp() * 1000)
-    except ValueError:
-        return None
-
-
-def format_timestamp_ms_to_string(ts_ms) -> str:
-    if not ts_ms:
-        return ""
-    try:
-        return datetime.datetime.fromtimestamp(int(ts_ms) / 1000).strftime("%Y-%m-%d %H:%M:%S")
+        import datetime
+        return datetime.datetime.fromtimestamp(int(ts_ms) / 1000).strftime('%Y-%m-%d %H:%M:%S')
     except (ValueError, TypeError):
         return str(ts_ms)
 
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# --- Callback functions để xử lý form submissions ---
+# @app.post("/search", response_class=HTMLResponse)
+# async def search_bill(request: Request, bill_id: str = Form(...)):
+#     if not bill_id:
+#         return HTMLResponse("<div class='error'>Vui lòng nhập Bill ID.</div>")
 
+#     found, record = record_service.search_record(bill_id)
+#     context = {
+#         "request": request,
+#         "employees": employee_service.get_employees(),
+#         "transport_providers": transport_provider_service.get_transport_providers()  # ← THÊM MỚI
+#     }
 
-def handle_success(message: str):
-    """Đặt thông báo thành công và reset ô nhập liệu."""
-    st.session_state.last_success_message = message
-    # Gán lại giá trị cho widget trong session state, đây là cách làm đúng trong callback
-    st.session_state.bill_id_input = ""
+#     if found and record:
+#         from src.utils.config import LOCK_FIELDS
+#         has_lock_values = any(record.get("fields", {}).get(f) for f in LOCK_FIELDS)
+#         context.update({
+#             "record": record,
+#             "can_delete": not has_lock_values,
+#             "lock_fields": ', '.join(LOCK_FIELDS),
+#             "format_ts": format_timestamp_ms_to_dt_string
+#         })
+#         return templates.TemplateResponse("_update_form.html", context)
+#     else:
+#         imex_items = record_service.get_api_data(bill_id)
+#         if not imex_items:
+#             return HTMLResponse("<div class='error'>❌ Không lấy được dữ liệu, kiểm tra lại Bill ID.</div>")
 
+#         example_item = imex_items[0]
+#         context["api_data"] = {
+#             "ID": bill_id,
+#             "ID kho đi": example_item.get("fromDepotId", ""),
+#             "Kho đi": example_item.get("fromDepotName", ""),
+#             "ID kho đến": example_item.get("toDepotId", ""),
+#             "Kho đến": example_item.get("toDepotName", ""),
+#             "Số lượng": int(example_item.get("realQuantity") or 0),
+#         }
+#         from src.utils.config import CREATABLE_FIELDS
+#         context["creatable_fields"] = CREATABLE_FIELDS
+#         return templates.TemplateResponse("_create_form.html", context)
 
-def handle_update(record_id, original_bill_id):
-    """Callback cho nút 'Lưu chỉnh sửa'."""
-    update_data = {}
-    date_fields = ["Ngày nhận hàng"]
-    numeric_fields = ["Số lượng bao/tải giao", "Số lượng bao tải nhận", "Thiếu thừa bao"]
+@app.post("/search", response_class=HTMLResponse)
+async def search_bill(request: Request, bill_id: str = Form(...)):
+    if not bill_id:
+        return HTMLResponse("<div class='error'>Vui lòng nhập Bill ID.</div>")
 
-    # Lấy dữ liệu đã sửa từ các widget trong form thông qua st.session_state
-    for col in UPDATABLE_FIELDS:
-        key = f"update_{col}"
-        if key in st.session_state:
-            val = st.session_state[key]
-            if col in date_fields and val is not None:
-                dt_obj = datetime.datetime.combine(val, datetime.datetime.min.time())
-                update_data[col] = int(dt_obj.timestamp() * 1000)
-            elif val is not None:
-                 update_data[col] = val
+    found, record = record_service.search_record(bill_id)
+    context = {
+        "request": request,
+        "employees": employee_service.get_employees(),
+        "transport_providers": transport_provider_service.get_transport_providers()
+    }
 
-    if not update_data:
-        st.warning("Không có thay đổi nào để lưu.")
-        return
-
-    result = larkbase_update_data(APP_TOKEN, TABLE_ID, record_id, update_data)
-    if result:
-        handle_success(f"📝 Cập nhật thành công cho Bill ID: {original_bill_id}. Giao diện đã được reset.")
+    if found and record:
+        # ← SỬA: Chỉ hiển thị thông tin, không cho edit
+        context.update({
+            "record": record,
+            "format_ts": format_timestamp_ms_to_dt_string
+        })
+        # ← SỬA: Tạo template mới hoặc sửa template để chỉ hiển thị
+        return templates.TemplateResponse("_view_only.html", context)
     else:
-        st.error("❌ Lỗi khi cập nhật dữ liệu!")
-
-
-def handle_delete(record_id, original_bill_id):
-    """Callback cho nút 'Xóa Bill này' với logic kiểm tra lại trước khi xóa."""
-    # 1. Tải lại dữ liệu mới nhất của record từ Larkbase để đảm bảo không có gì thay đổi
-    st.info("Đang kiểm tra lại trạng thái record trước khi xóa...")
-    latest_record = larkbase_find_by_field(APP_TOKEN, TABLE_ID, "ID", original_bill_id)
-
-    if not latest_record:
-        st.error(f"❌ Không tìm thấy record với Bill ID: {original_bill_id}. Có thể đã bị người khác xóa.")
-        # Xóa thông báo info
-        st.empty()
-        return
-
-    # 2. Kiểm tra lại điều kiện khóa trên dữ liệu mới nhất
-    fields = latest_record.get("fields", {})
-    has_lock_values = any(fields.get(f) for f in LOCK_FIELDS)
-
-    # 3. Nếu bị khóa, báo lỗi và dừng lại
-    if has_lock_values:
-        locked_fields_found = [f for f in LOCK_FIELDS if fields.get(f)]
-        st.error(
-            f"❌ Không thể xóa! Record đã được cập nhật bởi người khác và bị khóa bởi các trường: "
-            f"{', '.join(locked_fields_found)}. Vui lòng tải lại trang."
-        )
-        # Xóa thông báo info
-        st.empty()
-        return
-
-    # 4. Nếu không bị khóa, tiến hành xóa
-    result = larkbase_delete_record(APP_TOKEN, TABLE_ID, record_id)
-    if result:
-        handle_success(f"🗑️ Đã xóa thành công Bill ID: {original_bill_id}. Giao diện đã được reset.")
-    else:
-        st.error("❌ Xóa không thành công!")
-
-
-def handle_create(api_data, original_bill_id):
-    """Callback cho nút 'Thêm mới vào Larkbase'."""
-    new_fields = {}
-    # Lấy dữ liệu từ các widget trong form
-    for col in CREATABLE_FIELDS:
-        key = f"add_{col}"
-        if key in st.session_state:
-            new_fields[col] = st.session_state[key]
-
-    # Thêm các trường tự động tạo
-    new_fields["ID"] = api_data['ID']
-    new_fields["Ngày bàn giao"] = get_current_timestamp_ms()
-
-    record_data = {**new_fields, **api_data}
-    final_record_data = {k: v for k, v in record_data.items() if v is not None and str(v) != ""}
-
-    try:
-        ok = larkbase_write_data(APP_TOKEN, TABLE_ID, final_record_data)
-        if ok:
-            # Lấy thông tin đã nhập để hiển thị trong thông báo
-            so_luong_giao = new_fields.get("Số lượng bao/tải giao", "không có")
-            nguoi_ban_giao = new_fields.get("Người bàn giao", "không có")
-
-            # Tạo chuỗi thông báo mới
-            success_message = (
-                f"✅ Đã thêm thành công Bill ID: {original_bill_id}. "
-                f"Số lượng bao/tải giao: {so_luong_giao}. "
-                f"Người bàn giao: '{nguoi_ban_giao}'."
-            )
-            handle_success(success_message)
-        else:
-            st.error("❌ Không thể thêm mới. Kiểm tra lại thông báo lỗi từ API bên trên nếu có.")
-    except Exception as e:
-        st.error(f"Lỗi khi ghi dữ liệu: {e}")
-
-
-
-# --- Streamlit App UI ---
-st.set_page_config(layout="centered")
-
-
-# Khởi tạo session state nếu chưa tồn tại
-if 'last_success_message' not in st.session_state:
-    st.session_state.last_success_message = None
-if 'bill_id_input' not in st.session_state:
-    st.session_state.bill_id_input = ""
-
-
-load_material_ui_css()
-st.markdown(
-    '<div style="text-align:center;"><h2>📦 Phân phối giao nhận IMEX</h2>'
-    '<p style="color:#1976d2"><b>Nhập Bill ID, tra cứu, thêm, sửa, xóa thông tin giao nhận</b></p></div>',
-    unsafe_allow_html=True,
-)
-
-
-# Hiển thị thông báo thành công (nếu có) và xóa đi
-if st.session_state.last_success_message:
-    st.success(st.session_state.last_success_message)
-    st.session_state.last_success_message = None
-
-
-# Giá trị của widget giờ sẽ được điều khiển bởi các hàm callback
-bill_id = st.text_input(
-    "Nhập Bill ID:",
-    placeholder="Nhập mã Bill ID giao nhận",
-    key="bill_id_input"
-).strip()
-
-
-if bill_id:
-    record = larkbase_find_by_field(APP_TOKEN, TABLE_ID, "ID", bill_id)
-
-
-    # --- RECORD EXISTS: VIEW / UPDATE / DELETE ---
-    if record:
-        fields = record.get("fields", {})
-        st.markdown(f"<b>Đã tồn tại thông tin Bill ID <span style='color: #1976d2'>{bill_id}</span>!</b>", unsafe_allow_html=True)
-
-        has_lock_values = any(fields.get(f) for f in LOCK_FIELDS)
-        numeric_fields = ["Số lượng bao/tải giao", "Số lượng bao tải nhận", "Thiếu thừa bao"]
-        date_fields = ["Ngày nhận hàng"]
-
-        with st.form("update_or_delete"):
-            for col in LARKBASE_FIELDS:
-                val = fields.get(col, "")
-                is_editable = (col in UPDATABLE_FIELDS) and not (col in LOCK_FIELDS and val)
-
-                if not is_editable:
-                    display_val = format_timestamp_ms_to_string(val) if col in date_fields or col == "Ngày bàn giao" else val
-                    st.text_input(col, display_val, key=f"readonly_{col}", disabled=True)
-                else:
-                    if col in numeric_fields:
-                        default_val = int(val) if val else 0
-                        st.number_input(col, key=f"update_{col}", step=1, value=default_val, format="%d")
-                    elif col in date_fields:
-                        default_val = datetime.datetime.fromtimestamp(int(val) / 1000).date() if val else None
-                        st.date_input(col, key=f"update_{col}", value=default_val)
-                    else:
-                        st.text_input(col, val, key=f"update_{col}")
-
-            col1, col2 = st.columns(2)
-            with col1:
-                st.form_submit_button(
-                    "Lưu chỉnh sửa",
-                    on_click=handle_update,
-                    args=(record["record_id"], bill_id),
-                    use_container_width=True
-                )
-
-            can_delete = not has_lock_values
-            with col2:
-                st.form_submit_button(
-                    "Xóa Bill này",
-                    disabled=not can_delete,
-                    type="secondary",
-                    on_click=handle_delete,
-                    args=(record["record_id"], bill_id),
-                    use_container_width=True
-                )
-
-            if not can_delete:
-                st.info(f"Lưu ý: Bill này không thể xóa vì đã có thông tin ở một trong các trường sau: {', '.join(LOCK_FIELDS)}. Do đó, nút xóa đã được vô hiệu hóa.")
-
-
-    # --- RECORD NOT FOUND: CREATE NEW ---
-    else:
-        st.info(f"Đang tự động tra cứu và thêm mới Bill ID: {bill_id}...")
-
-        with st.spinner("Đang tải dữ liệu từ API..."):
-            imex_items = fetch_imex_details(bill_id)
-
+        # Phần tạo mới vẫn giữ nguyên
+        imex_items = record_service.get_api_data(bill_id)
         if not imex_items:
-            st.error("❌ Không lấy được dữ liệu chi tiết, kiểm tra lại Bill ID.")
+            return HTMLResponse("<div class='error'>❌ Không lấy được dữ liệu, kiểm tra lại Bill ID.</div>")
+
+        example_item = imex_items[0]
+        context["api_data"] = {
+            "ID": bill_id,
+            "ID kho đi": example_item.get("fromDepotId", ""),
+            "Kho đi": example_item.get("fromDepotName", ""),
+            "ID kho đến": example_item.get("toDepotId", ""),
+            "Kho đến": example_item.get("toDepotName", ""),
+            "Số lượng": int(example_item.get("realQuantity") or 0),
+        }
+        from src.utils.config import CREATABLE_FIELDS
+        context["creatable_fields"] = CREATABLE_FIELDS
+        return templates.TemplateResponse("_create_form.html", context)
+
+
+@app.post("/records", response_class=HTMLResponse)
+async def create_record(request: Request):
+    form_data = await request.form()
+    bill_id = form_data.get("ID", "Không rõ")
+    success, message = record_service.create_record(form_data)
+
+    if success:
+        return HTMLResponse(f"<div class='success'>✅ Đã thêm thành công Bill ID: {bill_id}</div>")
+    else:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi khi thêm mới: {message}</div>")
+
+@app.put("/records/{record_id}", response_class=HTMLResponse)
+async def update_record(record_id: str, request: Request):
+    form_data = await request.form()
+    success, message = record_service.update_record(record_id, form_data)
+    
+    if success:
+        return HTMLResponse("<div class='success'>📝 Cập nhật thành công. Form đã được reset.</div>")
+    else:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi khi cập nhật: {message}</div>")
+
+@app.delete("/records/{record_id}", response_class=Response)
+async def delete_record_endpoint(record_id: str):
+    success, message = record_service.delete_record(record_id)
+    if success:
+        return Response(status_code=200, content="<div class='success'>🗑️ Đã xóa thành công.</div>")
+    else:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi khi xóa: {message}</div>", status_code=400)
+
+def get_employee_display(employee_id, employees):
+    """Tìm và trả về chuỗi 'Tên (ID)' từ danh sách nhân viên."""
+    if not employee_id or not employees:
+        return ""
+    for emp in employees:
+        if emp.get('id') == employee_id:
+            return f"{emp.get('name', '')} ({emp.get('id', '')})"
+    return employee_id # Trả về ID nếu không tìm thấy
+
+# ← THÊM MỚI: Filter cho hiển thị tên nhà cung cấp
+def get_transport_provider_display(provider_id, transport_providers):
+    """Tìm và trả về tên nhà cung cấp từ ID."""
+    if not provider_id or not transport_providers:
+        return provider_id
+    for provider in transport_providers:
+        if provider.get('id') == provider_id:
+            return provider.get('name', provider_id)
+    return provider_id # Trả về ID nếu không tìm thấy
+
+templates.env.filters['get_employee_display'] = get_employee_display
+templates.env.filters['get_transport_provider_display'] = get_transport_provider_display  # ← THÊM MỚI
+
+@app.post("/refresh-employees", response_class=HTMLResponse)
+async def refresh_employees_endpoint():
+    """Endpoint để làm mới danh sách nhân viên"""
+    try:
+        import time
+        time.sleep(0.5)  # Tạo cảm giác xử lý
+        
+        success, message = employee_service.refresh_employees()
+        
+        if success:
+            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
         else:
-            example_item = imex_items[0]
-            api_data = {
-                "ID": bill_id, "Kho đi": example_item.get("fromDepotId", ""), "Kho đến": example_item.get("toDepotId", ""),
-                "Số lượng": int(example_item.get("realQuantity") or 0), "Số lượng sản phẩm yêu cầu": int(example_item.get("requiredQuantity") or 0),
-                "Số lượng sản phẩm hỏng": int(example_item.get("damagedQuantity") or 0), "Số lượng sản phẩm yêu cầu được duyệt": int(example_item.get("approvedQuantity") or 0),
-                "Số lượng sản phẩm yêu cầu được xác nhận": int(example_item.get("realQuantity") or 0), "Ngày tạo": convert_date_string_to_ms(example_item.get("requiredAt", "")),
-                "Ngày duyệt": convert_date_string_to_ms(example_item.get("approvedAt", "")), "Ngày xác nhận": convert_date_string_to_ms(example_item.get("confirmedAt", "")),
-                "Người xác nhận": example_item.get("approvedByUser", ""),
-            }
+            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
+            
+    except Exception as e:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
 
-            with st.form("create_new"):
-                numeric_fields = ["Số lượng bao/tải giao"]
+# ← THÊM MỚI: Endpoint để refresh transport providers
+@app.post("/refresh-transport-providers", response_class=HTMLResponse)
+async def refresh_transport_providers_endpoint():
+    """Endpoint để làm mới danh sách đơn vị vận chuyển"""
+    try:
+        import time
+        time.sleep(0.5)  # Tạo cảm giác xử lý
+        
+        # Bạn cần thay "tblDefault" bằng table ID thực tế chứa nhà cung cấp
+        # Ví dụ: "tblXXXXXXXXXXXXXXX"
+        success, message = transport_provider_service.refresh_transport_providers("tblyiELQIi6M1j1r")
+        
+        if success:
+            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
+        else:
+            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
+            
+    except Exception as e:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
 
-                for col in LARKBASE_FIELDS:
-                    is_creatable = col in CREATABLE_FIELDS
-                    if is_creatable:
-                        if col in numeric_fields:
-                            st.number_input(col, key=f"add_{col}", step=1, value=0, format="%d")
-                        else:
-                            st.text_input(col, "", key=f"add_{col}")
-                    else:
-                        if col == "ID":
-                            st.text_input(col, api_data['ID'], key=f"add_{col}_disabled", disabled=True)
-                        elif col == "Ngày bàn giao":
-                            ts_ms = get_current_timestamp_ms()
-                            st.text_input(col, format_timestamp_ms_to_string(ts_ms), key=f"add_{col}_disabled", disabled=True)
-                        else:
-                            st.text_input(col, "", key=f"add_{col}_disabled", disabled=True, help="Trường này sẽ được nhập ở bước cập nhật sau.")
-
-                st.form_submit_button(
-                    "Thêm mới vào Larkbase",
-                    on_click=handle_create,
-                    args=(api_data, bill_id),
-                    use_container_width=True
-                )
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 ============================================================
 
@@ -720,79 +607,195 @@ FILE: README.md
 ============================================================
 FILE: requirements.txt
 ============================================================
+fastapi
+uvicorn[standard]
+python-multipart
+jinja2
+requests
 
 ============================================================
 
 ============================================================
-FILE: src\styles\material_ui.py
+FILE: services.py
 ============================================================
-import streamlit as st
+from src.utils.api import fetch_imex_details
+from src.utils.larkbase import (
+    larkbase_find_by_field, larkbase_write_data, 
+    larkbase_update_data, larkbase_delete_record
+)
+from src.utils.cache import get_employee_list_from_file, update_employee_json_file
+from src.utils.transport_provider import get_transport_providers_from_file, update_transport_providers_json_file
+import time
+import datetime
+import logging
 
-def load_material_ui_css():
-    st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-    html, body, .main {font-family: 'Roboto', Arial, sans-serif;}
-    .material-card {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(33,150,243,.08);
-        padding: 2rem 2rem 1.5rem 2rem;
-        margin: 32px 0 16px 0;
-        border: 1px solid #eee;
-    }
-    .material-header {
-        color: #1976d2;
-        margin-bottom: 18px;
-        font-weight: 600;
-        letter-spacing: 1px;
-    }
-    .stButton>button {
-        width: 100%;
-        background: #1976d2;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 10px 0;
-        font-weight: 600;
-        font-size: 16px;
-        margin-top: 8px;
-    }
-    .stButton>button:hover {background: #125ca0;}
-    .material-success {
-        background: #e8f5e9;
-        border-left: 4px solid #43a047;
-        padding: 12px; margin-bottom: 12px; border-radius: 8px;
-        color: #256029;
-    }
-    .material-error {
-        background: #ffebee;
-        border-left: 4px solid #e53935;
-        padding: 12px; margin-bottom: 12px; border-radius: 8px;
-        color: #b71c1c;
-    }
-    .material-info {
-        background: #e3f2fd;
-        color: #0d47a1;
-        padding: 12px; margin-bottom: 12px; border-radius: 8px;
-        border-left: 4px solid #2196f3;
-    }
-    .material-table th {
-        background: #e3f2fd;
-        color: #1976d2;
-        font-weight: 600 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+class RecordService:
+    def __init__(self, app_token, table_id):
+        self.app_token = app_token
+        self.table_id = table_id
+
+    def search_record(self, bill_id):
+        """Tìm kiếm record theo Bill ID"""
+        return larkbase_find_by_field(self.app_token, self.table_id, "ID", bill_id)
+
+    # def create_record(self, form_data):
+    #     """Tạo record mới"""
+    #     new_record = {key: value for key, value in form_data.items()}
+    #     new_record["Ngày bàn giao"] = int(time.time() * 1000)
+    #     return larkbase_write_data(self.app_token, self.table_id, new_record)
+
+    # def create_record(self, form_data):
+    #     """Tạo record mới"""
+    #     new_record = {}
+        
+    #     # Danh sách các trường cần chuyển đổi thành số
+    #     numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
+        
+    #     for key, value in form_data.items():
+    #         if key in numeric_fields and value:
+    #             try:
+    #                 # Chuyển đổi thành số nguyên
+    #                 new_record[key] = int(value) if value else 0
+    #             except (ValueError, TypeError):
+    #                 # Nếu không chuyển đổi được, mặc định = 0
+    #                 new_record[key] = 0
+    #         else:
+    #             new_record[key] = value
+        
+    #     new_record["Ngày bàn giao"] = int(time.time() * 1000)
+        
+    #     # Debug: In ra dữ liệu trước khi gửi
+    #     logging.info(f"Data to send: {new_record}")
+    #     for key, value in new_record.items():
+    #         logging.info(f"Field '{key}': {value} (type: {type(value)})")
+        
+    #     return larkbase_write_data(self.app_token, self.table_id, new_record)
+
+    def create_record(self, form_data):
+        """Tạo record mới với tách riêng ID và tên từ dropdown"""
+        new_record = {}
+        
+        # Danh sách các trường cần chuyển đổi thành số
+        numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
+        
+        # Debug: In ra toàn bộ form_data
+        logging.info("=== FORM DATA DEBUG ===")
+        for key, value in form_data.items():
+            logging.info(f"Key: '{key}' = Value: '{value}'")
+        logging.info("=== END DEBUG ===")
+        
+        for key, value in form_data.items():
+            if key in numeric_fields and value:
+                try:
+                    new_record[key] = int(value) if value else 0
+                except (ValueError, TypeError):
+                    new_record[key] = 0
+            elif key == "Người bàn giao":  # ← SỬA: Bỏ "_tomselected"
+                # Đây là giá trị từ hidden input (chỉ chứa ID)
+                if value:
+                    # Lưu ID vào cột riêng
+                    new_record["ID người bàn giao"] = value
+                    
+                    # Tìm tên tương ứng với ID từ danh sách nhân viên
+                    from services import EmployeeService
+                    employee_service = EmployeeService()
+                    employees = employee_service.get_employees()
+                    
+                    employee_name = ""
+                    for emp in employees:
+                        if emp.get('id') == value:
+                            employee_name = emp.get('name', '')
+                            break
+                    
+                    if employee_name:
+                        new_record["Người bàn giao"] = employee_name
+                    else:
+                        new_record["Người bàn giao"] = value  # Fallback về ID nếu không tìm thấy tên
+                continue  # ← QUAN TRỌNG: Không lưu value gốc
+            elif value and key not in ["Người bàn giao_hidden"]:  
+                new_record[key] = value
+        
+        new_record["Ngày bàn giao"] = int(time.time() * 1000)
+        
+        # Debug: In ra dữ liệu trước khi gửi
+        logging.info(f"Data to send: {new_record}")
+        
+        return larkbase_write_data(self.app_token, self.table_id, new_record)
 
 
-def material_card(title: str, body: str):
-    st.markdown(f"""
-    <div class="material-card">
-        <div class="material-header">{title}</div>
-        <div>{body}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    def update_record(self, record_id, form_data):
+        """Cập nhật record với tách riêng ID và tên từ dropdown"""
+        from src.utils.config import UPDATABLE_FIELDS
+        
+        update_data = {}
+        for field in UPDATABLE_FIELDS:
+            if field in form_data and form_data[field]:
+                value = form_data[field]
+                
+                if field == "Người bàn giao":  # ← SỬA: Bỏ "_tomselected"
+                    # Lưu ID
+                    update_data["ID người bàn giao"] = value
+                    
+                    # Tìm tên từ danh sách nhân viên
+                    from services import EmployeeService
+                    employee_service = EmployeeService()
+                    employees = employee_service.get_employees()
+                    
+                    employee_name = ""
+                    for emp in employees:
+                        if emp.get('id') == value:
+                            employee_name = emp.get('name', '')
+                            break
+                    
+                    if employee_name:
+                        update_data["Người bàn giao"] = employee_name
+                    else:
+                        update_data["Người bàn giao"] = value
+                elif field == "Ngày nhận hàng" and value:
+                    dt_obj = datetime.datetime.strptime(value, '%Y-%m-%d')
+                    update_data[field] = int(dt_obj.timestamp() * 1000)
+                else:
+                    update_data[field] = value
+        
+        if not update_data:
+            return False, "Không có thông tin nào được thay đổi."
+        
+        return larkbase_update_data(self.app_token, self.table_id, record_id, update_data)
+
+
+
+
+    def delete_record(self, record_id):
+        """Xóa record"""
+        return larkbase_delete_record(self.app_token, self.table_id, record_id)
+
+    def get_api_data(self, bill_id):
+        """Lấy dữ liệu từ API"""
+        return fetch_imex_details(bill_id)
+
+class EmployeeService:
+    def get_employees(self):
+        """Lấy danh sách nhân viên"""
+        return get_employee_list_from_file()
+    
+    def refresh_employees(self):
+        """Làm mới danh sách nhân viên"""
+        return update_employee_json_file()
+
+
+
+# Thêm class mới sau EmployeeService
+class TransportProviderService:
+    def __init__(self, app_token):
+        self.app_token = app_token
+    
+    def get_transport_providers(self):
+        """Lấy danh sách nhà cung cấp"""
+        return get_transport_providers_from_file()
+    
+    def refresh_transport_providers(self, table_id="tblDefault"):
+        """Làm mới danh sách nhà cung cấp"""
+        return update_transport_providers_json_file(self.app_token, table_id)
 
 ============================================================
 
@@ -801,14 +804,9 @@ FILE: src\utils\api.py
 ============================================================
 import requests
 import json
+import logging
 
 def fetch_imex_details(bill_id: int) -> list[dict] | None:
-    """
-    Gọi API lấy chi tiết danh sách imex cho bill_id.
-    Trả về list dict, mỗi dict có các trường:
-        requiredQuantity, damagedQuantity, approvedQuantity, realQuantity
-    Hoặc None nếu lỗi.
-    """
     url = "https://open.nhanh.vn/api/bill/imexrequirements"
     payload = {
         "version": "2.0",
@@ -822,7 +820,14 @@ def fetch_imex_details(bill_id: int) -> list[dict] | None:
         try:
             res_json = res.json()
             if res_json.get("code") == 1:
-                imexs = res_json.get("data", {}).get("imexs", {})
+                data = res_json.get("data")
+                if not data:
+                    return None
+                    
+                imexs = data.get("imexs")
+                if not imexs:
+                    return None
+                    
                 result = []
                 for item in imexs.values():
                     result.append({
@@ -835,12 +840,118 @@ def fetch_imex_details(bill_id: int) -> list[dict] | None:
                         "approvedAt": item.get("approvedAt", ""),
                         "confirmedAt": item.get("confirmedAt", ""),
                         "fromDepotId": item.get("fromDepotId", ""),
+                        "fromDepotName": item.get("fromDepotName", ""),
                         "toDepotId": item.get("toDepotId", ""),
+                        "toDepotName": item.get("toDepotName", "")
                     })
                 return result
-        except Exception:
+        except Exception as e:
+            logging.error(f"Lỗi khi parse JSON: {e}")
             return None
     return None
+
+============================================================
+
+============================================================
+FILE: src\utils\cache.py
+============================================================
+# FILE: src/utils/cache.py
+
+import requests
+import logging
+import json
+import os
+
+# --- CẤU HÌNH ---
+PERSONNEL_API_BASE_URL = "https://minham.1office.vn/api/personnel/profile/gets?access_token=4467770316793457d8e1ad273033229"
+EMPLOYEE_JSON_PATH = "employees.json" # File JSON sẽ được lưu ở thư mục gốc của dự án
+
+logging.basicConfig(level=logging.INFO)
+
+
+def update_employee_json_file():
+    """
+    Gọi API 1Office để lấy danh sách nhân viên đang hoạt động,
+    bao gồm Mã NV và Phòng ban, sau đó lưu vào file employees.json.
+    Trả về (bool, message).
+    """
+    logging.info("Bắt đầu quá trình cập nhật danh sách nhân viên từ 1Office...")
+    all_employees_raw = []
+    page = 1
+
+    while True:
+        url = f"{PERSONNEL_API_BASE_URL}&page={page}"
+        try:
+            response = requests.get(url, timeout=20)
+            response.raise_for_status()
+            json_data = response.json()
+
+            if not json_data or not json_data.get("data"):
+                logging.info(f"Không có thêm dữ liệu ở trang {page}, dừng vòng lặp.")
+                break
+
+            current_page_data = json_data['data']
+            all_employees_raw.extend(current_page_data)
+            logging.info(f"Đã lấy thành công trang {page} với {len(current_page_data)} bản ghi.")
+            page += 1
+            # Thêm một khoảng nghỉ nhỏ để tránh gây quá tải cho API
+            # time.sleep(0.1) 
+
+        except requests.exceptions.RequestException as e:
+            msg = f"Lỗi khi gọi API 1Office ở trang {page}: {e}"
+            logging.error(msg)
+            return False, msg
+        except ValueError:
+            msg = f"Lỗi: Không thể phân tích JSON từ API ở trang {page}."
+            logging.error(msg)
+            return False, msg
+
+    # Lọc và định dạng lại dữ liệu, lấy thêm phòng ban
+    active_employees = []
+    for emp in all_employees_raw:
+        # Chỉ lấy nhân viên đang hoạt động và có đủ thông tin cần thiết
+        if emp.get("job_date_out") == "" and emp.get("code") and emp.get("name"):
+            active_employees.append({
+                "id": emp.get("code"),
+                "name": emp.get("name"),
+                "department": emp.get("department_id")
+            })
+    
+    # Sắp xếp danh sách theo tên để dễ tìm kiếm
+    active_employees.sort(key=lambda x: x['name'])
+
+    # Ghi ra file JSON
+    try:
+        with open(EMPLOYEE_JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(active_employees, f, ensure_ascii=False, indent=4)
+        msg = f"Cập nhật thành công! Đã lưu {len(active_employees)} nhân viên vào file {EMPLOYEE_JSON_PATH}."
+        logging.info(msg)
+        return True, msg
+    except IOError as e:
+        msg = f"Lỗi khi ghi file {EMPLOYEE_JSON_PATH}: {e}"
+        logging.error(msg)
+        return False, msg
+
+
+def get_employee_list_from_file():
+    """
+    Đọc danh sách nhân viên trực tiếp từ file employees.json.
+    Nếu file không tồn tại, thử tạo nó lần đầu.
+    """
+    if not os.path.exists(EMPLOYEE_JSON_PATH):
+        logging.warning(f"File {EMPLOYEE_JSON_PATH} không tồn tại. Đang thử tạo lần đầu tiên...")
+        success, message = update_employee_json_file()
+        if not success:
+            # Nếu tạo file thất bại, trả về danh sách rỗng
+            return []
+
+    try:
+        with open(EMPLOYEE_JSON_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (IOError, json.JSONDecodeError) as e:
+        logging.error(f"Lỗi khi đọc hoặc phân tích file {EMPLOYEE_JSON_PATH}: {e}")
+        return [] # Trả về rỗng nếu file bị lỗi
+
 
 ============================================================
 
@@ -852,9 +963,15 @@ FILE: src\utils\config.py
 # Danh sách cột hiển thị trong form (theo thứ tự mong muốn)
 LARKBASE_FIELDS = [
     "ID",
+    "ID kho đi",
+    "Kho đi", 
+    "ID kho đến",
+    "Kho đến",
     "Số lượng bao/tải giao", 
+    "ID người bàn giao",
     "Người bàn giao",
     "Ngày bàn giao",
+    "Đơn vị vận chuyển",
     "Số lượng bao tải nhận",
     "Người nhận", 
     "Ngày nhận hàng",
@@ -867,18 +984,19 @@ LARKBASE_FIELDS = [
 CREATABLE_FIELDS = [
     "Số lượng bao/tải giao",
     "Người bàn giao",
+    "Đơn vị vận chuyển"
 ]
 
 # Các trường người dùng có thể nhập liệu khi CẬP NHẬT bản ghi.
 UPDATABLE_FIELDS = [
     "Số lượng bao/tải giao",
-    "Người bàn giao"
+    "Người bàn giao",
+    "Đơn vị vận chuyển"
 ]
 
 # Các trường khi đã có dữ liệu sẽ:
 # 1. Tự khóa chính nó, không cho sửa nữa.
 # 2. Khóa không cho xóa toàn bộ bản ghi.
-# *** FIX: Thêm "Thiếu thừa bao" vào danh sách khóa ***
 LOCK_FIELDS = [
     "Số lượng bao tải nhận",
     "Người nhận",
@@ -889,10 +1007,10 @@ LOCK_FIELDS = [
 
 # Các cột lấy từ API (không hiển thị trong form nhưng vẫn lưu vào database)
 API_FIELDS = [
-    "Kho đi", "Kho đến", "Số lượng", "Số lượng sản phẩm yêu cầu",
-    "Số lượng sản phẩm hỏng", "Số lượng sản phẩm yêu cầu được duyệt",
-    "Số lượng sản phẩm yêu cầu được xác nhận", "Ngày tạo", "Ngày duyệt", 
-    "Ngày xác nhận", "Người xác nhận"
+    "ID kho đi", "Kho đi", "ID kho đến", "Kho đến", "Số lượng", 
+    "Số lượng sản phẩm yêu cầu", "Số lượng sản phẩm hỏng", 
+    "Số lượng sản phẩm yêu cầu được duyệt", "Số lượng sản phẩm yêu cầu được xác nhận", 
+    "Ngày tạo", "Ngày duyệt", "Ngày xác nhận", "Người xác nhận"
 ]
 
 # Toàn bộ fields để lưu vào Larkbase (hiện không dùng trong app.py)
@@ -903,13 +1021,17 @@ ALL_LARKBASE_FIELDS = LARKBASE_FIELDS + API_FIELDS
 ============================================================
 FILE: src\utils\larkbase.py
 ============================================================
+# FILE: src/utils/larkbase.py
+
 import requests
-import streamlit as st
+import logging
+
+# Thiết lập logging cơ bản
+logging.basicConfig(level=logging.INFO)
 
 API_ENDPOINT = 'https://open.larksuite.com/open-apis'
 API_HOST = "https://open.larksuite.com/open-apis/bitable/v1/apps"
 
-# Lấy access token (tự động lấy lại nếu có sẵn trong session)
 def larkbase_get_token(app_id=None, app_secret=None, endpoint=API_ENDPOINT):
     APP_ID = app_id or 'cli_a7fab27260385010'
     APP_SECRET = app_secret or 'Zg4MVcFfiOu0g09voTcpfd4WGDpA0Ly5'
@@ -921,7 +1043,7 @@ def larkbase_get_token(app_id=None, app_secret=None, endpoint=API_ENDPOINT):
             if data.get('code') == 0:
                 return data['tenant_access_token']
     except Exception as e:
-        st.error(f"❌ Lỗi khi lấy token: {e}")
+        logging.error(f"Lỗi khi lấy token: {e}")
     return None
 
 def get_headers(token):
@@ -930,18 +1052,14 @@ def get_headers(token):
         "Content-Type": "application/json"
     }
 
-# --- READ ---
-
-# Lấy toàn bộ record (với phân trang)
 def larkbase_get_all(app_token, table_id):
     token = larkbase_get_token()
     if not token:
-        st.error("❌ Không xác thực được với Larkbase.")
+        logging.error("Không xác thực được với Larkbase.")
         return []
 
     all_records = []
     page_token = ""
-    
     while True:
         try:
             url = f"{API_HOST}/{app_token}/tables/{table_id}/records?page_size=500"
@@ -949,153 +1067,996 @@ def larkbase_get_all(app_token, table_id):
                 url += f"&page_token={page_token}"
             
             resp = requests.get(url, headers=get_headers(token))
-            
-            # Kiểm tra status code trước
             if resp.status_code != 200:
-                st.error(f"❌ API trả về status code: {resp.status_code}")
+                logging.error(f"API trả về status code: {resp.status_code}")
                 break
             
-            # Kiểm tra và parse JSON response
-            try:
-                res_data = resp.json()
-            except Exception as e:
-                st.error(f"❌ Lỗi parse JSON response: {e}")
-                break
-            
-            # Kiểm tra response code
+            res_data = resp.json()
             if res_data.get("code") != 0:
-                st.error(f"❌ API trả về code: {res_data.get('code')}, msg: {res_data.get('msg', '')}")
+                logging.error(f"API trả về code: {res_data.get('code')}, msg: {res_data.get('msg', '')}")
                 break
-            
-            # Lấy data và items
-            data = res_data.get("data", {})
-            if data is None:
-                st.error("❌ Response data is None")
+
+            data = res_data.get("data")
+            if not data:  # ✅ Kiểm tra data trước
                 break
                 
             items = data.get("items", [])
-            if items is None:
-                items = []
-            
-            # Extend records
+            if not items:  # ✅ Kiểm tra items trước
+                break
+                
             all_records.extend(items)
             
-            # Kiểm tra page_token cho trang tiếp theo
             page_token = data.get("page_token", "")
-            if not page_token or not items:
+            if not page_token:
                 break
                 
         except Exception as e:
-            st.error(f"❌ Lỗi khi lấy dữ liệu: {e}")
+            logging.error(f"Lỗi khi lấy dữ liệu: {e}")
             break
-    
     return all_records
 
-# Tìm record theo (giá trị cột ID)
+
+
 def larkbase_find_by_field(app_token, table_id, field, value):
     all_records = larkbase_get_all(app_token, table_id)
     if not all_records:
-        return None
-        
-    # Nên kiểm tra field trùng tên cột đúng như Larkbase
+        # Trả về tuple (trạng thái, dữ liệu)
+        return False, None
     for record in all_records:
         fields = record.get('fields', {})
         if str(fields.get(field, '')).strip() == str(value).strip():
-            return record
-    return None
+            # Tìm thấy, trả về (True, record)
+            return True, record
+    # Không tìm thấy sau khi duyệt hết, trả về (False, None)
+    return False, None
 
-# --- CREATE ---
+
 def larkbase_write_data(app_token, table_id, data):
+    """Ghi dữ liệu mới và trả về (bool, message)"""
     token = larkbase_get_token()
     if not token:
-        st.error("❌ Không xác thực được với Larkbase.")
-        return False
-
+        return False, "Không thể xác thực với Larkbase."
     try:
         url = f"{API_HOST}/{app_token}/tables/{table_id}/records"
-        headers = get_headers(token)
-        fields = {"fields": data}
-        resp = requests.post(url, headers=headers, json=fields)
-        
-        if resp.status_code == 200:
-            try:
-                result = resp.json()
-                if result.get('code') == 0:
-                    return True
-                else:
-                    st.error(f"❌ Lỗi API: {result.get('msg', '')}")
-            except Exception as e:
-                st.error(f"❌ Lỗi parse response: {e}")
+        resp = requests.post(url, headers=get_headers(token), json={"fields": data})
+        res_json = resp.json()
+        if resp.status_code == 200 and res_json.get('code') == 0:
+            return True, "Thêm mới thành công"
         else:
-            st.error(f"❌ HTTP Error: {resp.status_code}")
+            error_msg = res_json.get('msg', resp.text)
+            logging.error(f"Lỗi API khi ghi: {error_msg}")
+            return False, error_msg
     except Exception as e:
-        st.error(f"❌ Lỗi khi ghi dữ liệu: {e}")
-    
-    return False
+        logging.error(f"Lỗi ngoại lệ khi ghi dữ liệu: {e}")
+        return False, str(e)
 
-# --- UPDATE ---
 def larkbase_update_data(app_token, table_id, record_id, data):
+    """Cập nhật dữ liệu và trả về (bool, message)"""
     token = larkbase_get_token()
     if not token:
-        st.error("❌ Không xác thực được với Larkbase.")
-        return False
-    
+        return False, "Không thể xác thực với Larkbase."
     try:
         url = f"{API_HOST}/{app_token}/tables/{table_id}/records/{record_id}"
         resp = requests.put(url, headers=get_headers(token), json={"fields": data})
-        
-        if resp.status_code == 200:
-            try:
-                result = resp.json()
-                if result.get('code') == 0:
-                    return True
-                else:
-                    st.error(f"❌ Lỗi API: {result.get('msg', '')}")
-            except Exception as e:
-                st.error(f"❌ Lỗi parse response: {e}")
+        res_json = resp.json()
+        if resp.status_code == 200 and res_json.get('code') == 0:
+            return True, "Cập nhật thành công"
         else:
-            st.error(f"❌ HTTP Error: {resp.status_code}")
+            error_msg = res_json.get('msg', resp.text)
+            logging.error(f"Lỗi API khi cập nhật: {error_msg}")
+            return False, error_msg
     except Exception as e:
-        st.error(f"❌ Lỗi khi cập nhật: {e}")
-    
-    return False
+        logging.error(f"Lỗi ngoại lệ khi cập nhật: {e}")
+        return False, str(e)
 
-# --- DELETE ---
 def larkbase_delete_record(app_token, table_id, record_id):
+    """Xóa một bản ghi và trả về (bool, message)"""
     token = larkbase_get_token()
     if not token:
-        st.error("❌ Không xác thực được với Larkbase.")
-        return False
-    
+        return False, "Không thể xác thực với Larkbase."
     try:
         url = f"{API_HOST}/{app_token}/tables/{table_id}/records/{record_id}"
         resp = requests.delete(url, headers=get_headers(token))
-        
-        if resp.status_code == 200:
-            try:
-                result = resp.json()
-                if result.get('code') == 0:
-                    return True
-                else:
-                    st.error(f"❌ Lỗi API: {result.get('msg', '')}")
-            except Exception as e:
-                st.error(f"❌ Lỗi parse response: {e}")
+        res_json = resp.json()
+        if resp.status_code == 200 and res_json.get('code') == 0:
+            return True, "Xóa thành công"
         else:
-            st.error(f"❌ HTTP Error: {resp.status_code}")
+            error_msg = res_json.get('msg', resp.text)
+            logging.error(f"Lỗi API khi xóa: {error_msg}")
+            return False, error_msg
     except Exception as e:
-        st.error(f"❌ Lỗi khi xóa: {e}")
-    
-    return False
+        logging.error(f"Lỗi ngoại lệ khi xóa: {e}")
+        return False, str(e)
 
+============================================================
+
+============================================================
+FILE: src\utils\transport_provider.py
+============================================================
+# FILE: src/utils/transport_provider.py
+
+from src.utils.larkbase import larkbase_get_all
+import logging
+import json
+import os
+
+# Cấu hình
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+TRANSPORT_PROVIDERS_JSON_PATH = os.path.join(PROJECT_ROOT, "transport_providers.json")
+
+def get_transport_providers_from_larkbase(app_token, table_id="tblDefault"):
+    """
+    Lấy danh sách nhà cung cấp từ Larkbase
+    """
+    try:
+        all_records = larkbase_get_all(app_token, table_id)
+        if not all_records:
+            logging.error("Không lấy được dữ liệu từ bảng nhà cung cấp")
+            return []
+        
+        providers = []
+        for record in all_records:
+            fields = record.get('fields', {})
+            provider_name = fields.get('Tên nhà cung cấp', '').strip()
+            
+            if provider_name:  # Chỉ lấy những record có tên
+                providers.append({
+                    "id": provider_name,  # Sử dụng tên làm ID
+                    "name": provider_name
+                })
+        
+        # Loại bỏ trùng lặp và sắp xếp
+        unique_providers = []
+        seen_names = set()
+        
+        for provider in providers:
+            if provider['name'] not in seen_names:
+                unique_providers.append(provider)
+                seen_names.add(provider['name'])
+        
+        # Sắp xếp theo tên
+        unique_providers.sort(key=lambda x: x['name'])
+        
+        return unique_providers
+        
+    except Exception as e:
+        logging.error(f"Lỗi khi lấy danh sách nhà cung cấp: {e}")
+        return []
+
+def update_transport_providers_json_file(app_token, table_id="tblDefault"):
+    """
+    Cập nhật file JSON chứa danh sách nhà cung cấp
+    """
+    try:
+        providers = get_transport_providers_from_larkbase(app_token, table_id)
+        
+        if not providers:
+            return False, "Không lấy được danh sách nhà cung cấp từ Larkbase"
+        
+        # Ghi vào file JSON
+        with open(TRANSPORT_PROVIDERS_JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(providers, f, ensure_ascii=False, indent=4)
+        
+        msg = f"Cập nhật thành công! Đã lưu {len(providers)} nhà cung cấp vào file {TRANSPORT_PROVIDERS_JSON_PATH}."
+        logging.info(msg)
+        return True, msg
+        
+    except Exception as e:
+        msg = f"Lỗi khi cập nhật file nhà cung cấp: {e}"
+        logging.error(msg)
+        return False, msg
+
+def get_transport_providers_from_file():
+    """
+    Đọc danh sách nhà cung cấp từ file JSON
+    """
+    if not os.path.exists(TRANSPORT_PROVIDERS_JSON_PATH):
+        logging.warning(f"File {TRANSPORT_PROVIDERS_JSON_PATH} không tồn tại.")
+        return []
+    
+    try:
+        with open(TRANSPORT_PROVIDERS_JSON_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (IOError, json.JSONDecodeError) as e:
+        logging.error(f"Lỗi khi đọc file {TRANSPORT_PROVIDERS_JSON_PATH}: {e}")
+        return []
+
+============================================================
+
+============================================================
+FILE: static\app.js
+============================================================
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- LOGIC CHO POPUP NOTIFICATION --- (Giữ nguyên, vẫn có thể hữu ích)
+    function showNotification(message, type = 'success', duration = 3000) {
+        const notification = document.createElement('div');
+        notification.className = `notification-popup ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => { notification.classList.add('show'); }, 100);
+        
+        setTimeout(() => {
+            notification.classList.add('hide');
+            notification.addEventListener('transitionend', () => notification.remove());
+        }, duration);
+    }
+
+    // ✅ THÊM: Hàm hiển thị thông báo lỗi validation
+    function showValidationError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'validation-error';
+        errorDiv.textContent = message;
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f44336;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            z-index: 10000;
+            font-size: 14px;
+        `;
+        
+        document.body.appendChild(errorDiv);
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 3000);
+    }
+    
+    // --- LOGIC CẢI TIẾN CHO EMPLOYEE DROPDOWN ---
+    function initEmployeeDropdown(component) {
+        const searchInput = component.querySelector('.employee-search-input');
+        const hiddenInput = component.querySelector('.employee-hidden-input');
+        const dropdown = component.querySelector('.employee-dropdown');
+        const options = dropdown.querySelectorAll('.employee-option');
+        const infoDiv = dropdown.querySelector('.employee-dropdown-info');
+
+        if (!searchInput || !hiddenInput || !dropdown || !infoDiv) return;
+        
+        // Ẩn dropdown ban đầu
+        dropdown.style.display = 'none';
+        
+        // Hiển thị giá trị có sẵn (nếu đang edit)
+        if (hiddenInput.value) {
+            const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
+            if (selectedOption) {
+                const employeeName = selectedOption.dataset.name;
+                const employeeId = selectedOption.dataset.value;
+                searchInput.value = `${employeeName} (${employeeId})`;
+                selectedOption.classList.add('selected');
+            }
+        }
+        
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            
+            // Chỉ hiện dropdown khi gõ ít nhất 1 ký tự
+            if (query.length < 1) {
+                dropdown.style.display = 'none';
+                hiddenInput.value = '';
+                return;
+            }
+            
+            dropdown.style.display = 'block';
+            filterEmployees(query);
+        });
+
+        // ✅ SỬA: Thêm validation khi blur - chỉ chặn khi không hợp lệ
+        searchInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                // Nếu input có giá trị nhưng hiddenInput rỗng = nhập sai
+                if (searchInput.value.trim() && !hiddenInput.value) {
+                    searchInput.value = ''; // Reset input
+                    showValidationError('Vui lòng chọn nhân viên từ danh sách');
+                }
+                dropdown.style.display = 'none';
+            }, 200);
+        });
+
+        // Hiện dropdown khi focus vào input (nếu đã có nội dung)
+        searchInput.addEventListener('focus', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            if (query.length >= 1) {
+                dropdown.style.display = 'block';
+                filterEmployees(query);
+            }
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.employee-option');
+            if (option) {
+                const employeeId = option.dataset.value;
+                const employeeName = option.dataset.name;
+
+                searchInput.value = `${employeeName} (${employeeId})`;
+                hiddenInput.value = employeeId;
+                dropdown.style.display = 'none';
+
+                // Xóa class selected cũ và thêm cho option được chọn
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            }
+        });
+        
+        function filterEmployees(query) {
+            let visibleCount = 0;
+            const maxResults = 5; // Giới hạn chỉ 5 kết quả
+            
+            options.forEach(option => {
+                const name = option.dataset.name.toLowerCase();
+                const id = option.dataset.value.toLowerCase();
+                const department = option.dataset.department.toLowerCase();
+                
+                const isMatch = name.includes(query) || id.includes(query) || department.includes(query);
+                
+                if (isMatch && visibleCount < maxResults) {
+                    option.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            // Cập nhật thông tin số kết quả
+            if (visibleCount === 0) {
+                infoDiv.innerHTML = '<small style="color: #c62828;">Không tìm thấy kết quả phù hợp</small>';
+            } else if (visibleCount >= maxResults) {
+                infoDiv.innerHTML = `<small>Hiển thị ${maxResults} kết quả đầu tiên. Gõ thêm để thu hẹp.</small>`;
+            } else {
+                infoDiv.innerHTML = `<small>Tìm thấy ${visibleCount} kết quả</small>`;
+            }
+        }
+    }
+
+    // --- LOGIC CHO TRANSPORT DROPDOWN (ĐÃ SỬA) ---
+    function initTransportDropdown(component) {
+        const searchInput = component.querySelector('.transport-search-input');
+        const hiddenInput = component.querySelector('.transport-hidden-input');
+        const dropdown = component.querySelector('.transport-dropdown');
+        const options = dropdown.querySelectorAll('.transport-option');
+        const infoDiv = dropdown.querySelector('.transport-dropdown-info');
+
+        if (!searchInput || !hiddenInput || !dropdown || !infoDiv) return;
+        
+        // ✅ SỬA: Ẩn dropdown ban đầu bằng class
+        dropdown.classList.remove('show');
+        
+        // Hiển thị giá trị có sẵn (nếu đang edit)
+        if (hiddenInput.value) {
+            const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
+            if (selectedOption) {
+                searchInput.value = selectedOption.dataset.name;
+                selectedOption.classList.add('selected');
+            }
+        }
+        
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (query.length < 1) {
+                dropdown.classList.remove('show'); // ✅ SỬA
+                hiddenInput.value = '';
+                return;
+            }
+            
+            dropdown.classList.add('show'); // ✅ SỬA
+            filterTransportProviders(query);
+        });
+
+        // ✅ SỬA: Thêm validation khi blur - chỉ chặn khi không hợp lệ
+        searchInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                // Nếu input có giá trị nhưng hiddenInput rỗng = nhập sai
+                if (searchInput.value.trim() && !hiddenInput.value) {
+                    searchInput.value = ''; // Reset input
+                    showValidationError('Vui lòng chọn đơn vị vận chuyển từ danh sách');
+                }
+                dropdown.classList.remove('show');
+            }, 200);
+        });
+
+        searchInput.addEventListener('focus', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            if (query.length >= 1) {
+                dropdown.classList.add('show'); // ✅ SỬA
+                filterTransportProviders(query);
+            }
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.transport-option');
+            if (option) {
+                const providerId = option.dataset.value;
+                const providerName = option.dataset.name;
+
+                searchInput.value = providerName;
+                hiddenInput.value = providerId;
+                dropdown.classList.remove('show'); // ✅ SỬA
+
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            }
+        });
+        
+        function filterTransportProviders(query) {
+            let visibleCount = 0;
+            const maxResults = 5;
+            
+            options.forEach(option => {
+                const name = option.dataset.name.toLowerCase();
+                const isMatch = name.includes(query);
+                
+                if (isMatch && visibleCount < maxResults) {
+                    option.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            if (visibleCount === 0) {
+                infoDiv.innerHTML = '<small style="color: #c62828;">Không tìm thấy kết quả phù hợp</small>';
+            } else if (visibleCount >= maxResults) {
+                infoDiv.innerHTML = `<small>Hiển thị ${maxResults} kết quả đầu tiên. Gõ thêm để thu hẹp.</small>`;
+            } else {
+                infoDiv.innerHTML = `<small>Tìm thấy ${visibleCount} kết quả</small>`;
+            }
+        }
+    }
+
+    // Khởi tạo cho tất cả dropdown có sẵn khi tải trang
+    document.querySelectorAll('.employee-dropdown-component').forEach(initEmployeeDropdown);
+    document.querySelectorAll('.transport-dropdown-component').forEach(initTransportDropdown);
+
+    // ✅ SỬA: Ẩn dropdown nếu click ra ngoài (tương thích cả hai phương pháp)
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.employee-search') && !e.target.closest('.transport-search')) {
+            // Employee vẫn dùng style.display
+            document.querySelectorAll('.employee-dropdown').forEach(dd => {
+                dd.style.display = 'none';
+            });
+            // Transport dùng class
+            document.querySelectorAll('.transport-dropdown').forEach(dd => {
+                dd.classList.remove('show');
+            });
+        }
+    });
+
+    // --- XỬ LÝ HTMX RESPONSE ---
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.failed) {
+            console.error("Yêu cầu HTMX thất bại:", evt.detail.xhr);
+        }
+    });
+    
+    // Khởi tạo lại JS cho dropdown khi HTMX swap nội dung mới vào
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        evt.detail.target.querySelectorAll('.employee-dropdown-component').forEach(initEmployeeDropdown);
+        evt.detail.target.querySelectorAll('.transport-dropdown-component').forEach(initTransportDropdown);
+    });
+});
+
+============================================================
+
+============================================================
+FILE: static\style.css
+============================================================
+/* ======================================== */
+/* FILE: static/style.css (ĐÃ CẬP NHẬT)     */
+/* ======================================== */
+
+/* --- PHONG CÁCH CƠ BẢN --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+.title {
+    text-align: center;
+    color: #1976d2;
+    margin-bottom: 32px;
+    font-size: 24px;
+    font-weight: 400;
+}
+
+/* --- FORM --- */
+.search-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+/* ĐÃ SỬA: Đảm bảo tất cả input và button có cùng chiều rộng */
+.form-control,
+.search-input,
+.employee-search-input,
+.transport-search-input,
+.btn {
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.form-control,
+.search-input {
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus,
+.search-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* --- DROPDOWN NHÂN VIÊN --- */
+.employee-dropdown-component {
+    width: 100%;
+}
+
+.employee-search {
+    position: relative;
+    width: 100%;
+}
+
+.employee-search-input {
+    width: 100% !important;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.employee-search-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.employee-dropdown {
+    display: none; /* Ẩn mặc định */
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 2px;
+}
+
+.employee-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.employee-option:hover {
+    background-color: #f5f5f5;
+}
+
+.employee-option:last-child {
+    border-bottom: none;
+}
+
+.employee-option small {
+    font-size: 11px;
+    color: #666;
+    display: block;
+    margin-top: 2px;
+}
+
+.employee-option.selected {
+    background-color: #e3f2fd;
+}
+
+.employee-dropdown-info {
+    padding: 8px 16px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+}
+
+/* --- DROPDOWN ĐƠNVỊ VẬN CHUYỂN (ĐÃ SỬA) --- */
+.transport-dropdown-component {
+    width: 100%;
+}
+
+.transport-search {
+    position: relative;
+    width: 100%;
+}
+
+.transport-search-input {
+    width: 100% !important;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.transport-search-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* ✅ SỬA: Bỏ !important và dùng class-based approach */
+.transport-dropdown {
+    display: none; /* Không dùng !important nữa */
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9999;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 2px;
+}
+
+/* ✅ SỬA: Dùng class 'show' thay vì 'visible' để đồng nhất với employee dropdown */
+.transport-dropdown.show {
+    display: block !important;
+}
+
+.transport-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.transport-option:hover {
+    background-color: #f5f5f5;
+}
+
+.transport-option:last-child {
+    border-bottom: none;
+}
+
+.transport-option.selected {
+    background-color: #e3f2fd;
+    font-weight: 500;
+}
+
+.transport-dropdown-info {
+    padding: 8px 16px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* ✅ THÊM: Đảm bảo dropdown hiển thị đúng khi có nhiều options */
+.transport-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.transport-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.transport-dropdown::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.transport-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+
+/* ============================================================ */
+/* --- KHU VỰC HIỆU ỨNG LOADING ĐỒNG BỘ ---                    */
+/* ============================================================ */
+
+/* 1. KEYFRAMES ANIMATION XOAY (SPIN) DÙNG CHUNG */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 2. SPINNER DÙNG CHUNG */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    vertical-align: middle;
+}
+
+/* 3. STYLE CHUNG CHO CÁC NÚT KHI LOADING */
+.btn,
+button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Vô hiệu hóa nút và giảm độ mờ khi đang xử lý request */
+.btn.htmx-request,
+button.htmx-request {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+/* Ẩn văn bản/icon gốc của nút khi đang loading */
+.htmx-request .btn-text {
+    display: none;
+}
+
+/* Hiển thị khu vực indicator (chứa spinner) bên trong nút khi loading */
+.htmx-request .htmx-indicator {
+    display: inline-block !important;
+}
+
+/* 4. STYLE CHO CÁC LOẠI NÚT CỤ THỂ */
+.btn {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100% !important;
+    min-width: unset;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background-color: #1976d2;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1565c0;
+}
+
+.btn-success {
+    background-color: #388e3c;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #2e7d32;
+}
+
+.btn-danger {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c62828;
+}
+
+/* 5. STYLE MỚI CHO NÚT REFRESH */
+.btn-refresh,
+.form-btn-refresh,
+.form-btn-refresh-transport {
+    width: 100% !important;
+    min-width: unset;
+    white-space: nowrap;
+    padding: 12px 16px;
+    height: auto;
+}
+
+/* Container cho nút refresh */
+.refresh-container {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.refresh-status-container {
+    font-size: 12px;
+    margin-top: 4px;
+    min-height: 18px;
+    text-align: center;
+    padding-right: 0;
+}
+
+/* Spinner trong nút refresh */
+.btn-refresh .spinner,
+.form-btn-refresh .spinner,
+.form-btn-refresh-transport .spinner {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+    border-top-color: #fff;
+}
+
+/* Hover effect cho nút refresh */
+.btn-refresh:hover,
+.form-btn-refresh:hover,
+.form-btn-refresh-transport:hover {
+    background-color: rgba(25, 118, 210, 0.8);
+}
+
+/* ĐÃ THÊM: Đảm bảo các nút submit cũng full width */
+.form-actions {
+    width: 100%;
+}
+
+.form-actions .btn {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+/* Nếu có nhiều nút trong 1 hàng, có thể dùng flex */
+.btn-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-group .btn {
+    flex: 1;
+}
+
+/* 6. VÔ HIỆU HÓA INDICATOR DẠNG THANH BAR TOÀN CỤC - ĐÃ SỬA */
+/* Chỉ ẩn global indicators, không ảnh hưởng button indicators */
+#htmx-indicator,
+.htmx-indicator.global {
+    display: none;
+}
+
+/* Đảm bảo button indicators vẫn hoạt động */
+.btn .htmx-indicator,
+button .htmx-indicator {
+    display: none; /* Ẩn mặc định */
+}
+
+.btn.htmx-request .htmx-indicator,
+button.htmx-request .htmx-indicator {
+    display: inline-block !important; /* Hiện khi loading */
+}
+
+/* --- CÁC STYLE KHÁC --- */
+.success,
+.error,
+.info {
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 16px 0;
+}
+
+.success {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    border-left: 4px solid #4caf50;
+}
+
+.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #f44336;
+}
+
+.info {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border-left: 4px solid #2196f3;
+}
+
+.elevation-1 {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+/* Popup notification styles */
+.notification-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateX(400px);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    max-width: 350px;
+    font-weight: 500;
+}
+
+.notification-popup.success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.notification-popup.show {
+    transform: translateX(0);
+}
+
+.notification-popup.hide {
+    transform: translateX(400px);
+    opacity: 0;
+}
+============================================================
+
+============================================================
+FILE: transport_providers.json
+============================================================
+[
+    {
+        "id": "Anh Hoài - Vận chuyển nội thành Hà Nội",
+        "name": "Anh Hoài - Vận chuyển nội thành Hà Nội"
+    },
+    {
+        "id": "Công ty Cổ phần đầu tư thương mại phát triển Nhất Tín - CN Hà Nội",
+        "name": "Công ty Cổ phần đầu tư thương mại phát triển Nhất Tín - CN Hà Nội"
+    },
+    {
+        "id": "Công ty TNHH Dịch vụ Vận Tải Tùng Bách",
+        "name": "Công ty TNHH Dịch vụ Vận Tải Tùng Bách"
+    }
+]
 ============================================================
 
 
 📊 THỐNG KÊ
 ------------------------------
-Tổng số file: 12
-File code: 9
+Tổng số file: 23
+File code: 14
 Các loại file code:
+  .css: 1 file
+  .js: 1 file
+  .json: 1 file
   .md: 1 file
-  .py: 5 file
+  .py: 7 file
   .txt: 2 file
   .yml: 1 file

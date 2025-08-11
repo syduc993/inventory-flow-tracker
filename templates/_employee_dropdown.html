@@ -1,0 +1,54 @@
+<!-- 
+    EMPLOYEE DROPDOWN COMPONENT - ĐÃ SỬA XUNG ĐỘT
+    - Thêm prefix "main-" cho tất cả classes và IDs
+    - Tránh xung đột với form template
+-->
+<div class="main-employee-dropdown-component">
+    <div class="form-group">
+        <label class="form-label">{{ label_text or "Chọn nhân viên" }}</label>
+        <div style="display: flex; gap: 8px; align-items: flex-end;">
+            <div class="main-employee-search" style="flex: 1;">
+                <input type="text" 
+                       class="form-control main-employee-search-input" 
+                       placeholder="Gõ tên, mã NV hoặc phòng ban..."
+                       autocomplete="off">
+                <input type="hidden" 
+                       class="main-employee-hidden-input" 
+                       name="{{ field_name }}" 
+                       value="{{ current_value or '' }}">
+                
+                <div class="main-employee-dropdown">
+                    <div class="employee-dropdown-info">
+                        <small>Gõ ít nhất 2 ký tự để tìm kiếm</small>
+                    </div>
+                    {% for emp in employees %}
+                    <div class="main-employee-option" 
+                         data-value="{{ emp.id }}" 
+                         data-name="{{ emp.name }}"
+                         data-department="{{ emp.department or '' }}">
+                        <strong>{{ emp.name }}</strong> ({{ emp.id }})
+                        {% if emp.department %}
+                        <br><small>{{ emp.department }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Nút refresh với target đã được sửa để tránh xung đột -->
+            <button type="button" 
+                    class="btn-refresh main-btn-refresh"
+                    hx-post="/refresh-employees"
+                    hx-trigger="click"
+                    hx-target="#main-refresh-status-{{ field_name }}"
+                    hx-indicator=".spinner"
+                    title="Làm mới danh sách nhân viên">
+                <span class="btn-text">🔄</span>
+                <span class="htmx-indicator spinner"></span>
+            </button>
+        </div>
+        
+        <!-- Khu vực hiển thị trạng thái refresh với ID duy nhất -->
+        <div id="main-refresh-status-{{ field_name }}" class="refresh-status-container"></div>
+    </div>
+</div>

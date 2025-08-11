@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMEX Distribution</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🚚 IMEX Distribution Tracker</h1>
+        
+        <!-- 
+            FORM TÌM KIẾM ĐÃ ĐƯỢC CẬP NHẬT
+            - Đã loại bỏ thẻ div.htmx-indicator thừa.
+            - Đã thêm hx-indicator="this" vào nút button.
+            - Cấu trúc bên trong nút đã được thay đổi để khớp với CSS.
+        -->
+        <form class="search-form" hx-post="/search" hx-target="#result-container" hx-indicator=".search-form">
+            <input type="text" name="bill_id" placeholder="Nhập Bill ID..." 
+                   class="search-input" required>
+
+            <button type="submit" class="btn btn-primary" hx-indicator="this">
+                <!-- Nội dung sẽ hiển thị khi loading -->
+                <span class="htmx-indicator">
+                    <span class="spinner"></span>
+                    Đang tìm...
+                </span>
+                <!-- Nội dung gốc của nút -->
+                <span class="btn-text">🔍 Tìm kiếm</span>
+            </button>
+        </form>
+
+        <!-- 
+            KHU VỰC HIỂN THỊ KẾT QUẢ - ĐÃ SỬA XUNG ĐỘT
+            - Thay đổi ID để tránh xung đột với form template
+            - Tách biệt khu vực refresh và kết quả tìm kiếm
+        -->
+        <div id="result-container">
+            <!-- Vùng hiển thị thông báo sau khi refresh nhân viên từ main search -->
+            <div id="main-refresh-status"></div>
+            <!-- Vùng hiển thị kết quả tìm kiếm (form tạo mới/cập nhật) -->
+            <div id="search-result"></div>
+        </div>
+        
+    </div>
+    
+    <!-- JavaScript cho popup notifications -->
+    <script src="/static/app.js"></script>
+</body>
+</html>

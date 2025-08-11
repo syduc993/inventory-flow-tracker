@@ -1,0 +1,1557 @@
+[
+    {
+        "id": "AM.0051",
+        "name": "Bùi Cẩm Anh",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0759",
+        "name": "Bùi Huy Hoàng",
+        "department": "Cửa hàng 156 Lương Ngọc Quyến, Thái Nguyên"
+    },
+    {
+        "id": "AM.0808",
+        "name": "Bùi Hữu Quyền",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0294",
+        "name": "Bùi Thanh Thương",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0558",
+        "name": "Bùi Thị Hà",
+        "department": "Kinh doanh online"
+    },
+    {
+        "id": "AM.0969",
+        "name": "Bùi Thị Lệ Nhung",
+        "department": "Cửa hàng 208 Bạch Mai"
+    },
+    {
+        "id": "AM.1056",
+        "name": "Bùi Thị Thương",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0085",
+        "name": "Bùi Thị Thủy",
+        "department": "Kiểm soát nội bộ"
+    },
+    {
+        "id": "AM.0562",
+        "name": "Bùi Thị Thủy",
+        "department": "Cửa hàng 208 Bạch Mai"
+    },
+    {
+        "id": "AM.0996",
+        "name": "Bùi Trọng Dũng",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0951",
+        "name": "Cao Duy Thái",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.0572",
+        "name": "Cao Hữu Đức Anh",
+        "department": "Bộ phận kiểm kê"
+    },
+    {
+        "id": "AM.0943",
+        "name": "Châu Giang Anh",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.1000",
+        "name": "Châu Văn Anh Tú",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0935",
+        "name": "Chế Viễn Thị Hoài Hương",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0253",
+        "name": "Doãn Thị Phương Thanh",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.0932",
+        "name": "Dương Chí Dũng",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0970",
+        "name": "Dương Minh Kiệt",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0931",
+        "name": "Dương Thanh",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0867",
+        "name": "Dương Thị Thanh Huyền",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0912",
+        "name": "Dương Thị Trúc Vy",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0526",
+        "name": "Dương Văn Thiện",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0573",
+        "name": "Dương Văn Trang",
+        "department": "Cửa hàng 1221 Giải Phóng"
+    },
+    {
+        "id": "AM.1031",
+        "name": "Hoàng Bích Ngọc",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.0794",
+        "name": "Hoàng Hải An",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0622",
+        "name": "Hoàng Khánh Ly",
+        "department": "Cửa hàng 1221 Giải Phóng"
+    },
+    {
+        "id": "AM.1046",
+        "name": "Hoàng Mạnh Cường",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.1058",
+        "name": "Hoàng Nguyễn Công Minh",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0081",
+        "name": "Hoàng Quang Huy",
+        "department": "Kho Shopee"
+    },
+    {
+        "id": "AM.0982",
+        "name": "Hoàng Quốc Việt",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.1016",
+        "name": "Hoàng Thanh Dũng",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.0653",
+        "name": "Hoàng Thanh Nga",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0093",
+        "name": "Hoàng Thị Hằng",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0090",
+        "name": "Hoàng Thị Linh",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0070",
+        "name": "Hoàng Thị Lực",
+        "department": "Phòng Hành chính - Nhân sự"
+    },
+    {
+        "id": "AM.0826",
+        "name": "Hoàng Thị Mỹ Thuận",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0525",
+        "name": "Hoàng Thị Ngọc",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.0065",
+        "name": "Hoàng Thị Quỳnh Anh",
+        "department": "Phòng Hành chính - Nhân sự"
+    },
+    {
+        "id": "AM.0805",
+        "name": "Hoàng Tiến Nghĩa",
+        "department": "Cửa hàng 156 Lương Ngọc Quyến, Thái Nguyên"
+    },
+    {
+        "id": "AM.0104",
+        "name": "Hoàng Tuấn Anh",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0950",
+        "name": "Hoàng Việt Dũng",
+        "department": "Kinh doanh Cửa hàng"
+    },
+    {
+        "id": "AM.1015",
+        "name": "Huỳnh Ngọc Long",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.0918",
+        "name": "Huỳnh Ngọc Như An",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0972",
+        "name": "Huỳnh Thị Hoa",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.1004",
+        "name": "Huỳnh Trung Hiếu",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0902",
+        "name": "Hán Thị Lam",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.0977",
+        "name": "Hồ Bão Trân",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0840",
+        "name": "Hồ Phi Khang",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.0899",
+        "name": "Hứa Thị Phương Thảo",
+        "department": "Phòng Tài chính - Kế toán"
+    },
+    {
+        "id": "AM.0998",
+        "name": "Ka Hoàng Thảo Ly",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0013",
+        "name": "Khuất Thị Thắm",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.0976",
+        "name": "Kim Tài",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0302",
+        "name": "La Thị Thanh Hường",
+        "department": "Cửa hàng 154 Quang Trung"
+    },
+    {
+        "id": "AM.1017",
+        "name": "Lang Thị Triệu Vi",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.0843",
+        "name": "LÊ VĂN GIÁP",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0464",
+        "name": "Lâm Thị Phương",
+        "department": "Phòng Tài chính - Kế toán"
+    },
+    {
+        "id": "AM.1041",
+        "name": "Lã Thảo Nguyên",
+        "department": "Cửa hàng 154 Quang Trung"
+    },
+    {
+        "id": "AM.0349",
+        "name": "Lê Bá Anh",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0980",
+        "name": "Lê Bình Luân",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0393",
+        "name": "Lê Minh Sơn",
+        "department": "Kho Nguyên phụ liệu"
+    },
+    {
+        "id": "AM.1038",
+        "name": "Lê Ngọc Uyên",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.0757",
+        "name": "Lê Phương Vy",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0799",
+        "name": "Lê Quang Huy",
+        "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
+    },
+    {
+        "id": "AM.0817",
+        "name": "Lê Quang Quỳnh Thư",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.1054",
+        "name": "Lê Quang Thắng",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0619",
+        "name": "Lê Sỹ Đức",
+        "department": "Công nghệ Thông tin (IT)"
+    },
+    {
+        "id": "AM.0001",
+        "name": "Lê Thiên Bình",
+        "department": "Ban Giám đốc"
+    },
+    {
+        "id": "AM.0482",
+        "name": "Lê Thiên Dũng",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0082",
+        "name": "Lê Thiên Linh",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0095",
+        "name": "Lê Thiên Tình",
+        "department": "Mua hàng & Cung ứng"
+    },
+    {
+        "id": "AM.0544",
+        "name": "Lê Thiên Tấn",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.0973",
+        "name": "Lê Thị Hương Giang",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0096",
+        "name": "Lê Thị Hồng",
+        "department": "Phát triển sản phẩm"
+    },
+    {
+        "id": "AM.0892",
+        "name": "Lê Thị Ngân",
+        "department": "Phòng Tài chính - Kế toán"
+    },
+    {
+        "id": "AM.0937",
+        "name": "Lê Thị Thuỳ Trang",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0083",
+        "name": "Lê Thị Thuỷ",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0883",
+        "name": "Lê Trung Kiên",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0991",
+        "name": "Lê Trọng Quân",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0850",
+        "name": "Lê Tô Hữu Lộc",
+        "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
+    },
+    {
+        "id": "AM.0924",
+        "name": "Lê Văn Hùng",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0782",
+        "name": "Lê Xuân Hương",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0865",
+        "name": "Lê Xuân Khanh",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0623",
+        "name": "Lê Đức Hùng",
+        "department": "Cửa hàng 34 Trần Phú"
+    },
+    {
+        "id": "AM.1049",
+        "name": "Lương Hoàng Quân",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0479",
+        "name": "Lương Thúy Nhi",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "283",
+        "name": "Lại Thị Mỹ Linh",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.1032",
+        "name": "Lại Thị Thiêm Anh",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0913",
+        "name": "Lữ Minh Nguyệt",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0773",
+        "name": "MAI ĐÌNH NAM",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0113",
+        "name": "Mạc Thị Mơ",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.0518",
+        "name": "Nguyễn Anh Tú",
+        "department": "Cửa hàng 154 Quang Trung"
+    },
+    {
+        "id": "AM.0990",
+        "name": "Nguyễn Bá Hoà",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.0825",
+        "name": "Nguyễn Bích Hà",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.1013",
+        "name": "Nguyễn Bảo Nghĩa",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0908",
+        "name": "Nguyễn Cao Hoàng Anh",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.0516",
+        "name": "Nguyễn Công Lâm",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0254",
+        "name": "Nguyễn Danh Đức",
+        "department": "Bộ phận kiểm kê"
+    },
+    {
+        "id": "AM.1060",
+        "name": "Nguyễn Duy Anh",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0074",
+        "name": "Nguyễn Duy Khoa",
+        "department": "Kho Shopee"
+    },
+    {
+        "id": "AM.0993",
+        "name": "Nguyễn Duy Thịnh",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.1040",
+        "name": "Nguyễn Gia Bảo",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.1012",
+        "name": "Nguyễn Hoài My",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0659",
+        "name": "Nguyễn Huy Thành",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0801",
+        "name": "Nguyễn Huy Điệp",
+        "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
+    },
+    {
+        "id": "AM.0803",
+        "name": "Nguyễn Huy Đức",
+        "department": "Cửa hàng 156 Lương Ngọc Quyến, Thái Nguyên"
+    },
+    {
+        "id": "AM.0574",
+        "name": "Nguyễn Hương Linh",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0868",
+        "name": "Nguyễn Hữu Hiền",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0925",
+        "name": "Nguyễn Khắc Mạnh",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0632",
+        "name": "Nguyễn Khắc Sỹ",
+        "department": "Kho Nguyên phụ liệu"
+    },
+    {
+        "id": "AM.0786",
+        "name": "Nguyễn Lam Hạnh",
+        "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
+    },
+    {
+        "id": "AM.1023",
+        "name": "Nguyễn Lê Cẩm Tiên",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.0823",
+        "name": "Nguyễn Mạnh Đạt",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.1027",
+        "name": "Nguyễn Nam Phương",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.0735",
+        "name": "Nguyễn Ngọc Anh Tuấn",
+        "department": "Kho Nguyên phụ liệu"
+    },
+    {
+        "id": "AM.1001",
+        "name": "Nguyễn Ngọc Trinh Nguyên",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0280",
+        "name": "Nguyễn Phúc Trường",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0897",
+        "name": "Nguyễn Quốc Hưng",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.0971",
+        "name": "Nguyễn Quốc Khãi",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0942",
+        "name": "Nguyễn Quốc Tồn",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0856",
+        "name": "Nguyễn Thanh Lâm",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.1002",
+        "name": "Nguyễn Thanh Tư",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.0451",
+        "name": "Nguyễn Thu Hương",
+        "department": "Cửa hàng 195 Quang Trung, Sơn Tây"
+    },
+    {
+        "id": "AM.0528",
+        "name": "Nguyễn Thu Uyên",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.1019",
+        "name": "Nguyễn Thành Long",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.1014",
+        "name": "Nguyễn Thị Anh Thư",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.0379",
+        "name": "Nguyễn Thị Bình",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.0416",
+        "name": "Nguyễn Thị Chiến",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0647",
+        "name": "Nguyễn Thị Dung",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.0927",
+        "name": "Nguyễn Thị Giang",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.0707",
+        "name": "Nguyễn Thị Hiền",
+        "department": "Kinh doanh online"
+    },
+    {
+        "id": "AM.0086",
+        "name": "Nguyễn Thị Huyền",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.0084",
+        "name": "Nguyễn Thị Huệ",
+        "department": "Kho Nguyên phụ liệu"
+    },
+    {
+        "id": "AM.0122",
+        "name": "Nguyễn Thị Hương",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.0175",
+        "name": "Nguyễn Thị Hạnh",
+        "department": "Phòng Tài chính - Kế toán"
+    },
+    {
+        "id": "AM.0094",
+        "name": "Nguyễn Thị Hải Tiệp",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0073",
+        "name": "Nguyễn Thị Hồng Nhung",
+        "department": "Phòng Tài chính - Kế toán"
+    },
+    {
+        "id": "AM.0590",
+        "name": "Nguyễn Thị Hồng Nhung",
+        "department": "Cửa hàng 195 Quang Trung, Sơn Tây"
+    },
+    {
+        "id": "AM.0637",
+        "name": "Nguyễn Thị Kim Anh",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0871",
+        "name": "Nguyễn Thị Kim Anh",
+        "department": "Phòng Hành chính - Nhân sự"
+    },
+    {
+        "id": "AM.0975",
+        "name": "Nguyễn Thị Kim Thúy",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0078",
+        "name": "Nguyễn Thị Lan",
+        "department": "Kho Nguyên phụ liệu"
+    },
+    {
+        "id": "AM.0831",
+        "name": "Nguyễn Thị Lan Anh",
+        "department": "Cửa hàng 1221 Giải Phóng"
+    },
+    {
+        "id": "AM.0916",
+        "name": "Nguyễn Thị Liểu Thanh",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.1030",
+        "name": "Nguyễn Thị Luân",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0873",
+        "name": "Nguyễn Thị Minh Châu",
+        "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
+    },
+    {
+        "id": "AM.0375",
+        "name": "Nguyễn Thị Mậu",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.0940",
+        "name": "Nguyễn Thị Mỹ Hạnh",
+        "department": "Tuyển dụng và phát triển nguồn nhân lực"
+    },
+    {
+        "id": "AM.0304",
+        "name": "Nguyễn Thị Nga",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0999",
+        "name": "Nguyễn Thị Ngoan",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.1028",
+        "name": "Nguyễn Thị Ngọc Lan",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.0934",
+        "name": "Nguyễn Thị Nhì",
+        "department": "Hành chính tổng hợp"
+    },
+    {
+        "id": "AM.0930",
+        "name": "Nguyễn Thị Như Quỳnh",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0819",
+        "name": "Nguyễn Thị Phương Anh",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0889",
+        "name": "Nguyễn Thị Phương Thảo",
+        "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
+    },
+    {
+        "id": "AM.0847",
+        "name": "Nguyễn Thị Quỳnh Hoa",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0477",
+        "name": "Nguyễn Thị Thanh Huyền",
+        "department": "Cửa hàng 195 Quang Trung, Sơn Tây"
+    },
+    {
+        "id": "AM.0893",
+        "name": "Nguyễn Thị Thu Anh",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0839",
+        "name": "Nguyễn Thị Thuý Uyên",
+        "department": "Cửa hàng 312 Trạm Trôi"
+    },
+    {
+        "id": "AM.0770",
+        "name": "Nguyễn Thị Thuỳ Linh",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.1007",
+        "name": "Nguyễn Thị Thuỷ Tiên",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.0750",
+        "name": "Nguyễn Thị Thắm",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0984",
+        "name": "Nguyễn Thị Tường Vy",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0523",
+        "name": "Nguyễn Tiến An",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.0145",
+        "name": "Nguyễn Tiến Anh",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.0842",
+        "name": "Nguyễn Tiến Kha",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0848",
+        "name": "Nguyễn Trung Khang",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.0520",
+        "name": "Nguyễn Trung Kiên",
+        "department": "Cửa hàng 208 Bạch Mai"
+    },
+    {
+        "id": "AM.0424",
+        "name": "Nguyễn Trọng Hiểu Sơn",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0914",
+        "name": "Nguyễn Trọng Hoàng Ân",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0046",
+        "name": "Nguyễn Tuấn Hoàng",
+        "department": "Trợ lý Ban Giám đốc"
+    },
+    {
+        "id": "AM.1047",
+        "name": "Nguyễn Tuấn Thi",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.1059",
+        "name": "Nguyễn Tùng Anh",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0776",
+        "name": "Nguyễn Tùng Đăng",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0679",
+        "name": "Nguyễn Tú Quyên",
+        "department": "Cửa hàng 34 Trần Phú"
+    },
+    {
+        "id": "AM.0987",
+        "name": "Nguyễn Viết Duy",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.1051",
+        "name": "Nguyễn Viết Huy",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0809",
+        "name": "Nguyễn Việt Hoàng",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0797",
+        "name": "Nguyễn Vân Phượng",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0887",
+        "name": "Nguyễn Võ Hoàng Anh",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.0821",
+        "name": "Nguyễn Văn Bảo Ân",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0564",
+        "name": "Nguyễn Văn Hiệp",
+        "department": "Cửa hàng 195 Quang Trung, Sơn Tây"
+    },
+    {
+        "id": "AM.1021",
+        "name": "Nguyễn Văn Linh",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.0449",
+        "name": "Nguyễn Văn Thược",
+        "department": "Cửa hàng 312 Trạm Trôi"
+    },
+    {
+        "id": "AM.0789",
+        "name": "Nguyễn Văn Tùng",
+        "department": "Cửa hàng 156 Lương Ngọc Quyến, Thái Nguyên"
+    },
+    {
+        "id": "AM.1052",
+        "name": "Nguyễn Văn Đạt",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.0537",
+        "name": "Nguyễn Văn Đức",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0599",
+        "name": "Nguyễn Xuân Nam",
+        "department": "Cửa hàng 1221 Giải Phóng"
+    },
+    {
+        "id": "AM.0620",
+        "name": "Nguyễn Xuân Sơn",
+        "department": "Cửa hàng 154 Quang Trung"
+    },
+    {
+        "id": "AM.0698",
+        "name": "Nguyễn Xuân Thanh Vân",
+        "department": "Cửa hàng 312 Trạm Trôi"
+    },
+    {
+        "id": "AM.0069",
+        "name": "Nguyễn Xuân Đông",
+        "department": "Kinh doanh Cửa hàng"
+    },
+    {
+        "id": "AM.1005",
+        "name": "Nguyễn Đoàn Hải Duyên",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.1043",
+        "name": "Nguyễn Đình Cường",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.0618",
+        "name": "Nguyễn Đình Duy Khánh",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0959",
+        "name": "Nguyễn Đình Minh Vũ",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0575",
+        "name": "Nguyễn Đức Hiếu",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0995",
+        "name": "Nguyễn Đức Hải",
+        "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
+    },
+    {
+        "id": "AM.0383",
+        "name": "Nguyễn Đức Tài",
+        "department": "Cửa hàng 208 Bạch Mai"
+    },
+    {
+        "id": "AM.0841",
+        "name": "Ngô Quang Đạt",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0818",
+        "name": "Ngô Thị Phương",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.1011",
+        "name": "Ngô Thị Quỳnh Nhi",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0920",
+        "name": "Ngô Thị Thanh Nhàn",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0939",
+        "name": "Ngô Thị Trà My",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0087",
+        "name": "Ngọ Thị Thanh Thủy",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.1020",
+        "name": "Phan Duy Toàn",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.0824",
+        "name": "Phan Gia Thị Lan Phương",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0835",
+        "name": "Phan Hà Thư",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0949",
+        "name": "Phan Thu Hằng",
+        "department": "Tuyển dụng và phát triển nguồn nhân lực"
+    },
+    {
+        "id": "AM.0947",
+        "name": "Phan Thị Quý Sang",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0742",
+        "name": "Phan Thị Thu Hoài",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0071",
+        "name": "Phan Thị Yến Nhi",
+        "department": "Phòng Tài chính - Kế toán"
+    },
+    {
+        "id": "AM.0997",
+        "name": "Phan Tấn Phước",
+        "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0751",
+        "name": "Phan Văn Quảng",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.1018",
+        "name": "Phạm Khánh Hưng",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.0966",
+        "name": "Phạm Minh Hiếu",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.0890",
+        "name": "Phạm Nhật Lan",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0638",
+        "name": "Phạm Quang Huy",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0988",
+        "name": "Phạm Thái Minh",
+        "department": "Cửa hàng 34 Trần Phú"
+    },
+    {
+        "id": "AM.0670",
+        "name": "Phạm Thị Kim Tuyến",
+        "department": "Cửa hàng 195 Quang Trung, Sơn Tây"
+    },
+    {
+        "id": "AM.1057",
+        "name": "Phạm Thị Phương Linh",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0754",
+        "name": "Phạm Thị Thảo",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0266",
+        "name": "Phạm Thị Tươi",
+        "department": "Cửa hàng 208 Bạch Mai"
+    },
+    {
+        "id": "AM.0900",
+        "name": "Phạm Thị Vỹ Ngân",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0861",
+        "name": "Phạm Trung Tiệp",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.0806",
+        "name": "Phạm Việt Bách",
+        "department": "Cửa hàng 154 Quang Trung"
+    },
+    {
+        "id": "AM.0561",
+        "name": "Phạm Văn Dũng",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.0524",
+        "name": "Quan Thị Thoa",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.0257",
+        "name": "Quách Thị Thúy",
+        "department": "Cửa hàng 34 Trần Phú"
+    },
+    {
+        "id": "AM.0743",
+        "name": "Sùng Thị Dúa",
+        "department": "Cửa hàng 1221 Giải Phóng"
+    },
+    {
+        "id": "AM.0247",
+        "name": "Triệu Thị Quỳnh",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0928",
+        "name": "Trà Thị Uyên Dung",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0860",
+        "name": "Trương Quốc Hoàng",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.0957",
+        "name": "Trương Quốc Phi",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.0952",
+        "name": "Trương Thu Uyên",
+        "department": "Marketing"
+    },
+    {
+        "id": "AM.0829",
+        "name": "Trương Thị Kim Khánh",
+        "department": "Cửa hàng 236 - 238 Lam Sơn, Thanh Hoá"
+    },
+    {
+        "id": "AM.0639",
+        "name": "Trương Trọng Trường",
+        "department": "Cửa hàng 34 Trần Phú"
+    },
+    {
+        "id": "AM.0589",
+        "name": "Trương Tuấn Đạt",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0706",
+        "name": "Trương Việt Hoàng",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.0955",
+        "name": "Trương Văn Quang",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0891",
+        "name": "Trần Anh Dũng",
+        "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
+    },
+    {
+        "id": "AM.1008",
+        "name": "Trần Bảo Minh",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.0986",
+        "name": "Trần Duyên Trường",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.0979",
+        "name": "Trần Kim Ngọc",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0857",
+        "name": "Trần Minh Phương",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.0989",
+        "name": "Trần Phương Nam",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0885",
+        "name": "Trần Thu Giang",
+        "department": "Kinh doanh Cửa hàng"
+    },
+    {
+        "id": "AM.0695",
+        "name": "Trần Thu Trang",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0793",
+        "name": "Trần Thị Hương Giang",
+        "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
+    },
+    {
+        "id": "AM.0798",
+        "name": "Trần Thị Linh Chi",
+        "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
+    },
+    {
+        "id": "AM.0002",
+        "name": "Trần Thị Linh Trang",
+        "department": "Ban Giám đốc"
+    },
+    {
+        "id": "AM.0858",
+        "name": "Trần Thị Phương Anh",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.0749",
+        "name": "Trần Thị Thu Hà",
+        "department": "Phòng Hành chính - Nhân sự"
+    },
+    {
+        "id": "AM.0906",
+        "name": "Trần Thị Thu Trang",
+        "department": "Phòng Tài chính - Kế toán"
+    },
+    {
+        "id": "AM.0611",
+        "name": "Trần Thị Thúy Hường",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.1037",
+        "name": "Trần Thị Tường Vi",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.0936",
+        "name": "Trần Viết Anh Dũng",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0335",
+        "name": "Trần Văn Khánh",
+        "department": "Cửa hàng 208 Bạch Mai"
+    },
+    {
+        "id": "AM.0744",
+        "name": "Trần Đức Bắc",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.1006",
+        "name": "Trịnh Gia Huy",
+        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
+    },
+    {
+        "id": "AM.0777",
+        "name": "Trịnh Quốc Khánh",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.1053",
+        "name": "Trịnh Thị Huyền",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0546",
+        "name": "Trịnh Thị Hương",
+        "department": "Cửa hàng 154 Quang Trung"
+    },
+    {
+        "id": "AM.0994",
+        "name": "Trịnh Văn Sỹ",
+        "department": "Kho Tổng Cửa hàng"
+    },
+    {
+        "id": "AM.0567",
+        "name": "Tô Thị Kim Hương",
+        "department": "Phòng Tài chính - Kế toán"
+    },
+    {
+        "id": "AM.0888",
+        "name": "Tăng Việt Hưng",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.0968",
+        "name": "Tạ Duy Hiển",
+        "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
+    },
+    {
+        "id": "AM.0769",
+        "name": "Vi Hoàng Anh",
+        "department": "Cửa hàng 156 Lương Ngọc Quyến, Thái Nguyên"
+    },
+    {
+        "id": "AM.0926",
+        "name": "Võ Anh Duy",
+        "department": "Công nghệ Thông tin (IT)"
+    },
+    {
+        "id": "AM.1022",
+        "name": "Võ Nguyễn Minh Hoàn",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.1044",
+        "name": "Võ Thành Lợi",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.0944",
+        "name": "Võ Văn Hoàng Phúc",
+        "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
+    },
+    {
+        "id": "AM.0869",
+        "name": "Văn Vũ Hưng",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0877",
+        "name": "Vũ Mai Hạnh",
+        "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
+    },
+    {
+        "id": "AM.1055",
+        "name": "Vũ Ngọc Chính",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0863",
+        "name": "Vũ Ngọc Đức",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.0964",
+        "name": "Vũ Thị Khánh Linh",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.0466",
+        "name": "Vũ Văn Khải",
+        "department": "Cửa hàng 34 Trần Phú"
+    },
+    {
+        "id": "AM.0992",
+        "name": "Vũ Đức Nam",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0130",
+        "name": "Vũ Đức Quân",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0568",
+        "name": "Đinh Công Thành",
+        "department": "Cửa hàng 116 Cầu Giấy"
+    },
+    {
+        "id": "AM.0453",
+        "name": "Đinh Hoàng Nam",
+        "department": "Cửa hàng 312 Trạm Trôi"
+    },
+    {
+        "id": "AM.0301",
+        "name": "Đinh Thanh Phong",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.1062",
+        "name": "Đinh Thế Long",
+        "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
+    },
+    {
+        "id": "AM.0870",
+        "name": "Đinh Thị Ngọc Anh",
+        "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
+    },
+    {
+        "id": "AM.0884",
+        "name": "Đinh Thị Thanh Xuân",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0960",
+        "name": "Đinh Văn Tú",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.1029",
+        "name": "Đinh Xuân Trường",
+        "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.0872",
+        "name": "Đoàn Thùy Linh",
+        "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
+    },
+    {
+        "id": "AM.0536",
+        "name": "Đoàn Thị Kim Ngân",
+        "department": "Cửa hàng 1221 Giải Phóng"
+    },
+    {
+        "id": "AM.0929",
+        "name": "Đàm Nguyễn Thùy Linh",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0501",
+        "name": "Đào Ngọc Phát",
+        "department": "Kiểm soát nội bộ"
+    },
+    {
+        "id": "AM.0761",
+        "name": "Đào Thu Duyên",
+        "department": "Cửa hàng 156 Lương Ngọc Quyến, Thái Nguyên"
+    },
+    {
+        "id": "AM.0909",
+        "name": "Đặng Gia Huy",
+        "department": "Cửa hàng 167 Nguyễn Văn Cừ, Vinh"
+    },
+    {
+        "id": "AM.0665",
+        "name": "Đặng Hoài Nam",
+        "department": "Cửa hàng 110 Nhổn"
+    },
+    {
+        "id": "AM.1042",
+        "name": "Đặng Hồ Thuý Quỳnh",
+        "department": "Cửa hàng 73 Nguyễn Việt Hồng, Cần Thơ"
+    },
+    {
+        "id": "AM.0833",
+        "name": "Đặng Minh Kiến",
+        "department": "Phòng Hành chính - Nhân sự"
+    },
+    {
+        "id": "AM.0739",
+        "name": "Đặng Phương Thảo",
+        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
+    },
+    {
+        "id": "AM.0854",
+        "name": "Đặng Thị Hà Phương",
+        "department": "Phòng Hành chính - Nhân sự"
+    },
+    {
+        "id": "AM.0613",
+        "name": "Đặng Thị Hằng",
+        "department": "Kế hoạch sản xuất"
+    },
+    {
+        "id": "AM.0738",
+        "name": "Đặng Thị Mai Trang",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0091",
+        "name": "Đặng Thị Nhung",
+        "department": "XƯỞNG MAY"
+    },
+    {
+        "id": "AM.1050",
+        "name": "Đặng Thị Thảo Phương",
+        "department": "Cửa hàng 42 Bến Nghé, Huế"
+    },
+    {
+        "id": "AM.0791",
+        "name": "Đặng Thị Yến",
+        "department": "Cửa hàng 156 Lương Ngọc Quyến, Thái Nguyên"
+    },
+    {
+        "id": "AM.0075",
+        "name": "Đặng Tài Chản",
+        "department": "Kho TikTok"
+    },
+    {
+        "id": "AM.1039",
+        "name": "Đỗ Nhật Dương",
+        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
+    },
+    {
+        "id": "AM.1063",
+        "name": "Đỗ Thái Bảo",
+        "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
+    },
+    {
+        "id": "AM.0198",
+        "name": "Đỗ Thị Bình",
+        "department": "Cửa hàng 290 Nguyễn Trãi"
+    },
+    {
+        "id": "AM.0102",
+        "name": "Đỗ Thị Bích Thảo",
+        "department": "Mua hàng & Cung ứng"
+    },
+    {
+        "id": "AM.0774",
+        "name": "Đỗ Tuấn Mạnh",
+        "department": "Cửa hàng 208 Bạch Mai"
+    },
+    {
+        "id": "AM.1061",
+        "name": "Đỗ Viết Chính",
+        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
+    },
+    {
+        "id": "AM.0549",
+        "name": "Đỗ Văn Lập",
+        "department": "Cửa hàng 175 Chùa Bộc"
+    },
+    {
+        "id": "AM.0418",
+        "name": "Đỗ Xuân Khánh",
+        "department": "Cửa hàng 110 Nhổn"
+    }
+]
