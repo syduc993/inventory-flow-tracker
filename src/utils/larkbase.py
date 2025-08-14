@@ -72,8 +72,6 @@ def larkbase_get_all(app_token, table_id):
             break
     return all_records
 
-
-
 def larkbase_find_by_field(app_token, table_id, field, value):
     all_records = larkbase_get_all(app_token, table_id)
     if not all_records:
@@ -86,7 +84,6 @@ def larkbase_find_by_field(app_token, table_id, field, value):
             return True, record
     # Không tìm thấy sau khi duyệt hết, trả về (False, None)
     return False, None
-
 
 def larkbase_write_data(app_token, table_id, data):
     """Ghi dữ liệu mới và trả về (bool, message)"""

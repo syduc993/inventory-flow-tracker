@@ -1,0 +1,31 @@
+<!-- Depot Dropdown Component -->
+<div class="depot-dropdown-component">
+    <div class="depot-search">
+        <input type="text" 
+               class="form-control depot-search-input" 
+               placeholder="Gõ để tìm depot..." 
+               autocomplete="off">
+        
+        <!-- Hidden input chứa ID thực sự để submit -->
+        <input type="hidden" 
+               name="{{ name if name else 'depot' }}" 
+               class="depot-hidden-input">
+        
+        <div class="depot-dropdown">
+            <div class="depot-dropdown-info">
+                <small>Nhập tên, mã hoặc địa chỉ depot để tìm kiếm</small>
+            </div>
+            
+            {% for depot in depots %}
+            <div class="depot-option" 
+                 data-value="{{ depot.id }}" 
+                 data-name="{{ depot.name }}"
+                 data-code="{{ depot.code }}"
+                 data-address="{{ depot.address }}">
+                <strong>{{ depot.name }}</strong>
+                <small>{{ depot.code }} - {{ depot.address }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

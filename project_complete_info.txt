@@ -1,29 +1,79 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-11 16:54:33
+Thời gian tạo: 2025-08-14 13:41:52
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
 📁 CẤU TRÚC THU MỤC
 --------------------------------------------------
 ├── 📁 src/
+│   ├── 📁 auth/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 auth_middleware.py
+│   │   ├── 📄 lark_oauth.py
+│   │   └── 📄 session_manager.py
+│   ├── 📁 core/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 app.py
+│   │   └── 📄 dependencies.py
+│   ├── 📁 routes/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 api_routes.py
+│   │   ├── 📄 auth_routes.py
+│   │   ├── 📄 record_routes.py
+│   │   ├── 📄 refresh_routes.py
+│   │   └── 📄 report_routes.py
+│   ├── 📁 services/
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 depot_service.py
+│   │   ├── 📄 employee_service.py
+│   │   ├── 📄 record_service.py
+│   │   ├── 📄 report_service.py
+│   │   └── 📄 transport_service.py
 │   └── 📁 utils/
+│       ├── 📄 __init__.py
 │       ├── 📄 api.py
 │       ├── 📄 cache.py
 │       ├── 📄 config.py
+│       ├── 📄 depot.py
 │       ├── 📄 larkbase.py
 │       └── 📄 transport_provider.py
 ├── 📁 static/
-│   ├── 📄 app.js
-│   └── 📄 style.css
+│   ├── 📁 css/
+│   │   ├── 📄 components.css
+│   │   ├── 📄 dropdowns.css
+│   │   ├── 📄 forms.css
+│   │   ├── 📄 main.css
+│   │   └── 📄 reports.css
+│   ├── 📁 images/
+│   └── 📁 js/
+│       ├── 📄 app.js
+│       ├── 📄 bulk-form.js
+│       ├── 📄 dropdown.js
+│       └── 📄 validators.js
 ├── 📁 templates/
-│   ├── 📄 _create_form.html
-│   ├── 📄 _employee_dropdown.html
-│   ├── 📄 _transport_dropdown.html
-│   ├── 📄 _update_form.html
-│   ├── 📄 _view_only.html
-│   └── 📄 index.html
+│   ├── 📁 auth/
+│   │   ├── 📄 login.html
+│   │   └── 📄 unauthorized.html
+│   ├── 📁 components/
+│   │   ├── 📁 common/
+│   │   │   ├── 📄 footer.html
+│   │   │   ├── 📄 header.html
+│   │   │   └── 📄 scripts.html
+│   │   ├── 📁 dropdowns/
+│   │   │   ├── 📄 depot.html
+│   │   │   ├── 📄 employee.html
+│   │   │   └── 📄 transport.html
+│   │   └── 📁 forms/
+│   │       ├── 📄 bulk_create.html
+│   │       ├── 📄 create.html
+│   │       ├── 📄 search.html
+│   │       └── 📄 update.html
+│   └── 📁 pages/
+│       ├── 📄 daily_report.html
+│       ├── 📄 index.html
+│       └── 📄 view_only.html
 ├── 📄 .gitignore
 ├── 📄 docker-compose.yml
 ├── 📄 Dockerfile
@@ -32,37 +82,70 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ├── 📄 project_complete_info.txt
 ├── 📄 README.md
 ├── 📄 requirements.txt
-├── 📄 services.py
-└── 📄 transport_providers.json
 
 
 📄 DANH SÁCH TẤT CẢ FILE
 --------------------------------------------------
-.gitignore (327 bytes)
-docker-compose.yml (349 bytes)
-Dockerfile (523 bytes)
-Get detail code.ipynb (9290 bytes)
-main.py (9020 bytes)
+.gitignore (0 bytes)
+docker-compose.yml (0 bytes)
+Dockerfile (0 bytes)
+Get detail code.ipynb (9334 bytes)
+main.py (253 bytes)
 project_complete_info.txt (0 bytes)
-README.md (260 bytes)
-requirements.txt (64 bytes)
-services.py (7612 bytes)
+README.md (0 bytes)
+requirements.txt (0 bytes)
+src\auth\__init__.py (0 bytes)
+src\auth\auth_middleware.py (2761 bytes)
+src\auth\lark_oauth.py (6808 bytes)
+src\auth\session_manager.py (3876 bytes)
+src\core\__init__.py (0 bytes)
+src\core\app.py (2075 bytes)
+src\core\dependencies.py (2258 bytes)
+src\routes\__init__.py (0 bytes)
+src\routes\api_routes.py (6038 bytes)
+src\routes\auth_routes.py (4183 bytes)
+src\routes\record_routes.py (4731 bytes)
+src\routes\refresh_routes.py (3074 bytes)
+src\routes\report_routes.py (7566 bytes)
+src\services\__init__.py (0 bytes)
+src\services\depot_service.py (769 bytes)
+src\services\employee_service.py (399 bytes)
+src\services\record_service.py (5064 bytes)
+src\services\report_service.py (16764 bytes)
+src\services\transport_service.py (609 bytes)
+src\utils\__init__.py (0 bytes)
 src\utils\api.py (2109 bytes)
-src\utils\cache.py (3906 bytes)
-src\utils\config.py (1849 bytes)
-src\utils\larkbase.py (5641 bytes)
+src\utils\cache.py (3902 bytes)
+src\utils\config.py (5056 bytes)
+src\utils\depot.py (3395 bytes)
+src\utils\larkbase.py (5635 bytes)
 src\utils\transport_provider.py (3208 bytes)
-static\app.js (11823 bytes)
-static\style.css (10159 bytes)
-templates\_create_form.html (13085 bytes)
-templates\_employee_dropdown.html (2596 bytes)
-templates\_transport_dropdown.html (1201 bytes)
-templates\_update_form.html (14270 bytes)
-templates\_view_only.html (3359 bytes)
-templates\index.html (2169 bytes)
-transport_providers.json (535 bytes)
+static\css\components.css (2734 bytes)
+static\css\dropdowns.css (3053 bytes)
+static\css\forms.css (3176 bytes)
+static\css\main.css (5462 bytes)
+static\css\reports.css (4757 bytes)
+static\js\app.js (1253 bytes)
+static\js\bulk-form.js (7517 bytes)
+static\js\dropdown.js (15965 bytes)
+static\js\validators.js (1173 bytes)
+templates\auth\login.html (3373 bytes)
+templates\auth\unauthorized.html (3976 bytes)
+templates\components\common\footer.html (0 bytes)
+templates\components\common\header.html (706 bytes)
+templates\components\common\scripts.html (2053 bytes)
+templates\components\dropdowns\depot.html (1191 bytes)
+templates\components\dropdowns\employee.html (1391 bytes)
+templates\components\dropdowns\transport.html (1292 bytes)
+templates\components\forms\bulk_create.html (4075 bytes)
+templates\components\forms\create.html (1201 bytes)
+templates\components\forms\search.html (439 bytes)
+templates\components\forms\update.html (0 bytes)
+templates\pages\daily_report.html (11204 bytes)
+templates\pages\index.html (2404 bytes)
+templates\pages\view_only.html (0 bytes)
 
-Tổng cộng: 23 file
+Tổng cộng: 58 file
 
 💻 NỘI DUNG TẤT CẢ FILE CODE
 ================================================================================
@@ -70,343 +153,840 @@ Tổng cộng: 23 file
 ============================================================
 FILE: docker-compose.yml
 ============================================================
-version: '3.8'
-services:
-  imex-app-fastapi:
-    build: .
-    ports:` 
-      - "8000:8000"
-    volumes:
-      - ./src:/app/src
-      - ./templates:/app/templates
-      - ./main.py:/app/main.py
-    # Để tự động reload khi code thay đổi trong lúc phát triển
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ============================================================
 
 ============================================================
 FILE: main.py
 ============================================================
-from fastapi import FastAPI, Request, Form, Response
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from services import RecordService, EmployeeService, TransportProviderService
+# main.py - Entry Point (Đã tối ưu)
+import uvicorn
+import os
+from src.core.app import create_app
 
-app = FastAPI(title="IMEX Distribution API")
-
-# Static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
-
-# Services
-APP_TOKEN = "Rm9PbvKLeaFFZcsSQpElnRjIgXg"
-TABLE_ID = "tblJJPUEFhsXHaxY"
-record_service = RecordService(APP_TOKEN, TABLE_ID)
-employee_service = EmployeeService()
-transport_provider_service = TransportProviderService(APP_TOKEN)
-
-def format_timestamp_ms_to_dt_string(ts_ms):
-    if not ts_ms: return ""
-    try:
-        import datetime
-        return datetime.datetime.fromtimestamp(int(ts_ms) / 1000).strftime('%Y-%m-%d %H:%M:%S')
-    except (ValueError, TypeError):
-        return str(ts_ms)
-
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-# @app.post("/search", response_class=HTMLResponse)
-# async def search_bill(request: Request, bill_id: str = Form(...)):
-#     if not bill_id:
-#         return HTMLResponse("<div class='error'>Vui lòng nhập Bill ID.</div>")
-
-#     found, record = record_service.search_record(bill_id)
-#     context = {
-#         "request": request,
-#         "employees": employee_service.get_employees(),
-#         "transport_providers": transport_provider_service.get_transport_providers()  # ← THÊM MỚI
-#     }
-
-#     if found and record:
-#         from src.utils.config import LOCK_FIELDS
-#         has_lock_values = any(record.get("fields", {}).get(f) for f in LOCK_FIELDS)
-#         context.update({
-#             "record": record,
-#             "can_delete": not has_lock_values,
-#             "lock_fields": ', '.join(LOCK_FIELDS),
-#             "format_ts": format_timestamp_ms_to_dt_string
-#         })
-#         return templates.TemplateResponse("_update_form.html", context)
-#     else:
-#         imex_items = record_service.get_api_data(bill_id)
-#         if not imex_items:
-#             return HTMLResponse("<div class='error'>❌ Không lấy được dữ liệu, kiểm tra lại Bill ID.</div>")
-
-#         example_item = imex_items[0]
-#         context["api_data"] = {
-#             "ID": bill_id,
-#             "ID kho đi": example_item.get("fromDepotId", ""),
-#             "Kho đi": example_item.get("fromDepotName", ""),
-#             "ID kho đến": example_item.get("toDepotId", ""),
-#             "Kho đến": example_item.get("toDepotName", ""),
-#             "Số lượng": int(example_item.get("realQuantity") or 0),
-#         }
-#         from src.utils.config import CREATABLE_FIELDS
-#         context["creatable_fields"] = CREATABLE_FIELDS
-#         return templates.TemplateResponse("_create_form.html", context)
-
-@app.post("/search", response_class=HTMLResponse)
-async def search_bill(request: Request, bill_id: str = Form(...)):
-    if not bill_id:
-        return HTMLResponse("<div class='error'>Vui lòng nhập Bill ID.</div>")
-
-    found, record = record_service.search_record(bill_id)
-    context = {
-        "request": request,
-        "employees": employee_service.get_employees(),
-        "transport_providers": transport_provider_service.get_transport_providers()
-    }
-
-    if found and record:
-        # ← SỬA: Chỉ hiển thị thông tin, không cho edit
-        context.update({
-            "record": record,
-            "format_ts": format_timestamp_ms_to_dt_string
-        })
-        # ← SỬA: Tạo template mới hoặc sửa template để chỉ hiển thị
-        return templates.TemplateResponse("_view_only.html", context)
-    else:
-        # Phần tạo mới vẫn giữ nguyên
-        imex_items = record_service.get_api_data(bill_id)
-        if not imex_items:
-            return HTMLResponse("<div class='error'>❌ Không lấy được dữ liệu, kiểm tra lại Bill ID.</div>")
-
-        example_item = imex_items[0]
-        context["api_data"] = {
-            "ID": bill_id,
-            "ID kho đi": example_item.get("fromDepotId", ""),
-            "Kho đi": example_item.get("fromDepotName", ""),
-            "ID kho đến": example_item.get("toDepotId", ""),
-            "Kho đến": example_item.get("toDepotName", ""),
-            "Số lượng": int(example_item.get("realQuantity") or 0),
-        }
-        from src.utils.config import CREATABLE_FIELDS
-        context["creatable_fields"] = CREATABLE_FIELDS
-        return templates.TemplateResponse("_create_form.html", context)
-
-
-@app.post("/records", response_class=HTMLResponse)
-async def create_record(request: Request):
-    form_data = await request.form()
-    bill_id = form_data.get("ID", "Không rõ")
-    success, message = record_service.create_record(form_data)
-
-    if success:
-        return HTMLResponse(f"<div class='success'>✅ Đã thêm thành công Bill ID: {bill_id}</div>")
-    else:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi khi thêm mới: {message}</div>")
-
-@app.put("/records/{record_id}", response_class=HTMLResponse)
-async def update_record(record_id: str, request: Request):
-    form_data = await request.form()
-    success, message = record_service.update_record(record_id, form_data)
-    
-    if success:
-        return HTMLResponse("<div class='success'>📝 Cập nhật thành công. Form đã được reset.</div>")
-    else:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi khi cập nhật: {message}</div>")
-
-@app.delete("/records/{record_id}", response_class=Response)
-async def delete_record_endpoint(record_id: str):
-    success, message = record_service.delete_record(record_id)
-    if success:
-        return Response(status_code=200, content="<div class='success'>🗑️ Đã xóa thành công.</div>")
-    else:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi khi xóa: {message}</div>", status_code=400)
-
-def get_employee_display(employee_id, employees):
-    """Tìm và trả về chuỗi 'Tên (ID)' từ danh sách nhân viên."""
-    if not employee_id or not employees:
-        return ""
-    for emp in employees:
-        if emp.get('id') == employee_id:
-            return f"{emp.get('name', '')} ({emp.get('id', '')})"
-    return employee_id # Trả về ID nếu không tìm thấy
-
-# ← THÊM MỚI: Filter cho hiển thị tên nhà cung cấp
-def get_transport_provider_display(provider_id, transport_providers):
-    """Tìm và trả về tên nhà cung cấp từ ID."""
-    if not provider_id or not transport_providers:
-        return provider_id
-    for provider in transport_providers:
-        if provider.get('id') == provider_id:
-            return provider.get('name', provider_id)
-    return provider_id # Trả về ID nếu không tìm thấy
-
-templates.env.filters['get_employee_display'] = get_employee_display
-templates.env.filters['get_transport_provider_display'] = get_transport_provider_display  # ← THÊM MỚI
-
-@app.post("/refresh-employees", response_class=HTMLResponse)
-async def refresh_employees_endpoint():
-    """Endpoint để làm mới danh sách nhân viên"""
-    try:
-        import time
-        time.sleep(0.5)  # Tạo cảm giác xử lý
-        
-        success, message = employee_service.refresh_employees()
-        
-        if success:
-            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
-        else:
-            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
-            
-    except Exception as e:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
-
-# ← THÊM MỚI: Endpoint để refresh transport providers
-@app.post("/refresh-transport-providers", response_class=HTMLResponse)
-async def refresh_transport_providers_endpoint():
-    """Endpoint để làm mới danh sách đơn vị vận chuyển"""
-    try:
-        import time
-        time.sleep(0.5)  # Tạo cảm giác xử lý
-        
-        # Bạn cần thay "tblDefault" bằng table ID thực tế chứa nhà cung cấp
-        # Ví dụ: "tblXXXXXXXXXXXXXXX"
-        success, message = transport_provider_service.refresh_transport_providers("tblyiELQIi6M1j1r")
-        
-        if success:
-            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
-        else:
-            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
-            
-    except Exception as e:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
+app = create_app()
 
 if __name__ == "__main__":
-    import uvicorn
-    import os
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
-
 
 ============================================================
 
 ============================================================
 FILE: project_complete_info.txt
 ============================================================
-================================================================================
-THÔNG TIN DỰ ÁN HOÀN CHỈNH
-================================================================================
-Thời gian tạo: 2025-08-11 16:54:33
-Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
-================================================================================
-
-📁 CẤU TRÚC THU MỤC
---------------------------------------------------
-├── 📁 src/
-│   └── 📁 utils/
-│       ├── 📄 api.py
-│       ├── 📄 cache.py
-│       ├── 📄 config.py
-│       ├── 📄 larkbase.py
-│       └── 📄 transport_provider.py
-├── 📁 static/
-│   ├── 📄 app.js
-│   └── 📄 style.css
-├── 📁 templates/
-│   ├── 📄 _create_form.html
-│   ├── 📄 _employee_dropdown.html
-│   ├── 📄 _transport_dropdown.html
-│   ├── 📄 _update_form.html
-│   ├── 📄 _view_only.html
-│   └── 📄 index.html
-├── 📄 .gitignore
-├── 📄 docker-compose.yml
-├── 📄 Dockerfile
-├── 📄 Get detail code.ipynb
-├── 📄 main.py
-├── 📄 project_complete_info.txt
-├── 📄 README.md
-├── 📄 requirements.txt
-├── 📄 services.py
-└── 📄 transport_providers.json
-
-
-📄 DANH SÁCH TẤT CẢ FILE
---------------------------------------------------
-.gitignore (327 bytes)
-docker-compose.yml (349 bytes)
-Dockerfile (523 bytes)
-Get detail code.ipynb (9290 bytes)
-main.py (9020 bytes)
-project_complete_info.txt (0 bytes)
-README.md (260 bytes)
-requirements.txt (64 bytes)
-services.py (7612 bytes)
-src\utils\api.py (2109 bytes)
-src\utils\cache.py (3906 bytes)
-src\utils\config.py (1849 bytes)
-src\utils\larkbase.py (5641 bytes)
-src\utils\transport_provider.py (3208 bytes)
-static\app.js (11823 bytes)
-static\style.css (10159 bytes)
-templates\_create_form.html (13085 bytes)
-templates\_employee_dropdown.html (2596 bytes)
-templates\_transport_dropdown.html (1201 bytes)
-templates\_update_form.html (14270 bytes)
-templates\_view_only.html (3359 bytes)
-templates\index.html (2169 bytes)
-transport_providers.json (535 bytes)
-
-Tổng cộng: 23 file
-
-💻 NỘI DUNG TẤT CẢ FILE CODE
-================================================================================
-
-============================================================
-FILE: docker-compose.yml
-============================================================
-version: '3.8'
-services:
-  imex-app-fastapi:
-    build: .
-    ports:` 
-      - "8000:8000"
-    volumes:
-      - ./src:/app/src
-      - ./templates:/app/templates
-      - ./main.py:/app/main.py
-    # Để tự động reload khi code thay đổi trong lúc phát triển
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ============================================================
 
 ============================================================
-FILE: main.py
+FILE: README.md
 ============================================================
-from fastapi import FastAPI, Request, Form, Response
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
+
+============================================================
+
+============================================================
+FILE: requirements.txt
+============================================================
+
+============================================================
+
+============================================================
+FILE: src\auth\__init__.py
+============================================================
+
+============================================================
+
+============================================================
+FILE: src\auth\auth_middleware.py
+============================================================
+# src/auth/auth_middleware.py
+import logging
+from typing import List
+from fastapi import Request, Response, HTTPException
+from fastapi.responses import RedirectResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from .session_manager import SessionManager
+
+logger = logging.getLogger(__name__)
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, session_manager: SessionManager, public_paths: List[str] = None):
+        super().__init__(app)
+        self.session_manager = session_manager
+        # ✅ SỬA: Sync public paths với main.py để tránh inconsistency
+        self.public_paths = public_paths or [
+            "/login",
+            "/auth/callback",
+            "/auth/lark",  # ← THÊM: Đảm bảo consistent với main.py
+            "/health",
+            "/static",
+            "/favicon.ico"
+        ]
+
+    def is_public_path(self, path: str) -> bool:
+        """Kiểm tra xem path có phải là public không"""
+        return any(path.startswith(public_path) for public_path in self.public_paths)
+
+    async def dispatch(self, request: Request, call_next):
+        # Skip auth cho public paths
+        if self.is_public_path(request.url.path):
+            return await call_next(request)
+
+        # Lấy session token từ cookie
+        session_token = request.cookies.get("session_token")
+        
+        if not session_token:
+            logger.info(f"No session token, redirecting to login: {request.url.path}")
+            return RedirectResponse(url="/login", status_code=302)
+
+        # Verify token
+        user_info = self.session_manager.get_user_from_token(session_token)
+        if not user_info:
+            logger.info(f"Invalid session token, redirecting to login: {request.url.path}")
+            response = RedirectResponse(url="/login", status_code=302)
+            response.delete_cookie("session_token")
+            return response
+
+        # Thêm user info vào request state
+        request.state.user = user_info
+        
+        # Try to refresh token if needed
+        refreshed_token = self.session_manager.refresh_token_if_needed(session_token)
+        
+        response = await call_next(request)
+        
+        # Set refreshed token if available
+        if refreshed_token and refreshed_token != session_token:
+            response.set_cookie(
+                "session_token", 
+                refreshed_token, 
+                httponly=True,
+                secure=False,  # Set True in production with HTTPS
+                samesite="lax",
+                max_age=24*60*60  # 24 hours
+            )
+            logger.info("Session token refreshed and set in cookie")
+
+        return response
+
+============================================================
+
+============================================================
+FILE: src\auth\lark_oauth.py
+============================================================
+# src/auth/lark_oauth.py
+import httpx
+import json
+import logging
+from typing import Optional, Tuple, Dict, Any
+from urllib.parse import urlencode
+import time
+
+logger = logging.getLogger(__name__)
+
+class LarkOAuthService:
+    def __init__(self, app_id: str, app_secret: str, base_url: str, redirect_uri: str):
+        self.app_id = app_id
+        self.app_secret = app_secret
+        self.base_url = base_url
+        self.redirect_uri = redirect_uri
+        self._app_access_token = None
+        self._token_expires_at = 0
+
+    def generate_oauth_url(self, state: str = None) -> str:
+        """Tạo URL OAuth để redirect user đến Lark"""
+        params = {
+            'app_id': self.app_id,
+            'redirect_uri': self.redirect_uri,
+            'response_type': 'code',
+            'scope': 'contact:user.id:readonly'
+        }
+        if state:
+            params['state'] = state
+        
+        oauth_url = f"{self.base_url}/authen/v1/authorize?" + urlencode(params)
+        logger.info(f"Generated OAuth URL: {oauth_url}")
+        return oauth_url
+
+    async def get_app_access_token(self) -> Optional[str]:
+        """Lấy app_access_token từ Lark"""
+        # Check cache
+        if self._app_access_token and time.time() < self._token_expires_at:
+            return self._app_access_token
+
+        url = f"{self.base_url}/auth/v3/app_access_token/internal"
+        payload = {
+            "app_id": self.app_id,
+            "app_secret": self.app_secret
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=payload, timeout=10)
+                response.raise_for_status()
+                
+                data = response.json()
+                if data.get('code') == 0:
+                    token = data.get('app_access_token')
+                    expires_in = data.get('expire', 7200)  # Default 2 hours
+                    
+                    # Cache token
+                    self._app_access_token = token
+                    self._token_expires_at = time.time() + expires_in - 300  # 5 min buffer
+                    
+                    logger.info("Successfully obtained app_access_token")
+                    return token
+                else:
+                    logger.error(f"Failed to get app_access_token: {data}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"Error getting app_access_token: {e}")
+            return None
+
+    async def exchange_code_for_token(self, code: str) -> Optional[str]:
+        """Đổi authorization code thành user_access_token"""
+        app_token = await self.get_app_access_token()
+        if not app_token:
+            return None
+
+        url = f"{self.base_url}/authen/v1/oidc/access_token"
+        headers = {
+            "Authorization": f"Bearer {app_token}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "grant_type": "authorization_code",
+            "code": code
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, headers=headers, json=payload, timeout=10)
+                response.raise_for_status()
+                
+                data = response.json()
+                if data.get('code') == 0:
+                    return data.get('data', {}).get('access_token')
+                else:
+                    logger.error(f"Failed to exchange code: {data}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"Error exchanging code: {e}")
+            return None
+
+    async def get_user_info(self, user_access_token: str) -> Optional[Dict[str, Any]]:
+        """Lấy thông tin user từ user_access_token"""
+        url = f"{self.base_url}/authen/v1/user_info"
+        headers = {
+            "Authorization": f"Bearer {user_access_token}"
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers=headers, timeout=10)
+                response.raise_for_status()
+                
+                data = response.json()
+                if data.get('code') == 0:
+                    return data.get('data')
+                else:
+                    logger.error(f"Failed to get user info: {data}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"Error getting user info: {e}")
+            return None
+
+    async def check_user_permission(self, open_id: str, app_token: str, table_id: str) -> Tuple[bool, str]:
+        """Kiểm tra quyền user trong Larkbase table"""
+        app_access_token = await self.get_app_access_token()
+        if not app_access_token:
+            return False, "Không thể xác thực với Lark"
+
+        url = f"{self.base_url}/bitable/v1/apps/{app_token}/tables/{table_id}/records/search"
+        headers = {
+            "Authorization": f"Bearer {app_access_token}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "filter": {
+                "conjunction": "and",
+                "conditions": [
+                    {
+                        "field_name": "Người",
+                        "operator": "contains", 
+                        "value": [open_id]
+                    },
+                    {
+                        "field_name": "Trạng thái",
+                        "operator": "is",
+                        "value": ["Kích hoạt"]
+                    }
+                ]
+            }
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, headers=headers, json=payload, timeout=10)
+                response.raise_for_status()
+                
+                data = response.json()
+                if data.get('code') == 0:
+                    items = data.get('data', {}).get('items', [])
+                    if items:
+                        return True, "User có quyền truy cập"
+                    else:
+                        return False, "User không có quyền truy cập hoặc chưa được kích hoạt"
+                else:
+                    logger.error(f"Failed to check permissions: {data}")
+                    return False, f"Lỗi kiểm tra quyền: {data.get('msg', 'Unknown error')}"
+                    
+        except Exception as e:
+            logger.error(f"Error checking permissions: {e}")
+            return False, f"Lỗi hệ thống: {str(e)}"
+
+============================================================
+
+============================================================
+FILE: src\auth\session_manager.py
+============================================================
+# src/auth/session_manager.py
+import jwt
+import time
+import logging
+from typing import Optional, Dict, Any
+from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
+
+class SessionManager:
+    def __init__(self, secret_key: str, expire_hours: int = 24):
+        self.secret_key = secret_key
+        self.expire_hours = expire_hours
+        self.algorithm = "HS256"
+
+    def create_session_token(self, user_info: Dict[str, Any]) -> str:
+        """Tạo JWT session token"""
+        now = datetime.utcnow()
+        payload = {
+            'user_id': user_info.get('open_id'),
+            'name': user_info.get('name'),
+            'email': user_info.get('email'),
+            'avatar_url': user_info.get('avatar_url'),
+            'iat': now,
+            'exp': now + timedelta(hours=self.expire_hours),
+            'iss': 'inventory-flow-tracker'
+        }
+        
+        token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
+        logger.info(f"Created session token for user: {user_info.get('name')}")
+        return token
+
+    def verify_session_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """Verify và decode JWT session token"""
+        try:
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            
+            # Check expiration manually for better error handling
+            exp = payload.get('exp')
+            if exp and datetime.utcfromtimestamp(exp) < datetime.utcnow():
+                logger.warning("Session token expired")
+                return None
+                
+            return payload
+            
+        except jwt.ExpiredSignatureError:
+            logger.warning("Session token expired")
+            return None
+        except jwt.InvalidTokenError as e:
+            logger.warning(f"Invalid session token: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Error verifying token: {e}")
+            return None
+
+    def refresh_token_if_needed(self, token: str, refresh_threshold_hours: int = 2) -> Optional[str]:
+        """Refresh token nếu sắp hết hạn"""
+        try:
+            payload = self.verify_session_token(token)
+            if not payload:
+                return None
+                
+            exp = payload.get('exp')
+            if exp:
+                exp_time = datetime.utcfromtimestamp(exp)
+                time_left = exp_time - datetime.utcnow()
+                
+                # Nếu còn ít hơn threshold thì refresh
+                if time_left.total_seconds() < (refresh_threshold_hours * 3600):
+                    # Tạo token mới với thông tin cũ
+                    user_info = {
+                        'open_id': payload.get('user_id'),
+                        'name': payload.get('name'),
+                        'email': payload.get('email'),
+                        'avatar_url': payload.get('avatar_url')
+                    }
+                    new_token = self.create_session_token(user_info)
+                    logger.info("Refreshed session token")
+                    return new_token
+                    
+            return token  # Token còn tốt, không cần refresh
+            
+        except Exception as e:
+            logger.error(f"Error refreshing token: {e}")
+            return None
+
+    def get_user_from_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """Lấy thông tin user từ token"""
+        payload = self.verify_session_token(token)
+        if payload:
+            return {
+                'user_id': payload.get('user_id'),
+                'name': payload.get('name'),
+                'email': payload.get('email'),
+                'avatar_url': payload.get('avatar_url')
+            }
+        return None
+
+============================================================
+
+============================================================
+FILE: src\core\__init__.py
+============================================================
+
+============================================================
+
+============================================================
+FILE: src\core\app.py
+============================================================
+# src/core/app.py - Application Factory
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from services import RecordService, EmployeeService, TransportProviderService
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
-app = FastAPI(title="IMEX Distribution API")
+from src.auth.auth_middleware import AuthMiddleware
+from src.auth.lark_oauth import LarkOAuthService
+from src.auth.session_manager import SessionManager
+from src.utils.config import AUTH_CONFIG
 
-# Static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+from src.routes import auth_routes, api_routes, record_routes, refresh_routes, report_routes
+
+def create_app():
+    """Create and configure FastAPI application"""
+    app = FastAPI(title="IMEX Distribution API")
+    
+    # Static files
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+    
+    # ✅ THÊM: Templates setup
+    templates = Jinja2Templates(directory="templates")
+    
+    # ✅ THÊM: Direct login route (không có prefix)
+    @app.get("/login", response_class=HTMLResponse)
+    async def login_page(request: Request):
+        """Trang đăng nhập trực tiếp"""
+        return templates.TemplateResponse("auth/login.html", {"request": request})
+    
+    # Setup authentication
+    lark_oauth = LarkOAuthService(
+        app_id=AUTH_CONFIG['LARK_APP_ID'],
+        app_secret=AUTH_CONFIG['LARK_APP_SECRET'],
+        base_url=AUTH_CONFIG['LARK_BASE_URL'],
+        redirect_uri=AUTH_CONFIG['REDIRECT_URI']
+    )
+    
+    session_manager = SessionManager(
+        secret_key=AUTH_CONFIG['SECRET_KEY'],
+        expire_hours=AUTH_CONFIG['SESSION_EXPIRE_HOURS']
+    )
+    
+    # Add authentication middleware
+    app.add_middleware(
+        AuthMiddleware,
+        session_manager=session_manager,
+        public_paths=["/login", "/auth/callback", "/auth/lark", "/health", "/static", "/favicon.ico"]
+    )
+    
+    # Include routers
+    app.include_router(auth_routes.router)
+    app.include_router(api_routes.router)
+    app.include_router(record_routes.router)
+    app.include_router(refresh_routes.router)
+    app.include_router(report_routes.router)
+    
+    return app
+
+============================================================
+
+============================================================
+FILE: src\core\dependencies.py
+============================================================
+# src/core/dependencies.py - Dependency Injection
+from fastapi import Request
+from fastapi.templating import Jinja2Templates
+
+from src.services.record_service import RecordService
+from src.services.employee_service import EmployeeService
+from src.services.transport_service import TransportProviderService
+from src.services.depot_service import DepotService
+from src.utils.config import API_TOKENS, TABLE_IDS
+
+# Setup templates
 templates = Jinja2Templates(directory="templates")
 
 # Services
-APP_TOKEN = "Rm9PbvKLeaFFZcsSQpElnRjIgXg"
-TABLE_ID = "tblJJPUEFhsXHaxY"
-record_service = RecordService(APP_TOKEN, TABLE_ID)
-employee_service = EmployeeService()
-transport_provider_service = TransportProviderService(APP_TOKEN)
+def get_record_service() -> RecordService:
+    return RecordService(API_TOKENS['MAIN_APP_TOKEN'], TABLE_IDS['MAIN_TABLE_ID'])
+
+def get_employee_service() -> EmployeeService:
+    return EmployeeService()
+
+def get_transport_service() -> TransportProviderService:
+    return TransportProviderService(API_TOKENS['MAIN_APP_TOKEN'])
+
+def get_depot_service() -> DepotService:
+    return DepotService()
+
+# Helper function
+def get_current_user(request: Request) -> dict:
+    """Lấy thông tin user hiện tại từ request state"""
+    return getattr(request.state, 'user', None)
+
+# Template filters
+def get_employee_display(employee_id, employees):
+    """Tìm và trả về chuỗi 'Tên (ID)' từ danh sách nhân viên."""
+    if not employee_id or not employees:
+        return ""
+    for emp in employees:
+        if emp.get('id') == employee_id:
+            return f"{emp.get('name', '')} ({emp.get('id', '')})"
+    return employee_id
+
+def get_transport_provider_display(provider_id, transport_providers):
+    """Tìm và trả về tên nhà cung cấp từ ID."""
+    if not provider_id or not transport_providers:
+        return provider_id
+    for provider in transport_providers:
+        if provider.get('id') == provider_id:
+            return provider.get('name', provider_id)
+    return provider_id
+
+
+# Thêm vào src/core/dependencies.py
+
+def get_report_service():
+    from src.services.report_service import ReportService
+    return ReportService(API_TOKENS['MAIN_APP_TOKEN'], TABLE_IDS['MAIN_TABLE_ID'])
+
+
+# Register template filters
+templates.env.filters['get_employee_display'] = get_employee_display
+templates.env.filters['get_transport_provider_display'] = get_transport_provider_display
+
+============================================================
+
+============================================================
+FILE: src\routes\__init__.py
+============================================================
+
+============================================================
+
+============================================================
+FILE: src\routes\api_routes.py
+============================================================
+# src/routes/api_routes.py - API Routes
+from fastapi import APIRouter, Request, Form, Depends
+from fastapi.responses import HTMLResponse, JSONResponse
+import time
+import logging
+
+from src.services.record_service import RecordService
+from src.services.employee_service import EmployeeService
+from src.services.transport_service import TransportProviderService
+from src.services.depot_service import DepotService
+from src.core.dependencies import get_current_user, templates, get_record_service, get_employee_service, get_transport_service, get_depot_service
+
+router = APIRouter(tags=["api"])
+logger = logging.getLogger(__name__)
+
+@router.get("/", response_class=HTMLResponse)
+async def read_root(
+    request: Request,
+    record_service: RecordService = Depends(get_record_service),
+    employee_service: EmployeeService = Depends(get_employee_service),
+    transport_service: TransportProviderService = Depends(get_transport_service),
+    depot_service: DepotService = Depends(get_depot_service)
+):
+    print("🔍 Loading template: pages/index.html")
+    user = get_current_user(request)
+    return templates.TemplateResponse("pages/index.html", {
+        "request": request,
+        "user": user,
+        "employees": employee_service.get_employees(),
+        "transport_providers": transport_service.get_transport_providers(),
+        "depots": depot_service.get_depots()
+    })
+
+@router.post("/validate-bill-id")
+async def validate_bill_id(
+    request: Request, 
+    bill_id: str = Form(...),
+    record_service: RecordService = Depends(get_record_service)
+):
+    """Validate single bill ID - chỉ dùng cho bulk form"""
+    try:
+        imex_items = record_service.get_api_data(bill_id)
+        if not imex_items:
+            return JSONResponse({
+                "valid": False,
+                "message": "ID không hợp lệ"
+            })
+        
+        example_item = imex_items[0]
+        quantity = int(example_item.get("realQuantity") or 0)
+        
+        return JSONResponse({
+            "valid": True,
+            "message": "ID hợp lệ",
+            "quantity": quantity,
+            "from_depot": example_item.get("fromDepotName", ""),
+            "to_depot": example_item.get("toDepotName", "")
+        })
+        
+    except Exception as e:
+        return JSONResponse({
+            "valid": False,
+            "message": f"Lỗi kiểm tra: {str(e)}"
+        })
+
+@router.post("/bulk-create-records", response_class=HTMLResponse)
+async def bulk_create_records(
+    request: Request,
+    record_service: RecordService = Depends(get_record_service),
+    depot_service: DepotService = Depends(get_depot_service)
+):
+    """Create multiple records at once"""
+    user = get_current_user(request)
+    
+    try:
+        body = await request.json()
+        from_depot = body.get("from_depot")
+        to_depot = body.get("to_depot") 
+        handover_person = body.get("handover_person")
+        transport_provider = body.get("transport_provider", "")
+        bill_data = body.get("bill_data", [])
+        
+        if not all([from_depot, to_depot, handover_person]):
+            return HTMLResponse('<div class="error">❌ Thiếu thông tin bắt buộc</div>')
+        
+        # Validate depots
+        from_valid, from_name = depot_service.validate_depot(from_depot)
+        to_valid, to_name = depot_service.validate_depot(to_depot)
+        
+        if not from_valid:
+            return HTMLResponse(f'<div class="error">❌ Kho đi không hợp lệ: {from_name}</div>')
+        if not to_valid:
+            return HTMLResponse(f'<div class="error">❌ Kho đến không hợp lệ: {to_name}</div>')
+        
+        results = []
+        success_count = 0
+        
+        for item in bill_data:
+            bill_id = item.get("bill_id")
+            quantity = item.get("quantity", 0)
+            
+            # Validate bill ID
+            imex_items = record_service.get_api_data(bill_id)
+            if not imex_items:
+                results.append(f"❌ {bill_id}: ID không hợp lệ")
+                continue
+            
+            # Create record
+            example_item = imex_items[0]
+            record_data = {
+                "ID": bill_id,
+                "ID kho đi": example_item.get("fromDepotId", ""),
+                "Kho đi": example_item.get("fromDepotName", ""),
+                "ID kho đến": example_item.get("toDepotId", ""),
+                "Kho đến": example_item.get("toDepotName", ""),
+                "Số lượng": int(example_item.get("realQuantity") or 0),
+                "Số lượng bao/tải giao": int(quantity) if quantity else 0,
+                "Người bàn giao": handover_person,
+                "Đơn vị vận chuyển": transport_provider,
+                "Ngày bàn giao": int(time.time() * 1000)
+            }
+            
+            success, message = record_service.create_record(record_data)
+            if success:
+                results.append(f"✅ {bill_id}: Thành công")
+                success_count += 1
+            else:
+                results.append(f"❌ {bill_id}: {message}")
+        
+        # Format results
+        result_html = f'<div class="success">📊 Hoàn thành: {success_count}/{len(bill_data)} bản ghi thành công</div>'
+        result_html += '<div class="info"><ul>'
+        for result in results:
+            result_html += f'<li>{result}</li>'
+        result_html += '</ul></div>'
+        
+        logger.info(f"User {user.get('name')} bulk created {success_count} records")
+        return HTMLResponse(result_html)
+        
+    except Exception as e:
+        logger.error(f"Error in bulk create: {e}")
+        return HTMLResponse(f'<div class="error">❌ Lỗi hệ thống: {str(e)}</div>')
+
+@router.get("/health")
+async def health_check():
+    """Health check endpoint (public)"""
+    return {"status": "ok", "service": "inventory-flow-tracker"}
+
+============================================================
+
+============================================================
+FILE: src\routes\auth_routes.py
+============================================================
+# src/routes/auth_routes.py - Authentication Routes
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+import secrets
+import logging
+
+from src.auth.lark_oauth import LarkOAuthService
+from src.auth.session_manager import SessionManager
+from src.utils.config import AUTH_CONFIG
+from src.core.dependencies import templates
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+logger = logging.getLogger(__name__)
+
+# Initialize services
+lark_oauth = LarkOAuthService(
+    app_id=AUTH_CONFIG['LARK_APP_ID'],
+    app_secret=AUTH_CONFIG['LARK_APP_SECRET'],
+    base_url=AUTH_CONFIG['LARK_BASE_URL'],
+    redirect_uri=AUTH_CONFIG['REDIRECT_URI']
+)
+
+session_manager = SessionManager(
+    secret_key=AUTH_CONFIG['SECRET_KEY'],
+    expire_hours=AUTH_CONFIG['SESSION_EXPIRE_HOURS']
+)
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Trang đăng nhập"""
+    return templates.TemplateResponse("auth/login.html", {"request": request})
+
+@router.get("/lark")
+async def login_with_lark():
+    """Redirect đến Lark OAuth"""
+    state = secrets.token_urlsafe(32)
+    oauth_url = lark_oauth.generate_oauth_url(state)
+    
+    logger.info(f"🔗 Generated OAuth URL: {oauth_url}")
+    
+    response = RedirectResponse(url=oauth_url, status_code=302)
+    response.set_cookie("oauth_state", state, httponly=True, max_age=600)
+    return response
+
+@router.get("/callback")
+async def auth_callback(request: Request, code: str = None, state: str = None, error: str = None):
+    """OAuth callback từ Lark"""
+    if error:
+        logger.error(f"OAuth error: {error}")
+        return templates.TemplateResponse("auth/unauthorized.html", {
+            "request": request,
+            "error": "Đăng nhập thất bại từ Lark"
+        })
+    
+    if not code:
+        return templates.TemplateResponse("auth/unauthorized.html", {
+            "request": request,
+            "error": "Không nhận được mã xác thực"
+        })
+    
+    try:
+        # Step 1: Exchange code for token
+        user_access_token = await lark_oauth.exchange_code_for_token(code)
+        if not user_access_token:
+            raise Exception("Không thể lấy access token")
+        
+        # Step 2: Get user info
+        user_info = await lark_oauth.get_user_info(user_access_token)
+        if not user_info:
+            raise Exception("Không thể lấy thông tin user")
+        
+        # Step 3: Check permission
+        open_id = user_info.get('open_id')
+        has_permission, message = await lark_oauth.check_user_permission(
+            open_id, 
+            AUTH_CONFIG['AUTH_APP_TOKEN'], 
+            AUTH_CONFIG['AUTH_TABLE_ID']
+        )
+        
+        if not has_permission:
+            return templates.TemplateResponse("auth/unauthorized.html", {
+                "request": request,
+                "error": message,
+                "user_name": user_info.get('name', 'Unknown')
+            })
+        
+        # Step 4: Create session
+        session_token = session_manager.create_session_token(user_info)
+        
+        # Step 5: Redirect with session
+        response = RedirectResponse(url="/", status_code=302)
+        response.set_cookie(
+            "session_token",
+            session_token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=AUTH_CONFIG['SESSION_EXPIRE_HOURS'] * 60 * 60
+        )
+        response.delete_cookie("oauth_state")
+        
+        logger.info(f"User {user_info.get('name')} đăng nhập thành công")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error during auth callback: {e}")
+        return templates.TemplateResponse("auth/unauthorized.html", {
+            "request": request,
+            "error": f"Lỗi hệ thống: {str(e)}"
+        })
+
+@router.post("/logout")
+async def logout():
+    """Đăng xuất"""
+    response = RedirectResponse(url="/login", status_code=302)
+    response.delete_cookie("session_token")
+    return response
+
+============================================================
+
+============================================================
+FILE: src\routes\record_routes.py
+============================================================
+# src/routes/record_routes.py - Record CRUD Routes
+from fastapi import APIRouter, Request, Form, Response, Depends
+from fastapi.responses import HTMLResponse
+import logging
+
+from src.services.record_service import RecordService
+from src.services.employee_service import EmployeeService
+from src.services.transport_service import TransportProviderService
+from src.core.dependencies import get_current_user, templates, get_record_service, get_employee_service, get_transport_service
+from src.utils.config import CREATABLE_FIELDS
+
+router = APIRouter(prefix="/records", tags=["records"])
+logger = logging.getLogger(__name__)
 
 def format_timestamp_ms_to_dt_string(ts_ms):
     if not ts_ms: return ""
@@ -416,72 +996,34 @@ def format_timestamp_ms_to_dt_string(ts_ms):
     except (ValueError, TypeError):
         return str(ts_ms)
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-# @app.post("/search", response_class=HTMLResponse)
-# async def search_bill(request: Request, bill_id: str = Form(...)):
-#     if not bill_id:
-#         return HTMLResponse("<div class='error'>Vui lòng nhập Bill ID.</div>")
-
-#     found, record = record_service.search_record(bill_id)
-#     context = {
-#         "request": request,
-#         "employees": employee_service.get_employees(),
-#         "transport_providers": transport_provider_service.get_transport_providers()  # ← THÊM MỚI
-#     }
-
-#     if found and record:
-#         from src.utils.config import LOCK_FIELDS
-#         has_lock_values = any(record.get("fields", {}).get(f) for f in LOCK_FIELDS)
-#         context.update({
-#             "record": record,
-#             "can_delete": not has_lock_values,
-#             "lock_fields": ', '.join(LOCK_FIELDS),
-#             "format_ts": format_timestamp_ms_to_dt_string
-#         })
-#         return templates.TemplateResponse("_update_form.html", context)
-#     else:
-#         imex_items = record_service.get_api_data(bill_id)
-#         if not imex_items:
-#             return HTMLResponse("<div class='error'>❌ Không lấy được dữ liệu, kiểm tra lại Bill ID.</div>")
-
-#         example_item = imex_items[0]
-#         context["api_data"] = {
-#             "ID": bill_id,
-#             "ID kho đi": example_item.get("fromDepotId", ""),
-#             "Kho đi": example_item.get("fromDepotName", ""),
-#             "ID kho đến": example_item.get("toDepotId", ""),
-#             "Kho đến": example_item.get("toDepotName", ""),
-#             "Số lượng": int(example_item.get("realQuantity") or 0),
-#         }
-#         from src.utils.config import CREATABLE_FIELDS
-#         context["creatable_fields"] = CREATABLE_FIELDS
-#         return templates.TemplateResponse("_create_form.html", context)
-
-@app.post("/search", response_class=HTMLResponse)
-async def search_bill(request: Request, bill_id: str = Form(...)):
+@router.post("/search", response_class=HTMLResponse)
+async def search_bill(
+    request: Request, 
+    bill_id: str = Form(...),
+    record_service: RecordService = Depends(get_record_service),
+    employee_service: EmployeeService = Depends(get_employee_service),
+    transport_service: TransportProviderService = Depends(get_transport_service)
+):
+    user = get_current_user(request)
+    
     if not bill_id:
         return HTMLResponse("<div class='error'>Vui lòng nhập Bill ID.</div>")
 
     found, record = record_service.search_record(bill_id)
     context = {
         "request": request,
+        "user": user,
         "employees": employee_service.get_employees(),
-        "transport_providers": transport_provider_service.get_transport_providers()
+        "transport_providers": transport_service.get_transport_providers()
     }
 
     if found and record:
-        # ← SỬA: Chỉ hiển thị thông tin, không cho edit
         context.update({
             "record": record,
             "format_ts": format_timestamp_ms_to_dt_string
         })
-        # ← SỬA: Tạo template mới hoặc sửa template để chỉ hiển thị
-        return templates.TemplateResponse("_view_only.html", context)
+        return templates.TemplateResponse("pages/view_only.html", context)
     else:
-        # Phần tạo mới vẫn giữ nguyên
         imex_items = record_service.get_api_data(bill_id)
         if not imex_items:
             return HTMLResponse("<div class='error'>❌ Không lấy được dữ liệu, kiểm tra lại Bill ID.</div>")
@@ -495,15 +1037,20 @@ async def search_bill(request: Request, bill_id: str = Form(...)):
             "Kho đến": example_item.get("toDepotName", ""),
             "Số lượng": int(example_item.get("realQuantity") or 0),
         }
-        from src.utils.config import CREATABLE_FIELDS
         context["creatable_fields"] = CREATABLE_FIELDS
-        return templates.TemplateResponse("_create_form.html", context)
+        return templates.TemplateResponse("components/forms/create.html", context)
 
-
-@app.post("/records", response_class=HTMLResponse)
-async def create_record(request: Request):
+@router.post("/", response_class=HTMLResponse)
+async def create_record(
+    request: Request,
+    record_service: RecordService = Depends(get_record_service)
+):
+    user = get_current_user(request)
     form_data = await request.form()
     bill_id = form_data.get("ID", "Không rõ")
+    
+    logger.info(f"User {user.get('name')} creating record for Bill ID: {bill_id}")
+    
     success, message = record_service.create_record(form_data)
 
     if success:
@@ -511,9 +1058,17 @@ async def create_record(request: Request):
     else:
         return HTMLResponse(f"<div class='error'>❌ Lỗi khi thêm mới: {message}</div>")
 
-@app.put("/records/{record_id}", response_class=HTMLResponse)
-async def update_record(record_id: str, request: Request):
+@router.put("/{record_id}", response_class=HTMLResponse)
+async def update_record(
+    record_id: str, 
+    request: Request,
+    record_service: RecordService = Depends(get_record_service)
+):
+    user = get_current_user(request)
     form_data = await request.form()
+    
+    logger.info(f"User {user.get('name')} updating record: {record_id}")
+    
     success, message = record_service.update_record(record_id, form_data)
     
     if success:
@@ -521,42 +1076,52 @@ async def update_record(record_id: str, request: Request):
     else:
         return HTMLResponse(f"<div class='error'>❌ Lỗi khi cập nhật: {message}</div>")
 
-@app.delete("/records/{record_id}", response_class=Response)
-async def delete_record_endpoint(record_id: str):
+@router.delete("/{record_id}", response_class=Response)
+async def delete_record_endpoint(
+    record_id: str, 
+    request: Request,
+    record_service: RecordService = Depends(get_record_service)
+):
+    user = get_current_user(request)
+    
+    logger.info(f"User {user.get('name')} deleting record: {record_id}")
+    
     success, message = record_service.delete_record(record_id)
     if success:
         return Response(status_code=200, content="<div class='success'>🗑️ Đã xóa thành công.</div>")
     else:
         return HTMLResponse(f"<div class='error'>❌ Lỗi khi xóa: {message}</div>", status_code=400)
 
-def get_employee_display(employee_id, employees):
-    """Tìm và trả về chuỗi 'Tên (ID)' từ danh sách nhân viên."""
-    if not employee_id or not employees:
-        return ""
-    for emp in employees:
-        if emp.get('id') == employee_id:
-            return f"{emp.get('name', '')} ({emp.get('id', '')})"
-    return employee_id # Trả về ID nếu không tìm thấy
+============================================================
 
-# ← THÊM MỚI: Filter cho hiển thị tên nhà cung cấp
-def get_transport_provider_display(provider_id, transport_providers):
-    """Tìm và trả về tên nhà cung cấp từ ID."""
-    if not provider_id or not transport_providers:
-        return provider_id
-    for provider in transport_providers:
-        if provider.get('id') == provider_id:
-            return provider.get('name', provider_id)
-    return provider_id # Trả về ID nếu không tìm thấy
+============================================================
+FILE: src\routes\refresh_routes.py
+============================================================
+# src/routes/refresh_routes.py - Data Refresh Routes
+from fastapi import APIRouter, Request, Depends
+from fastapi.responses import HTMLResponse
+import time
+import logging
 
-templates.env.filters['get_employee_display'] = get_employee_display
-templates.env.filters['get_transport_provider_display'] = get_transport_provider_display  # ← THÊM MỚI
+from src.services.employee_service import EmployeeService
+from src.services.transport_service import TransportProviderService
+from src.services.depot_service import DepotService
+from src.core.dependencies import get_current_user, get_employee_service, get_transport_service, get_depot_service
 
-@app.post("/refresh-employees", response_class=HTMLResponse)
-async def refresh_employees_endpoint():
+router = APIRouter(prefix="/refresh", tags=["refresh"])
+logger = logging.getLogger(__name__)
+
+@router.post("/employees", response_class=HTMLResponse)
+async def refresh_employees_endpoint(
+    request: Request,
+    employee_service: EmployeeService = Depends(get_employee_service)
+):
     """Endpoint để làm mới danh sách nhân viên"""
+    user = get_current_user(request)
+    logger.info(f"User {user.get('name')} refreshing employees")
+    
     try:
-        import time
-        time.sleep(0.5)  # Tạo cảm giác xử lý
+        time.sleep(0.5)
         
         success, message = employee_service.refresh_employees()
         
@@ -568,17 +1133,19 @@ async def refresh_employees_endpoint():
     except Exception as e:
         return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
 
-# ← THÊM MỚI: Endpoint để refresh transport providers
-@app.post("/refresh-transport-providers", response_class=HTMLResponse)
-async def refresh_transport_providers_endpoint():
+@router.post("/transport-providers", response_class=HTMLResponse)
+async def refresh_transport_providers_endpoint(
+    request: Request,
+    transport_service: TransportProviderService = Depends(get_transport_service)
+):
     """Endpoint để làm mới danh sách đơn vị vận chuyển"""
+    user = get_current_user(request)
+    logger.info(f"User {user.get('name')} refreshing transport providers")
+    
     try:
-        import time
-        time.sleep(0.5)  # Tạo cảm giác xử lý
+        time.sleep(0.5)
         
-        # Bạn cần thay "tblDefault" bằng table ID thực tế chứa nhà cung cấp
-        # Ví dụ: "tblXXXXXXXXXXXXXXX"
-        success, message = transport_provider_service.refresh_transport_providers("tblyiELQIi6M1j1r")
+        success, message = transport_service.refresh_transport_providers("tblyiELQIi6M1j1r")
         
         if success:
             return HTMLResponse(f"<div class='success'>✅ {message}</div>")
@@ -588,49 +1155,294 @@ async def refresh_transport_providers_endpoint():
     except Exception as e:
         return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
 
-if __name__ == "__main__":
-    import uvicorn
-    import os
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
-
-
-============================================================
-
-============================================================
-FILE: README.md
-============================================================
-# 📦 IMEX Distribution App
-
-Ứng dụng Streamlit giúp kiểm tra tổng requiredQuantity của 1 Bill ID IMEX từ API, nhập các thông tin giao nhận và lưu kết quả lên Larkbase.
-
-## 🚀 Hướng dẫn chạy nhanh
-
-**Bằng Python:**
-
-============================================================
-
-============================================================
-FILE: requirements.txt
-============================================================
-fastapi
-uvicorn[standard]
-python-multipart
-jinja2
-requests
+@router.post("/depots", response_class=HTMLResponse)
+async def refresh_depots_endpoint(
+    request: Request,
+    depot_service: DepotService = Depends(get_depot_service)
+):
+    """Endpoint để làm mới danh sách depot"""
+    user = get_current_user(request)
+    logger.info(f"User {user.get('name')} refreshing depots")
+    
+    try:
+        time.sleep(0.5)
+        
+        success, message = depot_service.refresh_depots()
+        
+        if success:
+            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
+        else:
+            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
+            
+    except Exception as e:
+        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
 
 ============================================================
 
 ============================================================
-FILE: services.py
+FILE: src\routes\report_routes.py
 ============================================================
+# # src/routes/report_routes.py - Report Routes
+# from fastapi import APIRouter, Request, Query, Depends
+# from fastapi.responses import HTMLResponse
+# from datetime import datetime, timedelta
+# import logging
+
+# from src.services.report_service import ReportService
+# from src.core.dependencies import get_current_user, templates, get_report_service
+
+# router = APIRouter(prefix="/reports", tags=["reports"])
+# logger = logging.getLogger(__name__)
+
+# @router.get("/daily", response_class=HTMLResponse)
+# async def daily_report_page(
+#     request: Request,
+#     date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+#     report_service: ReportService = Depends(get_report_service)
+# ):
+#     """Trang báo cáo hàng ngày của nhân viên"""
+#     user = get_current_user(request)
+    
+#     # Nếu không có date parameter, sử dụng ngày hôm nay
+#     if not date:
+#         date = datetime.now().strftime('%Y-%m-%d')
+    
+#     try:
+#         # Validate date format
+#         report_date = datetime.strptime(date, '%Y-%m-%d')
+        
+#         # Lấy dữ liệu báo cáo
+#         report_data = report_service.get_daily_report(user['user_id'], date)
+        
+#         # Tạo context cho template
+#         context = {
+#             "request": request,
+#             "user": user,
+#             "report_date": report_date,
+#             "date_str": date,
+#             "report_data": report_data,
+#             "today": datetime.now().strftime('%Y-%m-%d')
+#         }
+        
+#         return templates.TemplateResponse("pages/daily_report.html", context)
+        
+#     except ValueError:
+#         logger.error(f"Invalid date format: {date}")
+#         context = {
+#             "request": request,
+#             "user": user,
+#             "error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD",
+#             "today": datetime.now().strftime('%Y-%m-%d')
+#         }
+#         return templates.TemplateResponse("pages/daily_report.html", context)
+        
+#     except Exception as e:
+#         logger.error(f"Error generating daily report: {e}")
+#         context = {
+#             "request": request,
+#             "user": user,
+#             "error": f"Lỗi khi tạo báo cáo: {str(e)}",
+#             "today": datetime.now().strftime('%Y-%m-%d')
+#         }
+#         return templates.TemplateResponse("pages/daily_report.html", context)
+
+# @router.get("/weekly", response_class=HTMLResponse)
+# async def weekly_report_page(
+#     request: Request,
+#     week_start: str = Query(None, description="Ngày bắt đầu tuần (YYYY-MM-DD)"),
+#     report_service: ReportService = Depends(get_report_service)
+# ):
+#     """Trang báo cáo tuần của nhân viên"""
+#     user = get_current_user(request)
+    
+#     # Nếu không có week_start, sử dụng tuần hiện tại
+#     if not week_start:
+#         today = datetime.now()
+#         start_of_week = today - timedelta(days=today.weekday())
+#         week_start = start_of_week.strftime('%Y-%m-%d')
+    
+#     try:
+#         # Validate date format
+#         start_date = datetime.strptime(week_start, '%Y-%m-%d')
+#         end_date = start_date + timedelta(days=6)
+        
+#         # Lấy dữ liệu báo cáo tuần
+#         report_data = report_service.get_weekly_report(user['user_id'], week_start)
+        
+#         context = {
+#             "request": request,
+#             "user": user,
+#             "start_date": start_date,
+#             "end_date": end_date,
+#             "week_start": week_start,
+#             "report_data": report_data
+#         }
+        
+#         return templates.TemplateResponse("pages/weekly_report.html", context)
+        
+#     except Exception as e:
+#         logger.error(f"Error generating weekly report: {e}")
+#         context = {
+#             "request": request,
+#             "user": user,
+#             "error": f"Lỗi khi tạo báo cáo tuần: {str(e)}"
+#         }
+#         return templates.TemplateResponse("pages/weekly_report.html", context)
+
+
+# src/routes/report_routes.py
+from fastapi import APIRouter, Request, Query, Depends
+from fastapi.responses import HTMLResponse
+from datetime import datetime, timedelta
+import logging
+
+from src.services.report_service import ReportService
+from src.core.dependencies import get_current_user, templates, get_report_service
+
+router = APIRouter(prefix="/reports", tags=["reports"])
+logger = logging.getLogger(__name__)
+
+@router.get("/daily", response_class=HTMLResponse)
+async def daily_report_page(
+    request: Request,
+    date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+    employee: str = Query(None, description="ID nhân viên"),
+    from_depot: str = Query(None, description="ID kho đi"),
+    to_depot: str = Query(None, description="ID kho đến"),
+    report_service: ReportService = Depends(get_report_service)
+):
+    """Trang báo cáo hàng ngày với bộ lọc"""
+    user = get_current_user(request)
+    
+    # Nếu không có date parameter, sử dụng ngày hôm nay
+    if not date:
+        date = datetime.now().strftime('%Y-%m-%d')
+    
+    try:
+        # Validate date format
+        report_date = datetime.strptime(date, '%Y-%m-%d')
+        
+        # Lấy dữ liệu báo cáo với filters
+        report_data = report_service.get_daily_report(
+            user_id=None,  # Không filter theo user nữa
+            date_str=date,
+            employee_filter=employee,
+            from_depot_filter=from_depot,
+            to_depot_filter=to_depot
+        )
+        
+        # Lấy danh sách để làm filter options
+        all_employees = report_service.get_all_employees()
+        all_depots = report_service.get_all_depots()
+        
+        # Tạo context cho template
+        context = {
+            "request": request,
+            "user": user,
+            "report_date": report_date,
+            "date_str": date,
+            "report_data": report_data,
+            "today": datetime.now().strftime('%Y-%m-%d'),
+            "all_employees": all_employees,
+            "all_depots": all_depots,
+            "current_filters": {
+                "employee": employee,
+                "from_depot": from_depot,
+                "to_depot": to_depot
+            }
+        }
+        
+        return templates.TemplateResponse("pages/daily_report.html", context)
+        
+    except ValueError:
+        logger.error(f"Invalid date format: {date}")
+        context = {
+            "request": request,
+            "user": user,
+            "error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD",
+            "today": datetime.now().strftime('%Y-%m-%d'),
+            "all_employees": [],
+            "all_depots": [],
+            "current_filters": {}
+        }
+        return templates.TemplateResponse("pages/daily_report.html", context)
+        
+    except Exception as e:
+        logger.error(f"Error generating daily report: {e}")
+        context = {
+            "request": request,
+            "user": user,
+            "error": f"Lỗi khi tạo báo cáo: {str(e)}",
+            "today": datetime.now().strftime('%Y-%m-%d'),
+            "all_employees": [],
+            "all_depots": [],
+            "current_filters": {}
+        }
+        return templates.TemplateResponse("pages/daily_report.html", context)
+
+============================================================
+
+============================================================
+FILE: src\services\__init__.py
+============================================================
+
+============================================================
+
+============================================================
+FILE: src\services\depot_service.py
+============================================================
+# src/services/depot_service.py
+from src.utils.depot import get_depots_from_file, update_depot_json_file
+
+class DepotService:
+    def get_depots(self):
+        """Lấy danh sách depot"""
+        return get_depots_from_file()
+    
+    def refresh_depots(self):
+        """Làm mới danh sách depot"""
+        return update_depot_json_file()
+    
+    def validate_depot(self, depot_id):
+        """Kiểm tra depot_id có hợp lệ không"""
+        if not depot_id:
+            return False, "ID depot trống"
+        
+        depots = self.get_depots()
+        for depot in depots:
+            if depot.get('id') == str(depot_id):
+                return True, depot.get('name', '')
+        
+        return False, "Depot không tồn tại"
+
+============================================================
+
+============================================================
+FILE: src\services\employee_service.py
+============================================================
+# src/services/employee_service.py
+from src.utils.cache import get_employee_list_from_file, update_employee_json_file
+
+class EmployeeService:
+    def get_employees(self):
+        """Lấy danh sách nhân viên"""
+        return get_employee_list_from_file()
+    
+    def refresh_employees(self):
+        """Làm mới danh sách nhân viên"""
+        return update_employee_json_file()
+
+============================================================
+
+============================================================
+FILE: src\services\record_service.py
+============================================================
+# src/services/record_service.py
 from src.utils.api import fetch_imex_details
 from src.utils.larkbase import (
     larkbase_find_by_field, larkbase_write_data, 
     larkbase_update_data, larkbase_delete_record
 )
-from src.utils.cache import get_employee_list_from_file, update_employee_json_file
-from src.utils.transport_provider import get_transport_providers_from_file, update_transport_providers_json_file
 import time
 import datetime
 import logging
@@ -643,39 +1455,6 @@ class RecordService:
     def search_record(self, bill_id):
         """Tìm kiếm record theo Bill ID"""
         return larkbase_find_by_field(self.app_token, self.table_id, "ID", bill_id)
-
-    # def create_record(self, form_data):
-    #     """Tạo record mới"""
-    #     new_record = {key: value for key, value in form_data.items()}
-    #     new_record["Ngày bàn giao"] = int(time.time() * 1000)
-    #     return larkbase_write_data(self.app_token, self.table_id, new_record)
-
-    # def create_record(self, form_data):
-    #     """Tạo record mới"""
-    #     new_record = {}
-        
-    #     # Danh sách các trường cần chuyển đổi thành số
-    #     numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
-        
-    #     for key, value in form_data.items():
-    #         if key in numeric_fields and value:
-    #             try:
-    #                 # Chuyển đổi thành số nguyên
-    #                 new_record[key] = int(value) if value else 0
-    #             except (ValueError, TypeError):
-    #                 # Nếu không chuyển đổi được, mặc định = 0
-    #                 new_record[key] = 0
-    #         else:
-    #             new_record[key] = value
-        
-    #     new_record["Ngày bàn giao"] = int(time.time() * 1000)
-        
-    #     # Debug: In ra dữ liệu trước khi gửi
-    #     logging.info(f"Data to send: {new_record}")
-    #     for key, value in new_record.items():
-    #         logging.info(f"Field '{key}': {value} (type: {type(value)})")
-        
-    #     return larkbase_write_data(self.app_token, self.table_id, new_record)
 
     def create_record(self, form_data):
         """Tạo record mới với tách riêng ID và tên từ dropdown"""
@@ -696,14 +1475,14 @@ class RecordService:
                     new_record[key] = int(value) if value else 0
                 except (ValueError, TypeError):
                     new_record[key] = 0
-            elif key == "Người bàn giao":  # ← SỬA: Bỏ "_tomselected"
+            elif key == "Người bàn giao":
                 # Đây là giá trị từ hidden input (chỉ chứa ID)
                 if value:
                     # Lưu ID vào cột riêng
                     new_record["ID người bàn giao"] = value
                     
                     # Tìm tên tương ứng với ID từ danh sách nhân viên
-                    from services import EmployeeService
+                    from src.services.employee_service import EmployeeService
                     employee_service = EmployeeService()
                     employees = employee_service.get_employees()
                     
@@ -717,7 +1496,7 @@ class RecordService:
                         new_record["Người bàn giao"] = employee_name
                     else:
                         new_record["Người bàn giao"] = value  # Fallback về ID nếu không tìm thấy tên
-                continue  # ← QUAN TRỌNG: Không lưu value gốc
+                continue
             elif value and key not in ["Người bàn giao_hidden"]:  
                 new_record[key] = value
         
@@ -728,7 +1507,6 @@ class RecordService:
         
         return larkbase_write_data(self.app_token, self.table_id, new_record)
 
-
     def update_record(self, record_id, form_data):
         """Cập nhật record với tách riêng ID và tên từ dropdown"""
         from src.utils.config import UPDATABLE_FIELDS
@@ -738,12 +1516,12 @@ class RecordService:
             if field in form_data and form_data[field]:
                 value = form_data[field]
                 
-                if field == "Người bàn giao":  # ← SỬA: Bỏ "_tomselected"
+                if field == "Người bàn giao":
                     # Lưu ID
                     update_data["ID người bàn giao"] = value
                     
                     # Tìm tên từ danh sách nhân viên
-                    from services import EmployeeService
+                    from src.services.employee_service import EmployeeService
                     employee_service = EmployeeService()
                     employees = employee_service.get_employees()
                     
@@ -768,9 +1546,6 @@ class RecordService:
         
         return larkbase_update_data(self.app_token, self.table_id, record_id, update_data)
 
-
-
-
     def delete_record(self, record_id):
         """Xóa record"""
         return larkbase_delete_record(self.app_token, self.table_id, record_id)
@@ -779,18 +1554,414 @@ class RecordService:
         """Lấy dữ liệu từ API"""
         return fetch_imex_details(bill_id)
 
-class EmployeeService:
-    def get_employees(self):
-        """Lấy danh sách nhân viên"""
-        return get_employee_list_from_file()
-    
-    def refresh_employees(self):
-        """Làm mới danh sách nhân viên"""
-        return update_employee_json_file()
+============================================================
+
+============================================================
+FILE: src\services\report_service.py
+============================================================
+# # src/services/report_service.py
+# from datetime import datetime, timedelta
+# from collections import defaultdict
+# from src.utils.larkbase import larkbase_get_all
+# import logging
+# import json
+
+# logger = logging.getLogger(__name__)
+
+# class ReportService:
+#     def __init__(self, app_token, table_id):
+#         self.app_token = app_token
+#         self.table_id = table_id
+
+#     def get_daily_report(self, user_id, date_str):
+#         """Lấy báo cáo hàng ngày cho user"""
+#         try:
+#             # Parse date
+#             report_date = datetime.strptime(date_str, '%Y-%m-%d')
+#             start_timestamp = int(report_date.timestamp() * 1000)
+#             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
+            
+#             # ✅ THÊM: Lấy employee ID tương ứng với Lark user ID
+#             employee_id = self._get_employee_id_from_user_id(user_id)
+#             if not employee_id:
+#                 logger.warning(f"Không tìm thấy employee ID cho user {user_id}")
+#                 return self._empty_report_data()
+            
+#             logger.info(f"Mapping: Lark user {user_id} -> Employee ID {employee_id}")
+            
+#             # Lấy tất cả records
+#             all_records = larkbase_get_all(self.app_token, self.table_id)
+            
+#             # Filter records của employee trong ngày
+#             user_records = []
+#             for record in all_records:
+#                 fields = record.get('fields', {})
+                
+#                 # ✅ SỬA: Check employee ID thay vì user ID
+#                 record_user_id = fields.get('ID người bàn giao', '')
+#                 if record_user_id != employee_id:
+#                     continue
+                
+#                 # Check date
+#                 handover_date = fields.get('Ngày bàn giao')
+#                 if not handover_date:
+#                     continue
+                    
+#                 try:
+#                     handover_timestamp = int(handover_date)
+#                     if start_timestamp <= handover_timestamp < end_timestamp:
+#                         user_records.append(fields)
+#                 except (ValueError, TypeError):
+#                     continue
+            
+#             logger.info(f"Found {len(user_records)} records for employee {employee_id} on {date_str}")
+            
+#             # Tính toán thống kê
+#             return self._calculate_daily_statistics(user_records)
+            
+#         except Exception as e:
+#             logger.error(f"Error getting daily report: {e}")
+#             return self._empty_report_data()
+
+#     def _get_employee_id_from_user_id(self, lark_user_id):
+#         """Mapping tạm thời để test"""
+#         # ✅ TEST: Hardcode mapping cho user hiện tại
+#         user_mapping = {
+#             'ou_04bf3b2ad306e6bb53f5fe06ad8e492c': 'AM.0051'  # DA. Lê Sỹ Đức -> AM.0051
+#         }
+#         return user_mapping.get(lark_user_id)
+
+#     def _empty_report_data(self):
+#         """Trả về dữ liệu rỗng cho báo cáo"""
+#         return {
+#             'total_records': 0,
+#             'total_quantity': 0,
+#             'transport_providers': {},
+#             'routes': {},
+#             'transport_summary': [],
+#             'route_summary': []
+#         }
 
 
+#     def _calculate_daily_statistics(self, records):
+#         """Tính toán thống kê từ danh sách records"""
+#         if not records:
+#             return {
+#                 'total_records': 0,
+#                 'total_quantity': 0,
+#                 'transport_providers': {},
+#                 'routes': {},
+#                 'transport_summary': [],
+#                 'route_summary': []
+#             }
+        
+#         transport_stats = defaultdict(lambda: {'count': 0, 'quantity': 0})
+#         route_stats = defaultdict(lambda: {'count': 0, 'quantity': 0, 'transport_providers': set()})
+        
+#         total_quantity = 0
+        
+#         for fields in records:
+#             # Số lượng bao/tải - thử nhiều tên field
+#             quantity = 0
+#             quantity_field = (fields.get('Số lượng bao/tải giao') or 
+#                              fields.get('SoLuongBaoTaiGiao') or 
+#                              fields.get('HandoverQuantity') or 
+#                              fields.get('Quantity', 0))
+            
+#             try:
+#                 if isinstance(quantity_field, str):
+#                     quantity = int(quantity_field) if quantity_field.isdigit() else 0
+#                 elif isinstance(quantity_field, (int, float)):
+#                     quantity = int(quantity_field)
+#                 total_quantity += quantity
+#             except (ValueError, TypeError):
+#                 logger.warning(f"Error parsing quantity: {quantity_field}")
+#                 pass
+            
+#             # Đơn vị vận chuyển - thử nhiều tên field
+#             transport_provider = (fields.get('Đơn vị vận chuyển') or 
+#                                  fields.get('DonViVanChuyen') or 
+#                                  fields.get('TransportProvider') or 
+#                                  'Không rõ').strip()
+            
+#             if transport_provider:
+#                 transport_stats[transport_provider]['count'] += 1
+#                 transport_stats[transport_provider]['quantity'] += quantity
+            
+#             # Route (kho đi -> kho đến) - thử nhiều tên field
+#             from_depot = (fields.get('Kho đi') or 
+#                          fields.get('KhoDi') or 
+#                          fields.get('FromDepot') or 
+#                          'Không rõ').strip()
+            
+#             to_depot = (fields.get('Kho đến') or 
+#                        fields.get('KhoDen') or 
+#                        fields.get('ToDepot') or 
+#                        'Không rõ').strip()
+            
+#             route_key = f"{from_depot} → {to_depot}"
+            
+#             route_stats[route_key]['count'] += 1
+#             route_stats[route_key]['quantity'] += quantity
+#             if transport_provider:
+#                 route_stats[route_key]['transport_providers'].add(transport_provider)
+        
+#         # Chuyển đổi sang format cho template
+#         transport_summary = []
+#         for provider, stats in transport_stats.items():
+#             transport_summary.append({
+#                 'name': provider,
+#                 'count': stats['count'],
+#                 'quantity': stats['quantity']
+#             })
+        
+#         route_summary = []
+#         for route, stats in route_stats.items():
+#             route_summary.append({
+#                 'route': route,
+#                 'count': stats['count'],
+#                 'quantity': stats['quantity'],
+#                 'transport_providers': list(stats['transport_providers'])
+#             })
+        
+#         # Sắp xếp theo số lượng giảm dần
+#         transport_summary.sort(key=lambda x: x['quantity'], reverse=True)
+#         route_summary.sort(key=lambda x: x['quantity'], reverse=True)
+        
+#         return {
+#             'total_records': len(records),
+#             'total_quantity': total_quantity,
+#             'transport_providers': dict(transport_stats),
+#             'routes': dict(route_stats),
+#             'transport_summary': transport_summary,
+#             'route_summary': route_summary
+#         }
 
-# Thêm class mới sau EmployeeService
+# src/services/report_service.py
+from datetime import datetime, timedelta
+from collections import defaultdict
+from src.utils.larkbase import larkbase_get_all
+import logging
+import json
+
+logger = logging.getLogger(__name__)
+
+class ReportService:
+    def __init__(self, app_token, table_id):
+        self.app_token = app_token
+        self.table_id = table_id
+
+    def get_daily_report(self, user_id=None, date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None):
+        """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí"""
+        try:
+            # Parse date
+            if date_str:
+                report_date = datetime.strptime(date_str, '%Y-%m-%d')
+                start_timestamp = int(report_date.timestamp() * 1000)
+                end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
+            else:
+                # Lấy tất cả nếu không có date
+                start_timestamp = 0
+                end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
+            
+            # Lấy tất cả records
+            all_records = larkbase_get_all(self.app_token, self.table_id)
+            
+            # Filter records
+            filtered_records = []
+            for record in all_records:
+                fields = record.get('fields', {})
+                
+                # Filter by date nếu có
+                if date_str:
+                    handover_date = fields.get('Ngày bàn giao')
+                    if handover_date:
+                        try:
+                            handover_timestamp = int(handover_date)
+                            if not (start_timestamp <= handover_timestamp < end_timestamp):
+                                continue
+                        except (ValueError, TypeError):
+                            continue
+                
+                # Filter by employee nếu có
+                if employee_filter:
+                    record_employee_id = fields.get('ID người bàn giao', '')
+                    if record_employee_id != employee_filter:
+                        continue
+                
+                # Filter by from depot nếu có
+                if from_depot_filter:
+                    from_depot_id = fields.get('ID kho đi', '')
+                    if from_depot_id != from_depot_filter:
+                        continue
+                
+                # Filter by to depot nếu có
+                if to_depot_filter:
+                    to_depot_id = fields.get('ID kho đến', '')
+                    if to_depot_id != to_depot_filter:
+                        continue
+                
+                filtered_records.append(fields)
+            
+            logger.info(f"Found {len(filtered_records)} records after filtering")
+            
+            # Tính toán thống kê
+            return self._calculate_daily_statistics(filtered_records)
+            
+        except Exception as e:
+            logger.error(f"Error getting daily report: {e}")
+            return self._empty_report_data()
+
+    def get_all_employees(self):
+        """Lấy danh sách tất cả nhân viên từ records"""
+        try:
+            all_records = larkbase_get_all(self.app_token, self.table_id)
+            employees = {}
+            
+            for record in all_records:
+                fields = record.get('fields', {})
+                emp_id = fields.get('ID người bàn giao')
+                emp_name = fields.get('Người bàn giao')
+                
+                if emp_id and emp_name and emp_id not in employees:
+                    employees[emp_id] = emp_name
+            
+            return [{'id': emp_id, 'name': emp_name} for emp_id, emp_name in employees.items()]
+        except Exception as e:
+            logger.error(f"Error getting employees: {e}")
+            return []
+
+    def get_all_depots(self):
+        """Lấy danh sách tất cả depots từ records"""
+        try:
+            all_records = larkbase_get_all(self.app_token, self.table_id)
+            depots = {}
+            
+            for record in all_records:
+                fields = record.get('fields', {})
+                
+                # From depot
+                from_id = fields.get('ID kho đi')
+                from_name = fields.get('Kho đi')
+                if from_id and from_name and from_id not in depots:
+                    depots[from_id] = from_name
+                
+                # To depot
+                to_id = fields.get('ID kho đến')
+                to_name = fields.get('Kho đến')
+                if to_id and to_name and to_id not in depots:
+                    depots[to_id] = to_name
+            
+            return [{'id': depot_id, 'name': depot_name} for depot_id, depot_name in depots.items()]
+        except Exception as e:
+            logger.error(f"Error getting depots: {e}")
+            return []
+
+    def _empty_report_data(self):
+        """Trả về dữ liệu rỗng cho báo cáo"""
+        return {
+            'total_records': 0,
+            'total_quantity': 0,
+            'transport_providers': {},
+            'routes': {},
+            'transport_summary': [],
+            'route_summary': []
+        }
+
+    def _calculate_daily_statistics(self, records):
+        """Tính toán thống kê từ danh sách records"""
+        if not records:
+            return self._empty_report_data()
+        
+        transport_stats = defaultdict(lambda: {'count': 0, 'quantity': 0})
+        route_stats = defaultdict(lambda: {'count': 0, 'quantity': 0, 'transport_providers': set()})
+        
+        total_quantity = 0
+        
+        for fields in records:
+            # Số lượng bao/tải
+            quantity = 0
+            quantity_field = (fields.get('Số lượng bao/tải giao') or 
+                             fields.get('SoLuongBaoTaiGiao') or 
+                             fields.get('HandoverQuantity') or 
+                             fields.get('Quantity', 0))
+            
+            try:
+                if isinstance(quantity_field, str):
+                    quantity = int(quantity_field) if quantity_field.isdigit() else 0
+                elif isinstance(quantity_field, (int, float)):
+                    quantity = int(quantity_field)
+                total_quantity += quantity
+            except (ValueError, TypeError):
+                pass
+            
+            # Đơn vị vận chuyển
+            transport_provider = (fields.get('Đơn vị vận chuyển') or 
+                                 fields.get('DonViVanChuyen') or 
+                                 fields.get('TransportProvider') or 
+                                 'Không rõ').strip()
+            
+            if transport_provider:
+                transport_stats[transport_provider]['count'] += 1
+                transport_stats[transport_provider]['quantity'] += quantity
+            
+            # Route (kho đi → kho đến)
+            from_depot = (fields.get('Kho đi') or 
+                         fields.get('KhoDi') or 
+                         fields.get('FromDepot') or 
+                         'Không rõ').strip()
+            
+            to_depot = (fields.get('Kho đến') or 
+                       fields.get('KhoDen') or 
+                       fields.get('ToDepot') or 
+                       'Không rõ').strip()
+            
+            route_key = f"{from_depot} → {to_depot}"
+            
+            route_stats[route_key]['count'] += 1
+            route_stats[route_key]['quantity'] += quantity
+            if transport_provider:
+                route_stats[route_key]['transport_providers'].add(transport_provider)
+        
+        # Chuyển đổi sang format cho template
+        transport_summary = []
+        for provider, stats in transport_stats.items():
+            transport_summary.append({
+                'name': provider,
+                'count': stats['count'],
+                'quantity': stats['quantity']
+            })
+        
+        route_summary = []
+        for route, stats in route_stats.items():
+            route_summary.append({
+                'route': route,
+                'count': stats['count'],
+                'quantity': stats['quantity'],
+                'transport_providers': list(stats['transport_providers'])
+            })
+        
+        # Sắp xếp theo số lượng giảm dần
+        transport_summary.sort(key=lambda x: x['quantity'], reverse=True)
+        route_summary.sort(key=lambda x: x['quantity'], reverse=True)
+        
+        return {
+            'total_records': len(records),
+            'total_quantity': total_quantity,
+            'transport_providers': dict(transport_stats),
+            'routes': dict(route_stats),
+            'transport_summary': transport_summary,
+            'route_summary': route_summary
+        }
+
+============================================================
+
+============================================================
+FILE: src\services\transport_service.py
+============================================================
+# src/services/transport_service.py
+from src.utils.transport_provider import get_transport_providers_from_file, update_transport_providers_json_file
+
 class TransportProviderService:
     def __init__(self, app_token):
         self.app_token = app_token
@@ -802,6 +1973,12 @@ class TransportProviderService:
     def refresh_transport_providers(self, table_id="tblDefault"):
         """Làm mới danh sách nhà cung cấp"""
         return update_transport_providers_json_file(self.app_token, table_id)
+
+============================================================
+
+============================================================
+FILE: src\utils\__init__.py
+============================================================
 
 ============================================================
 
@@ -873,7 +2050,6 @@ PERSONNEL_API_BASE_URL = "https://minham.1office.vn/api/personnel/profile/gets?a
 EMPLOYEE_JSON_PATH = "employees.json" # File JSON sẽ được lưu ở thư mục gốc của dự án
 
 logging.basicConfig(level=logging.INFO)
-
 
 def update_employee_json_file():
     """
@@ -958,13 +2134,54 @@ def get_employee_list_from_file():
         logging.error(f"Lỗi khi đọc hoặc phân tích file {EMPLOYEE_JSON_PATH}: {e}")
         return [] # Trả về rỗng nếu file bị lỗi
 
-
 ============================================================
 
 ============================================================
 FILE: src\utils\config.py
 ============================================================
 # src/utils/config.py
+
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# ✅ SỬA: Centralize tất cả tokens ở đây thay vì hardcode ở nhiều file
+API_TOKENS = {
+    # Main app token (dùng cho Larkbase operations)
+    'MAIN_APP_TOKEN': os.getenv('MAIN_APP_TOKEN', 'Rm9PbvKLeaFFZcsSQpElnRjIgXg'),
+    
+    # API access token (dùng cho IMEX và Depot API)
+    'NHANH_ACCESS_TOKEN': os.getenv('NHANH_ACCESS_TOKEN', 'twf9P1xFZCUUgwt8zR0XgNeB6V5jsbq2KHb14bxovqK1ppCxyADwOK8FzQlCEeEGABRZINXoUCSzM50kjhwcrUSBWTY5nSvyhfnH2X2cI0pC7pNczSVxc1ratdDmxF85q7hUTUNCrUnpPTG5ZwLNO7bkMlEEJTCdPhgYaC'),
+    
+    # App credentials for API calls
+    'NHANH_APP_ID': os.getenv('NHANH_APP_ID', '74951'),
+    'NHANH_BUSINESS_ID': os.getenv('NHANH_BUSINESS_ID', '8901'),
+}
+
+# ✅ SỬA: Table IDs centralization
+TABLE_IDS = {
+    'MAIN_TABLE_ID': os.getenv('MAIN_TABLE_ID', 'tblJJPUEFhsXHaxY'),
+    'TRANSPORT_PROVIDERS_TABLE_ID': os.getenv('TRANSPORT_PROVIDERS_TABLE_ID', 'tblyiELQIi6M1j1r'),
+}
+
+# === AUTHENTICATION CONFIG ===
+AUTH_CONFIG = {
+    'LARK_APP_ID': os.getenv('LARK_APP_ID'),
+    'LARK_APP_SECRET': os.getenv('LARK_APP_SECRET'), 
+    'LARK_BASE_URL': os.getenv('LARK_BASE_URL', 'https://open.larksuite.com/open-apis'),
+    'REDIRECT_URI': os.getenv('REDIRECT_URI', 'http://localhost:8000/auth/callback'),
+    # ✅ SỬA: Sử dụng centralized token thay vì duplicate
+    'AUTH_APP_TOKEN': API_TOKENS['MAIN_APP_TOKEN'], 
+    'AUTH_TABLE_ID': os.getenv('AUTH_TABLE_ID', 'tblPermissions'),
+    'SECRET_KEY': os.getenv('SECRET_KEY', 'your-super-secret-key-change-this-in-production'),
+    'SESSION_EXPIRE_HOURS': int(os.getenv('SESSION_EXPIRE_HOURS', '24'))
+}
+
+# ============================================================================
+# ===  FORM FIELD CONFIGURATIONS  ===
+# ============================================================================
 
 # Danh sách cột hiển thị trong form (theo thứ tự mong muốn)
 LARKBASE_FIELDS = [
@@ -1021,6 +2238,148 @@ API_FIELDS = [
 
 # Toàn bộ fields để lưu vào Larkbase (hiện không dùng trong app.py)
 ALL_LARKBASE_FIELDS = LARKBASE_FIELDS + API_FIELDS
+
+# ============================================================================
+# ===  VALIDATION & HELPER FUNCTIONS  ===
+# ============================================================================
+
+# Validate required auth config
+REQUIRED_AUTH_VARS = ['LARK_APP_ID', 'LARK_APP_SECRET']
+for var in REQUIRED_AUTH_VARS:
+    if not AUTH_CONFIG[var]:
+        raise ValueError(f"Missing required environment variable: {var}")
+
+# ✅ SỬA: Helper functions để get tokens safely
+def get_main_app_token():
+    """Lấy main app token cho Larkbase operations"""
+    return API_TOKENS['MAIN_APP_TOKEN']
+
+def get_nhanh_access_token():
+    """Lấy access token cho Nhanh API calls"""
+    return API_TOKENS['NHANH_ACCESS_TOKEN']
+
+def get_nhanh_credentials():
+    """Lấy đầy đủ credentials cho Nhanh API"""
+    return {
+        'app_id': API_TOKENS['NHANH_APP_ID'],
+        'business_id': API_TOKENS['NHANH_BUSINESS_ID'],
+        'access_token': API_TOKENS['NHANH_ACCESS_TOKEN']
+    }
+
+def get_table_id(table_name='main'):
+    """Lấy table ID theo tên"""
+    table_map = {
+        'main': TABLE_IDS['MAIN_TABLE_ID'],
+        'transport': TABLE_IDS['TRANSPORT_PROVIDERS_TABLE_ID']
+    }
+    return table_map.get(table_name, TABLE_IDS['MAIN_TABLE_ID'])
+
+============================================================
+
+============================================================
+FILE: src\utils\depot.py
+============================================================
+# FILE: src/utils/depot.py
+
+import requests
+import logging
+import json
+import os
+
+# Cấu hình
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+DEPOT_JSON_PATH = os.path.join(PROJECT_ROOT, "depots.json")
+
+# Thông tin API
+DEPOT_API_URL = "https://pos.open.nhanh.vn/api/store/depot"
+DEPOT_API_PARAMS = {
+    'version': "2.0",
+    'appId': "74951", 
+    'businessId': "8901",
+    'accessToken': "twf9P1xFZCUUgwt8zR0XgNeB6V5jsbq2KHb14bxovqK1ppCxyADwOK8FzQlCEeEGABRZINXoUCSzM50kjhwcrUSBWTY5nSvyhfnH2X2cI0pC7pNczSVxc1ratdDmxF85q7hUTUNCrUnpPTG5ZwLNO7bkMlEEJTCdPhgYaC"
+}
+
+def get_depots_from_api():
+    """
+    Lấy danh sách depot từ API Nhanh.vn
+    """
+    try:
+        response = requests.post(DEPOT_API_URL, data=DEPOT_API_PARAMS, timeout=20)
+        response.raise_for_status()
+        
+        json_data = response.json()
+        if json_data.get("code") != 1:
+            logging.error(f"API depot trả về code: {json_data.get('code')}")
+            return []
+        
+        data = json_data.get("data", {})
+        if not data:
+            logging.warning("Không có dữ liệu depot từ API")
+            return []
+        
+        depots = []
+        for depot_info in data.values():
+            depot_id = depot_info.get("id")
+            depot_name = depot_info.get("name", "")
+            depot_code = depot_info.get("code", "")
+            
+            if depot_id and depot_name:
+                depots.append({
+                    "id": str(depot_id),
+                    "name": depot_name,
+                    "code": depot_code,
+                    "address": depot_info.get("address", "")
+                })
+        
+        # Sắp xếp theo tên
+        depots.sort(key=lambda x: x['name'])
+        
+        logging.info(f"Lấy thành công {len(depots)} depot từ API")
+        return depots
+        
+    except Exception as e:
+        logging.error(f"Lỗi khi lấy danh sách depot: {e}")
+        return []
+
+def update_depot_json_file():
+    """
+    Cập nhật file JSON chứa danh sách depot
+    """
+    try:
+        depots = get_depots_from_api()
+        
+        if not depots:
+            return False, "Không lấy được danh sách depot từ API"
+        
+        # Ghi vào file JSON
+        with open(DEPOT_JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(depots, f, ensure_ascii=False, indent=4)
+        
+        msg = f"Cập nhật thành công! Đã lưu {len(depots)} depot vào file {DEPOT_JSON_PATH}."
+        logging.info(msg)
+        return True, msg
+        
+    except Exception as e:
+        msg = f"Lỗi khi cập nhật file depot: {e}"
+        logging.error(msg)
+        return False, msg
+
+def get_depots_from_file():
+    """
+    Đọc danh sách depot từ file JSON
+    """
+    if not os.path.exists(DEPOT_JSON_PATH):
+        logging.warning(f"File {DEPOT_JSON_PATH} không tồn tại. Đang thử tạo lần đầu tiên...")
+        success, message = update_depot_json_file()
+        if not success:
+            return []
+    
+    try:
+        with open(DEPOT_JSON_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (IOError, json.JSONDecodeError) as e:
+        logging.error(f"Lỗi khi đọc file {DEPOT_JSON_PATH}: {e}")
+        return []
 
 ============================================================
 
@@ -1101,8 +2460,6 @@ def larkbase_get_all(app_token, table_id):
             break
     return all_records
 
-
-
 def larkbase_find_by_field(app_token, table_id, field, value):
     all_records = larkbase_get_all(app_token, table_id)
     if not all_records:
@@ -1115,7 +2472,6 @@ def larkbase_find_by_field(app_token, table_id, field, value):
             return True, record
     # Không tìm thấy sau khi duyệt hết, trả về (False, None)
     return False, None
-
 
 def larkbase_write_data(app_token, table_id, data):
     """Ghi dữ liệu mới và trả về (bool, message)"""
@@ -1270,710 +2626,11 @@ def get_transport_providers_from_file():
 ============================================================
 
 ============================================================
-FILE: static\app.js
+FILE: static\css\components.css
 ============================================================
-document.addEventListener('DOMContentLoaded', () => {
+/* static/css/components.css - Component Styles */
 
-    // --- LOGIC CHO POPUP NOTIFICATION --- (Giữ nguyên, vẫn có thể hữu ích)
-    function showNotification(message, type = 'success', duration = 3000) {
-        const notification = document.createElement('div');
-        notification.className = `notification-popup ${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => { notification.classList.add('show'); }, 100);
-        
-        setTimeout(() => {
-            notification.classList.add('hide');
-            notification.addEventListener('transitionend', () => notification.remove());
-        }, duration);
-    }
-
-    // ✅ THÊM: Hàm hiển thị thông báo lỗi validation
-    function showValidationError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'validation-error';
-        errorDiv.textContent = message;
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #f44336;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            z-index: 10000;
-            font-size: 14px;
-        `;
-        
-        document.body.appendChild(errorDiv);
-        
-        setTimeout(() => {
-            errorDiv.remove();
-        }, 3000);
-    }
-    
-    // --- LOGIC CẢI TIẾN CHO EMPLOYEE DROPDOWN ---
-    function initEmployeeDropdown(component) {
-        const searchInput = component.querySelector('.employee-search-input');
-        const hiddenInput = component.querySelector('.employee-hidden-input');
-        const dropdown = component.querySelector('.employee-dropdown');
-        const options = dropdown.querySelectorAll('.employee-option');
-        const infoDiv = dropdown.querySelector('.employee-dropdown-info');
-
-        if (!searchInput || !hiddenInput || !dropdown || !infoDiv) return;
-        
-        // Ẩn dropdown ban đầu
-        dropdown.style.display = 'none';
-        
-        // Hiển thị giá trị có sẵn (nếu đang edit)
-        if (hiddenInput.value) {
-            const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
-            if (selectedOption) {
-                const employeeName = selectedOption.dataset.name;
-                const employeeId = selectedOption.dataset.value;
-                searchInput.value = `${employeeName} (${employeeId})`;
-                selectedOption.classList.add('selected');
-            }
-        }
-        
-        searchInput.addEventListener('input', () => {
-            const query = searchInput.value.trim().toLowerCase();
-            
-            // Chỉ hiện dropdown khi gõ ít nhất 1 ký tự
-            if (query.length < 1) {
-                dropdown.style.display = 'none';
-                hiddenInput.value = '';
-                return;
-            }
-            
-            dropdown.style.display = 'block';
-            filterEmployees(query);
-        });
-
-        // ✅ SỬA: Thêm validation khi blur - chỉ chặn khi không hợp lệ
-        searchInput.addEventListener('blur', () => {
-            setTimeout(() => {
-                // Nếu input có giá trị nhưng hiddenInput rỗng = nhập sai
-                if (searchInput.value.trim() && !hiddenInput.value) {
-                    searchInput.value = ''; // Reset input
-                    showValidationError('Vui lòng chọn nhân viên từ danh sách');
-                }
-                dropdown.style.display = 'none';
-            }, 200);
-        });
-
-        // Hiện dropdown khi focus vào input (nếu đã có nội dung)
-        searchInput.addEventListener('focus', () => {
-            const query = searchInput.value.trim().toLowerCase();
-            if (query.length >= 1) {
-                dropdown.style.display = 'block';
-                filterEmployees(query);
-            }
-        });
-
-        dropdown.addEventListener('click', (e) => {
-            const option = e.target.closest('.employee-option');
-            if (option) {
-                const employeeId = option.dataset.value;
-                const employeeName = option.dataset.name;
-
-                searchInput.value = `${employeeName} (${employeeId})`;
-                hiddenInput.value = employeeId;
-                dropdown.style.display = 'none';
-
-                // Xóa class selected cũ và thêm cho option được chọn
-                options.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-            }
-        });
-        
-        function filterEmployees(query) {
-            let visibleCount = 0;
-            const maxResults = 5; // Giới hạn chỉ 5 kết quả
-            
-            options.forEach(option => {
-                const name = option.dataset.name.toLowerCase();
-                const id = option.dataset.value.toLowerCase();
-                const department = option.dataset.department.toLowerCase();
-                
-                const isMatch = name.includes(query) || id.includes(query) || department.includes(query);
-                
-                if (isMatch && visibleCount < maxResults) {
-                    option.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    option.style.display = 'none';
-                }
-            });
-            
-            // Cập nhật thông tin số kết quả
-            if (visibleCount === 0) {
-                infoDiv.innerHTML = '<small style="color: #c62828;">Không tìm thấy kết quả phù hợp</small>';
-            } else if (visibleCount >= maxResults) {
-                infoDiv.innerHTML = `<small>Hiển thị ${maxResults} kết quả đầu tiên. Gõ thêm để thu hẹp.</small>`;
-            } else {
-                infoDiv.innerHTML = `<small>Tìm thấy ${visibleCount} kết quả</small>`;
-            }
-        }
-    }
-
-    // --- LOGIC CHO TRANSPORT DROPDOWN (ĐÃ SỬA) ---
-    function initTransportDropdown(component) {
-        const searchInput = component.querySelector('.transport-search-input');
-        const hiddenInput = component.querySelector('.transport-hidden-input');
-        const dropdown = component.querySelector('.transport-dropdown');
-        const options = dropdown.querySelectorAll('.transport-option');
-        const infoDiv = dropdown.querySelector('.transport-dropdown-info');
-
-        if (!searchInput || !hiddenInput || !dropdown || !infoDiv) return;
-        
-        // ✅ SỬA: Ẩn dropdown ban đầu bằng class
-        dropdown.classList.remove('show');
-        
-        // Hiển thị giá trị có sẵn (nếu đang edit)
-        if (hiddenInput.value) {
-            const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
-            if (selectedOption) {
-                searchInput.value = selectedOption.dataset.name;
-                selectedOption.classList.add('selected');
-            }
-        }
-        
-        searchInput.addEventListener('input', () => {
-            const query = searchInput.value.trim().toLowerCase();
-            
-            if (query.length < 1) {
-                dropdown.classList.remove('show'); // ✅ SỬA
-                hiddenInput.value = '';
-                return;
-            }
-            
-            dropdown.classList.add('show'); // ✅ SỬA
-            filterTransportProviders(query);
-        });
-
-        // ✅ SỬA: Thêm validation khi blur - chỉ chặn khi không hợp lệ
-        searchInput.addEventListener('blur', () => {
-            setTimeout(() => {
-                // Nếu input có giá trị nhưng hiddenInput rỗng = nhập sai
-                if (searchInput.value.trim() && !hiddenInput.value) {
-                    searchInput.value = ''; // Reset input
-                    showValidationError('Vui lòng chọn đơn vị vận chuyển từ danh sách');
-                }
-                dropdown.classList.remove('show');
-            }, 200);
-        });
-
-        searchInput.addEventListener('focus', () => {
-            const query = searchInput.value.trim().toLowerCase();
-            if (query.length >= 1) {
-                dropdown.classList.add('show'); // ✅ SỬA
-                filterTransportProviders(query);
-            }
-        });
-
-        dropdown.addEventListener('click', (e) => {
-            const option = e.target.closest('.transport-option');
-            if (option) {
-                const providerId = option.dataset.value;
-                const providerName = option.dataset.name;
-
-                searchInput.value = providerName;
-                hiddenInput.value = providerId;
-                dropdown.classList.remove('show'); // ✅ SỬA
-
-                options.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-            }
-        });
-        
-        function filterTransportProviders(query) {
-            let visibleCount = 0;
-            const maxResults = 5;
-            
-            options.forEach(option => {
-                const name = option.dataset.name.toLowerCase();
-                const isMatch = name.includes(query);
-                
-                if (isMatch && visibleCount < maxResults) {
-                    option.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    option.style.display = 'none';
-                }
-            });
-            
-            if (visibleCount === 0) {
-                infoDiv.innerHTML = '<small style="color: #c62828;">Không tìm thấy kết quả phù hợp</small>';
-            } else if (visibleCount >= maxResults) {
-                infoDiv.innerHTML = `<small>Hiển thị ${maxResults} kết quả đầu tiên. Gõ thêm để thu hẹp.</small>`;
-            } else {
-                infoDiv.innerHTML = `<small>Tìm thấy ${visibleCount} kết quả</small>`;
-            }
-        }
-    }
-
-    // Khởi tạo cho tất cả dropdown có sẵn khi tải trang
-    document.querySelectorAll('.employee-dropdown-component').forEach(initEmployeeDropdown);
-    document.querySelectorAll('.transport-dropdown-component').forEach(initTransportDropdown);
-
-    // ✅ SỬA: Ẩn dropdown nếu click ra ngoài (tương thích cả hai phương pháp)
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.employee-search') && !e.target.closest('.transport-search')) {
-            // Employee vẫn dùng style.display
-            document.querySelectorAll('.employee-dropdown').forEach(dd => {
-                dd.style.display = 'none';
-            });
-            // Transport dùng class
-            document.querySelectorAll('.transport-dropdown').forEach(dd => {
-                dd.classList.remove('show');
-            });
-        }
-    });
-
-    // --- XỬ LÝ HTMX RESPONSE ---
-    document.body.addEventListener('htmx:afterRequest', function(evt) {
-        if (evt.detail.failed) {
-            console.error("Yêu cầu HTMX thất bại:", evt.detail.xhr);
-        }
-    });
-    
-    // Khởi tạo lại JS cho dropdown khi HTMX swap nội dung mới vào
-    document.body.addEventListener('htmx:afterSwap', function(evt) {
-        evt.detail.target.querySelectorAll('.employee-dropdown-component').forEach(initEmployeeDropdown);
-        evt.detail.target.querySelectorAll('.transport-dropdown-component').forEach(initTransportDropdown);
-    });
-});
-
-============================================================
-
-============================================================
-FILE: static\style.css
-============================================================
-/* ======================================== */
-/* FILE: static/style.css (ĐÃ CẬP NHẬT)     */
-/* ======================================== */
-
-/* --- PHONG CÁCH CƠ BẢN --- */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
-    line-height: 1.5;
-}
-
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 24px;
-}
-
-.title {
-    text-align: center;
-    color: #1976d2;
-    margin-bottom: 32px;
-    font-size: 24px;
-    font-weight: 400;
-}
-
-/* --- FORM --- */
-.search-form {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #555;
-    font-size: 14px;
-}
-
-/* ĐÃ SỬA: Đảm bảo tất cả input và button có cùng chiều rộng */
-.form-control,
-.search-input,
-.employee-search-input,
-.transport-search-input,
-.btn {
-    width: 100% !important;
-    box-sizing: border-box;
-}
-
-.form-control,
-.search-input {
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.2s;
-}
-
-.form-control:focus,
-.search-input:focus {
-    outline: none;
-    border-color: #1976d2;
-    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-}
-
-/* --- DROPDOWN NHÂN VIÊN --- */
-.employee-dropdown-component {
-    width: 100%;
-}
-
-.employee-search {
-    position: relative;
-    width: 100%;
-}
-
-.employee-search-input {
-    width: 100% !important;
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.2s;
-}
-
-.employee-search-input:focus {
-    outline: none;
-    border-color: #1976d2;
-    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-}
-
-.employee-dropdown {
-    display: none; /* Ẩn mặc định */
-    position: absolute;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    width: 100%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 2px;
-}
-
-.employee-option {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 14px;
-}
-
-.employee-option:hover {
-    background-color: #f5f5f5;
-}
-
-.employee-option:last-child {
-    border-bottom: none;
-}
-
-.employee-option small {
-    font-size: 11px;
-    color: #666;
-    display: block;
-    margin-top: 2px;
-}
-
-.employee-option.selected {
-    background-color: #e3f2fd;
-}
-
-.employee-dropdown-info {
-    padding: 8px 16px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    text-align: center;
-    font-style: italic;
-    color: #6c757d;
-}
-
-/* --- DROPDOWN ĐƠNVỊ VẬN CHUYỂN (ĐÃ SỬA) --- */
-.transport-dropdown-component {
-    width: 100%;
-}
-
-.transport-search {
-    position: relative;
-    width: 100%;
-}
-
-.transport-search-input {
-    width: 100% !important;
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: border-color 0.2s;
-}
-
-.transport-search-input:focus {
-    outline: none;
-    border-color: #1976d2;
-    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-}
-
-/* ✅ SỬA: Bỏ !important và dùng class-based approach */
-.transport-dropdown {
-    display: none; /* Không dùng !important nữa */
-    position: absolute;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 9999;
-    width: 100%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 2px;
-}
-
-/* ✅ SỬA: Dùng class 'show' thay vì 'visible' để đồng nhất với employee dropdown */
-.transport-dropdown.show {
-    display: block !important;
-}
-
-.transport-option {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
-}
-
-.transport-option:hover {
-    background-color: #f5f5f5;
-}
-
-.transport-option:last-child {
-    border-bottom: none;
-}
-
-.transport-option.selected {
-    background-color: #e3f2fd;
-    font-weight: 500;
-}
-
-.transport-dropdown-info {
-    padding: 8px 16px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    text-align: center;
-    font-style: italic;
-    color: #6c757d;
-    font-size: 12px;
-}
-
-/* ✅ THÊM: Đảm bảo dropdown hiển thị đúng khi có nhiều options */
-.transport-dropdown::-webkit-scrollbar {
-    width: 6px;
-}
-
-.transport-dropdown::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.transport-dropdown::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.transport-dropdown::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-
-/* ============================================================ */
-/* --- KHU VỰC HIỆU ỨNG LOADING ĐỒNG BỘ ---                    */
-/* ============================================================ */
-
-/* 1. KEYFRAMES ANIMATION XOAY (SPIN) DÙNG CHUNG */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* 2. SPINNER DÙNG CHUNG */
-.spinner {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 1s ease-in-out infinite;
-    vertical-align: middle;
-}
-
-/* 3. STYLE CHUNG CHO CÁC NÚT KHI LOADING */
-.btn,
-button {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Vô hiệu hóa nút và giảm độ mờ khi đang xử lý request */
-.btn.htmx-request,
-button.htmx-request {
-    cursor: not-allowed;
-    opacity: 0.8;
-}
-
-/* Ẩn văn bản/icon gốc của nút khi đang loading */
-.htmx-request .btn-text {
-    display: none;
-}
-
-/* Hiển thị khu vực indicator (chứa spinner) bên trong nút khi loading */
-.htmx-request .htmx-indicator {
-    display: inline-block !important;
-}
-
-/* 4. STYLE CHO CÁC LOẠI NÚT CỤ THỂ */
-.btn {
-    padding: 12px 16px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    width: 100% !important;
-    min-width: unset;
-    white-space: nowrap;
-}
-
-.btn-primary {
-    background-color: #1976d2;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #1565c0;
-}
-
-.btn-success {
-    background-color: #388e3c;
-    color: white;
-}
-
-.btn-success:hover {
-    background-color: #2e7d32;
-}
-
-.btn-danger {
-    background-color: #d32f2f;
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #c62828;
-}
-
-/* 5. STYLE MỚI CHO NÚT REFRESH */
-.btn-refresh,
-.form-btn-refresh,
-.form-btn-refresh-transport {
-    width: 100% !important;
-    min-width: unset;
-    white-space: nowrap;
-    padding: 12px 16px;
-    height: auto;
-}
-
-/* Container cho nút refresh */
-.refresh-container {
-    width: 100%;
-    margin-bottom: 16px;
-}
-
-.refresh-status-container {
-    font-size: 12px;
-    margin-top: 4px;
-    min-height: 18px;
-    text-align: center;
-    padding-right: 0;
-}
-
-/* Spinner trong nút refresh */
-.btn-refresh .spinner,
-.form-btn-refresh .spinner,
-.form-btn-refresh-transport .spinner {
-    width: 14px;
-    height: 14px;
-    border-width: 2px;
-    border-top-color: #fff;
-}
-
-/* Hover effect cho nút refresh */
-.btn-refresh:hover,
-.form-btn-refresh:hover,
-.form-btn-refresh-transport:hover {
-    background-color: rgba(25, 118, 210, 0.8);
-}
-
-/* ĐÃ THÊM: Đảm bảo các nút submit cũng full width */
-.form-actions {
-    width: 100%;
-}
-
-.form-actions .btn {
-    width: 100%;
-    margin-bottom: 8px;
-}
-
-/* Nếu có nhiều nút trong 1 hàng, có thể dùng flex */
-.btn-group {
-    display: flex;
-    gap: 8px;
-    width: 100%;
-}
-
-.btn-group .btn {
-    flex: 1;
-}
-
-/* 6. VÔ HIỆU HÓA INDICATOR DẠNG THANH BAR TOÀN CỤC - ĐÃ SỬA */
-/* Chỉ ẩn global indicators, không ảnh hưởng button indicators */
-#htmx-indicator,
-.htmx-indicator.global {
-    display: none;
-}
-
-/* Đảm bảo button indicators vẫn hoạt động */
-.btn .htmx-indicator,
-button .htmx-indicator {
-    display: none; /* Ẩn mặc định */
-}
-
-.btn.htmx-request .htmx-indicator,
-button.htmx-request .htmx-indicator {
-    display: inline-block !important; /* Hiện khi loading */
-}
-
-/* --- CÁC STYLE KHÁC --- */
+/* Status & notification styles */
 .success,
 .error,
 .info {
@@ -2004,7 +2661,506 @@ button.htmx-request .htmx-indicator {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
-/* Popup notification styles */
+/* Spinner */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    vertical-align: middle;
+}
+
+/* Button loading states */
+.btn,
+button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn.htmx-request,
+button.htmx-request {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.htmx-request .btn-text {
+    display: none;
+}
+
+.htmx-request .htmx-indicator {
+    display: inline-block !important;
+}
+
+/* Bulk form styles */
+.bulk-form-container {
+    width: 100%;
+}
+
+.mode-selection {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.mode-btn {
+    flex: 1;
+    opacity: 0.7;
+}
+
+.mode-btn.active {
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+}
+
+.common-fields-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.common-fields-section h4 {
+    margin-bottom: 16px;
+    color: #1976d2;
+}
+
+.bill-ids-section {
+    margin-bottom: 24px;
+}
+
+.bill-ids-section h4 {
+    margin-bottom: 16px;
+    color: #1976d2;
+}
+
+.table-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.bill-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bill-table th,
+.bill-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.bill-table th {
+    background-color: #f5f5f5;
+    font-weight: 500;
+}
+
+.bill-table input {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.status-cell {
+    text-align: center;
+    min-width: 120px;
+}
+
+.status-pending { color: #666; }
+.status-checking { color: #1976d2; }
+.status-valid { color: #4caf50; font-weight: 500; }
+.status-invalid { color: #f44336; font-weight: 500; }
+.status-error { color: #ff9800; }
+
+============================================================
+
+============================================================
+FILE: static\css\dropdowns.css
+============================================================
+/* static/css/dropdowns.css - Dropdown Styles */
+
+/* Dropdown components */
+.employee-dropdown-component,
+.transport-dropdown-component,
+.depot-dropdown-component {
+    width: 100%;
+}
+
+.employee-search,
+.transport-search,
+.depot-search {
+    position: relative;
+    width: 100%;
+}
+
+/* Dropdown inputs */
+.employee-search-input,
+.transport-search-input,
+.depot-search-input {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.employee-search-input:focus,
+.transport-search-input:focus,
+.depot-search-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Dropdown containers */
+.employee-dropdown,
+.transport-dropdown,
+.depot-dropdown {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 2px;
+}
+
+/* Transport dropdown show state */
+.transport-dropdown.show {
+    display: block !important;
+}
+
+/* Dropdown options */
+.employee-option,
+.transport-option,
+.depot-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.employee-option:hover,
+.transport-option:hover,
+.depot-option:hover {
+    background-color: #f5f5f5;
+}
+
+.employee-option:last-child,
+.transport-option:last-child,
+.depot-option:last-child {
+    border-bottom: none;
+}
+
+.employee-option.selected,
+.transport-option.selected,
+.depot-option.selected {
+    background-color: #e3f2fd;
+    font-weight: 500;
+}
+
+.employee-option small,
+.depot-option small {
+    font-size: 11px;
+    color: #666;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Dropdown info sections */
+.employee-dropdown-info,
+.transport-dropdown-info,
+.depot-dropdown-info {
+    padding: 8px 16px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* Scrollbar styles */
+.employee-dropdown::-webkit-scrollbar,
+.transport-dropdown::-webkit-scrollbar,
+.depot-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.employee-dropdown::-webkit-scrollbar-track,
+.transport-dropdown::-webkit-scrollbar-track,
+.depot-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.employee-dropdown::-webkit-scrollbar-thumb,
+.transport-dropdown::-webkit-scrollbar-thumb,
+.depot-dropdown::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.employee-dropdown::-webkit-scrollbar-thumb:hover,
+.transport-dropdown::-webkit-scrollbar-thumb:hover,
+.depot-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+============================================================
+
+============================================================
+FILE: static\css\forms.css
+============================================================
+/* static/css/forms.css - Form Styles */
+
+/* Form basics */
+.search-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.form-control,
+.search-input {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus,
+.search-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Buttons */
+.btn {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: unset;
+    white-space: nowrap;
+    height: auto;
+}
+
+.btn-primary {
+    background-color: #1976d2;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1565c0;
+}
+
+.btn-success {
+    background-color: #388e3c;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #2e7d32;
+}
+
+.btn-danger {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c62828;
+}
+
+/* Special button sizes */
+.btn-small {
+    width: auto !important;
+    padding: 6px 12px !important;
+    font-size: 12px;
+    flex: 0 0 auto;
+}
+
+/* Form actions */
+.form-actions {
+    width: 100%;
+}
+
+.form-actions .btn {
+    margin-bottom: 8px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-group .btn {
+    flex: 1;
+}
+
+/* Input with refresh button */
+.input-with-refresh {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.input-with-refresh > div {
+    flex: 1;
+}
+
+.input-with-refresh .btn {
+    width: auto !important;
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+/* Refresh container */
+.refresh-container {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.refresh-status-container {
+    font-size: 12px;
+    margin-top: 4px;
+    min-height: 18px;
+    text-align: center;
+    padding-right: 0;
+}
+
+.btn-refresh,
+.form-btn-refresh,
+.form-btn-refresh-transport {
+    width: 100% !important;
+}
+
+.btn-refresh .spinner,
+.form-btn-refresh .spinner,
+.form-btn-refresh-transport .spinner {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+    border-top-color: #fff;
+}
+
+.btn-refresh:hover,
+.form-btn-refresh:hover,
+.form-btn-refresh-transport:hover {
+    background-color: rgba(25, 118, 210, 0.8);
+}
+
+/* HTMX indicators */
+#htmx-indicator,
+.htmx-indicator.global {
+    display: none;
+}
+
+.btn .htmx-indicator,
+button .htmx-indicator {
+    display: none;
+}
+
+.btn.htmx-request .htmx-indicator,
+button.htmx-request .htmx-indicator {
+    display: inline-block !important;
+}
+
+.table-actions .btn {
+    width: auto !important;
+    flex: 0 0 auto;
+}
+
+============================================================
+
+============================================================
+FILE: static\css\main.css
+============================================================
+/* static/css/main.css - Base Styles */
+@import url('./components.css');
+@import url('./forms.css'); 
+@import url('./dropdowns.css');
+@import url('./reports.css');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+.title {
+    text-align: center;
+    color: #1976d2;
+    margin-bottom: 32px;
+    font-size: 24px;
+    font-weight: 400;
+}
+
+/* Keyframes for animations */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notification styles */
 .notification-popup {
     position: fixed;
     top: 20px;
@@ -2032,37 +3188,1153 @@ button.htmx-request .htmx-indicator {
     transform: translateX(400px);
     opacity: 0;
 }
+
+/* User info */
+.user-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 12px;
+    background: #e3f2fd;
+    border-radius: 4px;
+}
+
+.btn-logout {
+    background: none;
+    border: 1px solid #1976d2;
+    color: #1976d2;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    width: auto !important;
+}
+
+.btn-logout:hover {
+    background: #1976d2;
+    color: white;
+}
+
+/* ✅ SỬA: Navbar Styles - bắt buộc giữ 1 dòng */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1976d2;
+    padding: 10px 16px;
+    margin: -24px -24px 24px -24px;
+    border-radius: 8px 8px 0 0;
+    flex-wrap: nowrap;
+    min-height: 44px;
+    overflow: hidden; /* Ngăn content tràn ra */
+}
+
+.navbar-brand {
+    flex-shrink: 0; /* Không cho brand bị co lại */
+}
+
+.navbar-brand .brand-link {
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    flex-shrink: 1; /* Cho phép nav co lại khi cần */
+    min-width: 0; /* Quan trọng để cho phép flex shrink */
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    padding: 5px 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0; /* Không cho links bị co */
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.navbar .user-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+    flex-shrink: 1; /* Cho phép user info co lại */
+    min-width: 0;
+}
+
+.user-name {
+    color: white;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px; /* Giới hạn độ rộng tên */
+}
+
+.navbar .btn-logout {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 3px 6px;
+    font-size: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.navbar .btn-logout:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Remove old user-info styles from main pages */
+.page-content .user-info {
+    display: none;
+}
+
+/* ✅ Mobile responsiveness - vẫn bắt buộc 1 dòng */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 8px 12px;
+        gap: 4px;
+        min-height: 40px;
+    }
+    
+    .navbar-brand .brand-link {
+        font-size: 13px;
+    }
+    
+    .navbar-nav {
+        gap: 3px;
+    }
+    
+    .nav-link {
+        padding: 3px 4px;
+        font-size: 11px;
+    }
+    
+    .user-name {
+        font-size: 11px;
+        max-width: 70px; /* Thu nhỏ hơn trên mobile */
+    }
+    
+    .navbar .btn-logout {
+        padding: 2px 4px;
+        font-size: 9px;
+    }
+}
+
+/* ✅ Cho màn hình rất nhỏ - vẫn giữ 1 dòng */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 6px 8px;
+    }
+    
+    .navbar-brand .brand-link {
+        font-size: 12px;
+    }
+    
+    .nav-link {
+        font-size: 10px;
+        padding: 2px 3px;
+    }
+    
+    .user-name {
+        max-width: 50px; /* Rất nhỏ trên mobile */
+        font-size: 10px;
+    }
+    
+    .navbar .btn-logout {
+        padding: 2px 3px;
+        font-size: 8px;
+    }
+}
+
+/* ✅ Màn hình cực nhỏ - ưu tiên giữ chức năng */
+@media (max-width: 360px) {
+    .user-name {
+        display: none; /* Ẩn tên để tiết kiệm không gian */
+    }
+    
+    .nav-link {
+        font-size: 9px;
+        padding: 2px;
+    }
+    
+    .navbar-brand .brand-link {
+        font-size: 11px;
+    }
+}
+
 ============================================================
 
 ============================================================
-FILE: transport_providers.json
+FILE: static\css\reports.css
 ============================================================
-[
-    {
-        "id": "Anh Hoài - Vận chuyển nội thành Hà Nội",
-        "name": "Anh Hoài - Vận chuyển nội thành Hà Nội"
-    },
-    {
-        "id": "Công ty Cổ phần đầu tư thương mại phát triển Nhất Tín - CN Hà Nội",
-        "name": "Công ty Cổ phần đầu tư thương mại phát triển Nhất Tín - CN Hà Nội"
-    },
-    {
-        "id": "Công ty TNHH Dịch vụ Vận Tải Tùng Bách",
-        "name": "Công ty TNHH Dịch vụ Vận Tải Tùng Bách"
+/* static/css/reports.css - Report Styles */
+
+.report-header {
+    margin-bottom: 32px;
+}
+
+.date-selector {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.date-form {
+    display: flex;
+    gap: 16px;
+    align-items: end;
+}
+
+.date-form .form-group {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.date-form .btn {
+    width: auto !important;
+    white-space: nowrap;
+}
+
+.report-nav {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.report-nav .btn {
+    width: auto !important;
+    padding: 8px 16px;
+}
+
+/* Summary cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+}
+
+.summary-card h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #1976d2;
+}
+
+.summary-card p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Report sections */
+.report-section {
+    margin-bottom: 32px;
+}
+
+.report-section h2 {
+    color: #1976d2;
+    margin-bottom: 16px;
+    font-size: 1.5rem;
+}
+
+/* Tables */
+.table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.report-table th,
+.report-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.report-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+}
+
+.report-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+/* Transport and route specific styles */
+.transport-name,
+.route-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.transport-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.transport-tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* Progress bars */
+.progress-bar {
+    position: relative;
+    background: #e0e0e0;
+    border-radius: 10px;
+    height: 20px;
+    width: 100px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #4caf50, #81c784);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .date-form {
+        flex-direction: column;
     }
-]
+    
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .report-nav {
+        flex-direction: column;
+    }
+    
+    .transport-list {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile optimizations for daily report */
+@media (max-width: 767px) {
+    .container {
+        padding: 12px;
+        margin: 10px;
+    }
+    
+    .title {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .report-table {
+        font-size: 11px;
+    }
+    
+    .report-table th,
+    .report-table td {
+        padding: 4px 6px; /* Thu nhỏ padding */
+        word-break: keep-all; /* Không break word */
+        white-space: nowrap; /* Không xuống dòng */
+    }
+    
+    /* Riêng cột tuyến đường - cho phép scroll ngang */
+    .route-name {
+        min-width: 120px;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .transport-list {
+        flex-direction: row; /* Giữ ngang thay vì xuống dòng */
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+    
+    .transport-tag {
+        margin: 2px 0;
+    }
+    
+    /* Container cho phép scroll ngang */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .stat-number {
+        font-size: 16px !important;
+    }
+    
+    .report-stats {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
+============================================================
+
+============================================================
+FILE: static\js\app.js
+============================================================
+// static/js/app.js - Main Application Logic
+import DropdownManager from './dropdown.js';
+import BulkFormManager from './bulk-form.js';
+import { showNotification, showValidationError } from './validators.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize managers
+    const dropdownManager = new DropdownManager();
+    const bulkFormManager = new BulkFormManager();
+    
+    // Global click handler to hide dropdowns
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.employee-search') && 
+            !e.target.closest('.transport-search') && 
+            !e.target.closest('.depot-search')) {
+            dropdownManager.hideAllDropdowns();
+        }
+    });
+    
+    // HTMX event handlers
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.failed) {
+            console.error("Yêu cầu HTMX thất bại:", evt.detail.xhr);
+            showNotification("Yêu cầu thất bại", "error");
+        }
+    });
+    
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        // Re-initialize dropdowns after content swap
+        dropdownManager.initializeNewDropdowns(evt.detail.target);
+    });
+});
+
+============================================================
+
+============================================================
+FILE: static\js\bulk-form.js
+============================================================
+import { showValidationError } from './validators.js';
+
+class BulkFormManager {
+    constructor() {
+        this.rowCounter = 0;
+        this.bindGlobalMethods();
+    }
+    
+    bindGlobalMethods() {
+        // Bind methods to window for onclick handlers
+        window.addBillRow = this.addBillRow.bind(this);
+        window.removeBillRow = this.removeBillRow.bind(this);
+        window.validateBillId = this.validateBillId.bind(this);
+        // ✅ BỎ: validateAllIds - không cần kiểm tra tất cả nữa
+        window.submitBulkForm = this.submitBulkForm.bind(this);
+    }
+    
+    addBillRow() {
+        const tbody = document.querySelector('#billTable tbody');
+        if (!tbody) return;
+        
+        this.rowCounter++;
+        
+        const row = document.createElement('tr');
+        row.id = `row-${this.rowCounter}`;
+        row.innerHTML = `
+            <td>
+                <input type="text" 
+                    class="form-control bill-id-input" 
+                    name="bill_ids[]" 
+                    placeholder="Nhập Bill ID"
+                    onblur="validateBillId(this)">
+            </td>
+            <td>
+                <input type="number" 
+                    class="form-control quantity-input" 
+                    name="quantities[]" 
+                    placeholder="SL bao/tải"
+                    min="1">
+            </td>
+            <td class="status-cell">
+                <span class="status-pending">⏳ Chưa kiểm tra</span>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">
+                    🗑️
+                </button>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    }
+    
+    removeBillRow(rowId) {
+        const row = document.getElementById(rowId);
+        if (row) {
+            row.remove();
+        }
+    }
+    
+    async validateBillId(input) {
+        const billId = input.value.trim();
+        const row = input.closest('tr');
+        const statusCell = row.querySelector('.status-cell');
+        
+        if (!billId) {
+            statusCell.innerHTML = '<span class="status-pending">⏳ Chưa kiểm tra</span>';
+            return;
+        }
+        
+        statusCell.innerHTML = '<span class="status-checking">🔄 Đang kiểm tra...</span>';
+        
+        try {
+            const response = await fetch('/validate-bill-id', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `bill_id=${billId}`
+            });
+            
+            const result = await response.json();
+            
+            if (result.valid) {
+                statusCell.innerHTML = '<span class="status-valid">✅ Hợp lệ</span>';
+                const quantityInput = row.querySelector('.quantity-input');
+                if (result.quantity && !quantityInput.value) {
+                    quantityInput.value = result.quantity;
+                }
+            } else {
+                // ✅ SỬA: Rút gọn thông báo lỗi từ "ID không hợp lệ hoặc không có dữ liệu" thành "ID không hợp lệ"
+                const errorMessage = result.message.replace('ID không hợp lệ hoặc không có dữ liệu', 'ID không hợp lệ');
+                statusCell.innerHTML = `<span class="status-invalid">❌ ${errorMessage}</span>`;
+            }
+        } catch (error) {
+            statusCell.innerHTML = '<span class="status-error">⚠️ Lỗi kiểm tra</span>';
+            console.error('Error validating bill ID:', error);
+        }
+    }
+    
+    // ✅ BỎ: validateAllIds method - không cần nữa vì mỗi ID đã tự kiểm tra
+    
+    // ✅ THÊM: Helper method để kiểm tra có ID không hợp lệ không
+    hasInvalidIds() {
+        const invalidStatuses = document.querySelectorAll('.status-invalid');
+        return invalidStatuses.length > 0;
+    }
+    
+    async submitBulkForm() {
+        const submitBtn = document.getElementById('submitBtn');
+        const resultContainer = document.getElementById('bulk-result-container');
+        
+        // ✅ SỬA: Validation frontend - không cho submit nếu có ID không hợp lệ
+        if (this.hasInvalidIds()) {
+            resultContainer.innerHTML = '<div class="error">❌ Vui lòng sửa các ID không hợp lệ trước khi lưu</div>';
+            return;
+        }
+        
+        // Get common fields
+        const fromDepot = document.querySelector('input[name="from_depot"]')?.value;
+        const toDepot = document.querySelector('input[name="to_depot"]')?.value;
+        const handoverPerson = document.querySelector('input[name="handover_person"]')?.value;
+        const transportProvider = document.querySelector('input[name="transport_provider"]')?.value || '';
+        
+        // Validate common fields
+        if (!fromDepot || !toDepot || !handoverPerson) {
+            resultContainer.innerHTML = '<div class="error">❌ Vui lòng điền đầy đủ thông tin bắt buộc (Kho đi, Kho đến, Người bàn giao)</div>';
+            return;
+        }
+        
+        // Get bill data
+        const rows = document.querySelectorAll('#billTable tbody tr');
+        const billData = [];
+        
+        for (const row of rows) {
+            const billId = row.querySelector('.bill-id-input')?.value.trim();
+            const quantity = row.querySelector('.quantity-input')?.value;
+            
+            if (billId) {
+                billData.push({
+                    bill_id: billId,
+                    quantity: quantity || 0
+                });
+            }
+        }
+        
+        if (billData.length === 0) {
+            resultContainer.innerHTML = '<div class="error">❌ Vui lòng nhập ít nhất 1 Bill ID</div>';
+            return;
+        }
+        
+        // Show loading
+        submitBtn?.classList.add('htmx-request');
+        resultContainer.innerHTML = '<div class="info">🔄 Đang xử lý...</div>';
+        
+        try {
+            const response = await fetch('/bulk-create-records', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    from_depot: fromDepot,
+                    to_depot: toDepot,
+                    handover_person: handoverPerson,
+                    transport_provider: transportProvider,
+                    bill_data: billData
+                })
+            });
+            
+            const result = await response.text();
+            resultContainer.innerHTML = result;
+            
+            // Reset form if successful
+            if (result.includes('success')) {
+                const tbody = document.querySelector('#billTable tbody');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    this.addBillRow();
+                }
+            }
+            
+        } catch (error) {
+            resultContainer.innerHTML = '<div class="error">❌ Lỗi hệ thống: ' + error.message + '</div>';
+        } finally {
+            submitBtn?.classList.remove('htmx-request');
+        }
+    }
+}
+
+export default BulkFormManager;
+
+============================================================
+
+============================================================
+FILE: static\js\dropdown.js
+============================================================
+// static/js/dropdown.js - Dropdown Management
+class DropdownManager {
+    constructor() {
+        this.initializeAll();
+    }
+    
+    initializeAll() {
+        this.initEmployeeDropdowns();
+        this.initTransportDropdowns();
+        this.initDepotDropdowns();
+    }
+    
+    initializeNewDropdowns(container) {
+        container.querySelectorAll('.employee-dropdown-component').forEach(this.initEmployeeDropdown.bind(this));
+        container.querySelectorAll('.transport-dropdown-component').forEach(this.initTransportDropdown.bind(this));
+        container.querySelectorAll('.depot-dropdown-component').forEach(this.initDepotDropdown.bind(this));
+    }
+    
+    hideAllDropdowns() {
+        // Employee và Depot dropdowns
+        document.querySelectorAll('.employee-dropdown, .depot-dropdown').forEach(dd => {
+            dd.style.display = 'none';
+        });
+        // Transport dropdowns
+        document.querySelectorAll('.transport-dropdown').forEach(dd => {
+            dd.classList.remove('show');
+        });
+    }
+    
+    initEmployeeDropdowns() {
+        document.querySelectorAll('.employee-dropdown-component').forEach(this.initEmployeeDropdown.bind(this));
+    }
+    
+    initTransportDropdowns() {
+        document.querySelectorAll('.transport-dropdown-component').forEach(this.initTransportDropdown.bind(this));
+    }
+    
+    initDepotDropdowns() {
+        document.querySelectorAll('.depot-dropdown-component').forEach(this.initDepotDropdown.bind(this));
+    }
+    
+    initEmployeeDropdown(component) {
+        const searchInput = component.querySelector('.employee-search-input');
+        const hiddenInput = component.querySelector('.employee-hidden-input');
+        const dropdown = component.querySelector('.employee-dropdown');
+        const options = dropdown.querySelectorAll('.employee-option');
+        const infoDiv = dropdown.querySelector('.employee-dropdown-info');
+
+        if (!searchInput || !hiddenInput || !dropdown || !infoDiv) return;
+        
+        dropdown.style.display = 'none';
+        
+        // ✅ SỬA: Show existing value khi focus lại
+        if (hiddenInput.value) {
+            const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
+            if (selectedOption) {
+                const employeeName = selectedOption.dataset.name;
+                const employeeId = selectedOption.dataset.value;
+                searchInput.value = `${employeeName} (${employeeId})`;
+                selectedOption.classList.add('selected');
+            }
+        }
+        
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (query.length < 1) {
+                dropdown.style.display = 'none';
+                hiddenInput.value = '';
+                return;
+            }
+            
+            dropdown.style.display = 'block';
+            this.filterEmployees(query, options, infoDiv);
+        });
+
+        // ✅ SỬA: Ngăn người dùng nhập tự do - chỉ cho phép chọn từ dropdown
+        searchInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (searchInput.value.trim() && !hiddenInput.value) {
+                    searchInput.value = '';
+                    this.showValidationError('Vui lòng chọn nhân viên từ danh sách');
+                }
+                dropdown.style.display = 'none';
+            }, 200);
+        });
+
+        // ✅ SỬA: Show giá trị đã chọn khi focus lại
+        searchInput.addEventListener('focus', () => {
+            if (hiddenInput.value) {
+                // Nếu đã có giá trị được chọn, hiển thị dropdown với giá trị đó
+                dropdown.style.display = 'block';
+                this.filterEmployees(searchInput.value.toLowerCase(), options, infoDiv);
+            } else {
+                const query = searchInput.value.trim().toLowerCase();
+                if (query.length >= 1) {
+                    dropdown.style.display = 'block';
+                    this.filterEmployees(query, options, infoDiv);
+                }
+            }
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.employee-option');
+            if (option) {
+                const employeeId = option.dataset.value;
+                const employeeName = option.dataset.name;
+
+                searchInput.value = `${employeeName} (${employeeId})`;
+                hiddenInput.value = employeeId;
+                dropdown.style.display = 'none';
+
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            }
+        });
+
+        // ✅ SỬA: Ngăn người dùng typing sau khi đã chọn
+        searchInput.addEventListener('keydown', (e) => {
+            // Nếu đã có giá trị selected và người dùng gõ thêm, clear selection
+            if (hiddenInput.value && e.key !== 'Tab' && e.key !== 'Enter') {
+                if (e.key === 'Backspace' || e.key === 'Delete' || e.key.length === 1) {
+                    hiddenInput.value = '';
+                    options.forEach(opt => opt.classList.remove('selected'));
+                }
+            }
+        });
+    }
+    
+    initTransportDropdown(component) {
+        const searchInput = component.querySelector('.transport-search-input');
+        const hiddenInput = component.querySelector('.transport-hidden-input');
+        const dropdown = component.querySelector('.transport-dropdown');
+        const options = dropdown.querySelectorAll('.transport-option');
+        const infoDiv = dropdown.querySelector('.transport-dropdown-info');
+
+        if (!searchInput || !hiddenInput || !dropdown || !infoDiv) return;
+        
+        dropdown.classList.remove('show');
+        
+        // ✅ SỬA: Show existing value khi focus lại
+        if (hiddenInput.value) {
+            const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
+            if (selectedOption) {
+                searchInput.value = selectedOption.dataset.name;
+                selectedOption.classList.add('selected');
+            }
+        }
+        
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (query.length < 1) {
+                dropdown.classList.remove('show');
+                hiddenInput.value = '';
+                return;
+            }
+            
+            dropdown.classList.add('show');
+            this.filterTransportProviders(query, options, infoDiv);
+        });
+
+        // ✅ SỬA: Ngăn người dùng nhập tự do
+        searchInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (searchInput.value.trim() && !hiddenInput.value) {
+                    searchInput.value = '';
+                    this.showValidationError('Vui lòng chọn đơn vị vận chuyển từ danh sách');
+                }
+                dropdown.classList.remove('show');
+            }, 200);
+        });
+
+        // ✅ SỬA: Show giá trị đã chọn khi focus lại
+        searchInput.addEventListener('focus', () => {
+            if (hiddenInput.value) {
+                dropdown.classList.add('show');
+                this.filterTransportProviders(searchInput.value.toLowerCase(), options, infoDiv);
+            } else {
+                const query = searchInput.value.trim().toLowerCase();
+                if (query.length >= 1) {
+                    dropdown.classList.add('show');
+                    this.filterTransportProviders(query, options, infoDiv);
+                }
+            }
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.transport-option');
+            if (option) {
+                const providerId = option.dataset.value;
+                const providerName = option.dataset.name;
+
+                searchInput.value = providerName;
+                hiddenInput.value = providerId;
+                dropdown.classList.remove('show');
+
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            }
+        });
+
+        // ✅ SỬA: Ngăn người dùng typing sau khi đã chọn
+        searchInput.addEventListener('keydown', (e) => {
+            if (hiddenInput.value && e.key !== 'Tab' && e.key !== 'Enter') {
+                if (e.key === 'Backspace' || e.key === 'Delete' || e.key.length === 1) {
+                    hiddenInput.value = '';
+                    options.forEach(opt => opt.classList.remove('selected'));
+                }
+            }
+        });
+    }
+    
+    initDepotDropdown(component) {
+        const searchInput = component.querySelector('.depot-search-input');
+        const hiddenInput = component.querySelector('.depot-hidden-input');
+        const dropdown = component.querySelector('.depot-dropdown');
+        const options = dropdown.querySelectorAll('.depot-option');
+        const infoDiv = dropdown.querySelector('.depot-dropdown-info');
+
+        if (!searchInput || !hiddenInput || !dropdown || !infoDiv) return;
+        
+        dropdown.style.display = 'none';
+        
+        // ✅ SỬA: Show existing value khi focus lại  
+        if (hiddenInput.value) {
+            const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
+            if (selectedOption) {
+                searchInput.value = selectedOption.dataset.name;
+                selectedOption.classList.add('selected');
+            }
+        }
+        
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (query.length < 1) {
+                dropdown.style.display = 'none';
+                hiddenInput.value = '';
+                return;
+            }
+            
+            dropdown.style.display = 'block';
+            this.filterDepots(query, options, infoDiv);
+        });
+
+        // ✅ SỬA: Ngăn người dùng nhập tự do
+        searchInput.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (searchInput.value.trim() && !hiddenInput.value) {
+                    searchInput.value = '';
+                    this.showValidationError('Vui lòng chọn depot từ danh sách');
+                }
+                dropdown.style.display = 'none';
+            }, 200);
+        });
+
+        // ✅ SỬA: Show giá trị đã chọn khi focus lại
+        searchInput.addEventListener('focus', () => {
+            if (hiddenInput.value) {
+                dropdown.style.display = 'block';
+                this.filterDepots(searchInput.value.toLowerCase(), options, infoDiv);
+            } else {
+                const query = searchInput.value.trim().toLowerCase();
+                if (query.length >= 1) {
+                    dropdown.style.display = 'block';
+                    this.filterDepots(query, options, infoDiv);
+                }
+            }
+        });
+
+        dropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.depot-option');
+            if (option) {
+                const depotId = option.dataset.value;
+                const depotName = option.dataset.name;
+
+                searchInput.value = depotName;
+                hiddenInput.value = depotId;
+                dropdown.style.display = 'none';
+
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            }
+        });
+
+        // ✅ SỬA: Ngăn người dùng typing sau khi đã chọn
+        searchInput.addEventListener('keydown', (e) => {
+            if (hiddenInput.value && e.key !== 'Tab' && e.key !== 'Enter') {
+                if (e.key === 'Backspace' || e.key === 'Delete' || e.key.length === 1) {
+                    hiddenInput.value = '';
+                    options.forEach(opt => opt.classList.remove('selected'));
+                }
+            }
+        });
+    }
+    
+    filterEmployees(query, options, infoDiv) {
+        let visibleCount = 0;
+        const maxResults = 5;
+        
+        options.forEach(option => {
+            const name = option.dataset.name.toLowerCase();
+            const id = option.dataset.value.toLowerCase();
+            const department = option.dataset.department.toLowerCase();
+            
+            const isMatch = name.includes(query) || id.includes(query) || department.includes(query);
+            
+            if (isMatch && visibleCount < maxResults) {
+                option.style.display = 'block';
+                visibleCount++;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        
+        this.updateInfoDiv(infoDiv, visibleCount, maxResults);
+    }
+    
+    filterTransportProviders(query, options, infoDiv) {
+        let visibleCount = 0;
+        const maxResults = 5;
+        
+        options.forEach(option => {
+            const name = option.dataset.name.toLowerCase();
+            const isMatch = name.includes(query);
+            
+            if (isMatch && visibleCount < maxResults) {
+                option.style.display = 'block';
+                visibleCount++;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        
+        this.updateInfoDiv(infoDiv, visibleCount, maxResults);
+    }
+    
+    filterDepots(query, options, infoDiv) {
+        let visibleCount = 0;
+        const maxResults = 5;
+        
+        options.forEach(option => {
+            const name = option.dataset.name.toLowerCase();
+            const code = option.dataset.code.toLowerCase();
+            const address = option.dataset.address.toLowerCase();
+            
+            const isMatch = name.includes(query) || code.includes(query) || address.includes(query);
+            
+            if (isMatch && visibleCount < maxResults) {
+                option.style.display = 'block';
+                visibleCount++;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+        
+        this.updateInfoDiv(infoDiv, visibleCount, maxResults);
+    }
+    
+    updateInfoDiv(infoDiv, visibleCount, maxResults) {
+        if (visibleCount === 0) {
+            infoDiv.innerHTML = '<small style="color: #c62828;">Không tìm thấy kết quả phù hợp</small>';
+        } else if (visibleCount >= maxResults) {
+            infoDiv.innerHTML = `<small>Hiển thị ${maxResults} kết quả đầu tiên. Gõ thêm để thu hẹp.</small>`;
+        } else {
+            infoDiv.innerHTML = `<small>Tìm thấy ${visibleCount} kết quả</small>`;
+        }
+    }
+
+    // ✅ THÊM: Helper method để show validation error
+    showValidationError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'validation-error';
+        errorDiv.textContent = message;
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f44336;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            z-index: 10000;
+            font-size: 14px;
+        `;
+        
+        document.body.appendChild(errorDiv);
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 3000);
+    }
+}
+
+export default DropdownManager;
+
+============================================================
+
+============================================================
+FILE: static\js\validators.js
+============================================================
+// static/js/validators.js - Validation Utilities
+export function showNotification(message, type = 'success', duration = 3000) {
+    const notification = document.createElement('div');
+    notification.className = `notification-popup ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => { notification.classList.add('show'); }, 100);
+    
+    setTimeout(() => {
+        notification.classList.add('hide');
+        notification.addEventListener('transitionend', () => notification.remove());
+    }, duration);
+}
+
+export function showValidationError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'validation-error';
+    errorDiv.textContent = message;
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #f44336;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        z-index: 10000;
+        font-size: 14px;
+    `;
+    
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => {
+        errorDiv.remove();
+    }, 3000);
+}
+
 ============================================================
 
 
 📊 THỐNG KÊ
 ------------------------------
-Tổng số file: 23
-File code: 14
+Tổng số file: 58
+File code: 40
 Các loại file code:
-  .css: 1 file
-  .js: 1 file
-  .json: 1 file
+  .css: 5 file
+  .js: 4 file
   .md: 1 file
-  .py: 7 file
+  .py: 27 file
   .txt: 2 file
   .yml: 1 file

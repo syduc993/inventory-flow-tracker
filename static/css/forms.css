@@ -1,0 +1,183 @@
+/* static/css/forms.css - Form Styles */
+
+/* Form basics */
+.search-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.form-control,
+.search-input {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus,
+.search-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Buttons */
+.btn {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: unset;
+    white-space: nowrap;
+    height: auto;
+}
+
+.btn-primary {
+    background-color: #1976d2;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1565c0;
+}
+
+.btn-success {
+    background-color: #388e3c;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #2e7d32;
+}
+
+.btn-danger {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c62828;
+}
+
+/* Special button sizes */
+.btn-small {
+    width: auto !important;
+    padding: 6px 12px !important;
+    font-size: 12px;
+    flex: 0 0 auto;
+}
+
+/* Form actions */
+.form-actions {
+    width: 100%;
+}
+
+.form-actions .btn {
+    margin-bottom: 8px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-group .btn {
+    flex: 1;
+}
+
+/* Input with refresh button */
+.input-with-refresh {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.input-with-refresh > div {
+    flex: 1;
+}
+
+.input-with-refresh .btn {
+    width: auto !important;
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+/* Refresh container */
+.refresh-container {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.refresh-status-container {
+    font-size: 12px;
+    margin-top: 4px;
+    min-height: 18px;
+    text-align: center;
+    padding-right: 0;
+}
+
+.btn-refresh,
+.form-btn-refresh,
+.form-btn-refresh-transport {
+    width: 100% !important;
+}
+
+.btn-refresh .spinner,
+.form-btn-refresh .spinner,
+.form-btn-refresh-transport .spinner {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+    border-top-color: #fff;
+}
+
+.btn-refresh:hover,
+.form-btn-refresh:hover,
+.form-btn-refresh-transport:hover {
+    background-color: rgba(25, 118, 210, 0.8);
+}
+
+/* HTMX indicators */
+#htmx-indicator,
+.htmx-indicator.global {
+    display: none;
+}
+
+.btn .htmx-indicator,
+button .htmx-indicator {
+    display: none;
+}
+
+.btn.htmx-request .htmx-indicator,
+button.htmx-request .htmx-indicator {
+    display: inline-block !important;
+}
+
+.table-actions .btn {
+    width: auto !important;
+    flex: 0 0 auto;
+}

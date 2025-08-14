@@ -1,0 +1,17 @@
+<!-- templates/components/common/header.html -->
+<nav class="navbar">
+    <div class="navbar-container">
+        <div class="navbar-brand">
+            <a href="/" class="brand-link">Trang chủ</a>
+        </div>
+        <div class="navbar-nav">
+            <a href="/reports/daily" class="nav-link">📊 Báo cáo</a>
+            <div class="user-info">
+                <span class="user-name">👋 {{ user.name if user else 'Guest' }}</span>
+                <form method="post" action="/auth/logout" style="display: inline;">
+                    <button type="submit" class="btn-logout">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>

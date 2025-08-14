@@ -1,10 +1,9 @@
+# src/services/record_service.py
 from src.utils.api import fetch_imex_details
 from src.utils.larkbase import (
     larkbase_find_by_field, larkbase_write_data, 
     larkbase_update_data, larkbase_delete_record
 )
-from src.utils.cache import get_employee_list_from_file, update_employee_json_file
-from src.utils.transport_provider import get_transport_providers_from_file, update_transport_providers_json_file
 import time
 import datetime
 import logging
@@ -17,39 +16,6 @@ class RecordService:
     def search_record(self, bill_id):
         """Tìm kiếm record theo Bill ID"""
         return larkbase_find_by_field(self.app_token, self.table_id, "ID", bill_id)
-
-    # def create_record(self, form_data):
-    #     """Tạo record mới"""
-    #     new_record = {key: value for key, value in form_data.items()}
-    #     new_record["Ngày bàn giao"] = int(time.time() * 1000)
-    #     return larkbase_write_data(self.app_token, self.table_id, new_record)
-
-    # def create_record(self, form_data):
-    #     """Tạo record mới"""
-    #     new_record = {}
-        
-    #     # Danh sách các trường cần chuyển đổi thành số
-    #     numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
-        
-    #     for key, value in form_data.items():
-    #         if key in numeric_fields and value:
-    #             try:
-    #                 # Chuyển đổi thành số nguyên
-    #                 new_record[key] = int(value) if value else 0
-    #             except (ValueError, TypeError):
-    #                 # Nếu không chuyển đổi được, mặc định = 0
-    #                 new_record[key] = 0
-    #         else:
-    #             new_record[key] = value
-        
-    #     new_record["Ngày bàn giao"] = int(time.time() * 1000)
-        
-    #     # Debug: In ra dữ liệu trước khi gửi
-    #     logging.info(f"Data to send: {new_record}")
-    #     for key, value in new_record.items():
-    #         logging.info(f"Field '{key}': {value} (type: {type(value)})")
-        
-    #     return larkbase_write_data(self.app_token, self.table_id, new_record)
 
     def create_record(self, form_data):
         """Tạo record mới với tách riêng ID và tên từ dropdown"""
@@ -70,14 +36,14 @@ class RecordService:
                     new_record[key] = int(value) if value else 0
                 except (ValueError, TypeError):
                     new_record[key] = 0
-            elif key == "Người bàn giao":  # ← SỬA: Bỏ "_tomselected"
+            elif key == "Người bàn giao":
                 # Đây là giá trị từ hidden input (chỉ chứa ID)
                 if value:
                     # Lưu ID vào cột riêng
                     new_record["ID người bàn giao"] = value
                     
                     # Tìm tên tương ứng với ID từ danh sách nhân viên
-                    from services import EmployeeService
+                    from src.services.employee_service import EmployeeService
                     employee_service = EmployeeService()
                     employees = employee_service.get_employees()
                     
@@ -91,7 +57,7 @@ class RecordService:
                         new_record["Người bàn giao"] = employee_name
                     else:
                         new_record["Người bàn giao"] = value  # Fallback về ID nếu không tìm thấy tên
-                continue  # ← QUAN TRỌNG: Không lưu value gốc
+                continue
             elif value and key not in ["Người bàn giao_hidden"]:  
                 new_record[key] = value
         
@@ -102,7 +68,6 @@ class RecordService:
         
         return larkbase_write_data(self.app_token, self.table_id, new_record)
 
-
     def update_record(self, record_id, form_data):
         """Cập nhật record với tách riêng ID và tên từ dropdown"""
         from src.utils.config import UPDATABLE_FIELDS
@@ -112,12 +77,12 @@ class RecordService:
             if field in form_data and form_data[field]:
                 value = form_data[field]
                 
-                if field == "Người bàn giao":  # ← SỬA: Bỏ "_tomselected"
+                if field == "Người bàn giao":
                     # Lưu ID
                     update_data["ID người bàn giao"] = value
                     
                     # Tìm tên từ danh sách nhân viên
-                    from services import EmployeeService
+                    from src.services.employee_service import EmployeeService
                     employee_service = EmployeeService()
                     employees = employee_service.get_employees()
                     
@@ -142,9 +107,6 @@ class RecordService:
         
         return larkbase_update_data(self.app_token, self.table_id, record_id, update_data)
 
-
-
-
     def delete_record(self, record_id):
         """Xóa record"""
         return larkbase_delete_record(self.app_token, self.table_id, record_id)
@@ -152,27 +114,3 @@ class RecordService:
     def get_api_data(self, bill_id):
         """Lấy dữ liệu từ API"""
         return fetch_imex_details(bill_id)
-
-class EmployeeService:
-    def get_employees(self):
-        """Lấy danh sách nhân viên"""
-        return get_employee_list_from_file()
-    
-    def refresh_employees(self):
-        """Làm mới danh sách nhân viên"""
-        return update_employee_json_file()
-
-
-
-# Thêm class mới sau EmployeeService
-class TransportProviderService:
-    def __init__(self, app_token):
-        self.app_token = app_token
-    
-    def get_transport_providers(self):
-        """Lấy danh sách nhà cung cấp"""
-        return get_transport_providers_from_file()
-    
-    def refresh_transport_providers(self, table_id="tblDefault"):
-        """Làm mới danh sách nhà cung cấp"""
-        return update_transport_providers_json_file(self.app_token, table_id)

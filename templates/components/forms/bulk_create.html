@@ -1,0 +1,106 @@
+<div class="bulk-form-container">
+    <!-- Common Fields Section -->
+    <div class="common-fields-section">
+        <h4>📋 Thông tin chung</h4>
+        
+        <div class="form-group">
+            <label class="form-label">Kho đi:</label>
+            <div class="input-with-refresh">
+                <div>
+                    {% set name = "from_depot" %}
+                    {% include "components/dropdowns/depot.html" %}
+                </div>
+                <button type="button" class="btn btn-primary form-btn-refresh" 
+                        hx-post="/refresh/depots" 
+                        hx-target=".refresh-status-container">
+                    <span class="btn-text">🔄 Làm mới</span>
+                    <span class="htmx-indicator spinner"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Kho đến:</label>
+            {% set name = "to_depot" %}
+            {% include "components/dropdowns/depot.html" %}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Người bàn giao:</label>
+            <div class="input-with-refresh">
+                <div>
+                    {% set name = "handover_person" %}
+                    {% include "components/dropdowns/employee.html" %}
+                </div>
+                <button type="button" class="btn btn-primary form-btn-refresh" 
+                        hx-post="/refresh/employees" 
+                        hx-target=".refresh-status-container">
+                    <span class="btn-text">🔄 Làm mới</span>
+                    <span class="htmx-indicator spinner"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Đơn vị vận chuyển:</label>
+            <div class="input-with-refresh">
+                <div>
+                    {% set name = "transport_provider" %}
+                    {% include "components/dropdowns/transport.html" %}
+                </div>
+                <button type="button" class="btn btn-primary form-btn-refresh-transport" 
+                        hx-post="/refresh/transport-providers" 
+                        hx-target=".refresh-status-container">
+                    <span class="btn-text">🔄 Làm mới</span>
+                    <span class="htmx-indicator spinner"></span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="refresh-status-container"></div>
+    </div>
+
+    <!-- Bill IDs Section -->
+    <div class="bill-ids-section">
+        <h4>📦 Danh sách Bill ID</h4>
+        
+        <!-- ✅ BỎ: table-actions với nút "Kiểm tra tất cả" -->
+        
+        <table class="bill-table" id="billTable">
+            <thead>
+                <tr>
+                    <th>Bill ID</th>
+                    <th>Số lượng bao/tải</th>
+                    <th>Trạng thái</th>
+                    <th>Xóa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be added dynamically -->
+            </tbody>
+        </table>
+        
+        <!-- ✅ SỬA: Di chuyển nút "Thêm dòng" xuống dưới bảng -->
+        <div class="table-actions" style="margin-top: 16px;">
+            <button type="button" class="btn btn-success btn-small" onclick="addBillRow()">
+                ➕ Thêm dòng
+            </button>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-success" id="submitBtn" onclick="submitBulkForm()">
+            <span class="btn-text">💾 Tạo tất cả bản ghi</span>
+            <span class="htmx-indicator spinner"></span>
+        </button>
+    </div>
+
+    <div id="bulk-result-container"></div>
+</div>
+
+<script>
+// Add initial row when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    addBillRow();
+});
+</script>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo dõi hàng luân chuyển</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="container">
+        {% include 'components/common/header.html' %}
+        
+        <h1 class="title">Theo dõi hàng luân chuyển</h1>
+        
+        <div class="mode-selection">
+            <button type="button" class="btn btn-primary mode-btn" id="bulkModeBtn">
+                📦 Tạo hàng loạt
+            </button>
+            <button type="button" class="btn btn-primary mode-btn" id="singleModeBtn">
+                🔍 Tìm kiếm đơn lẻ
+            </button>
+        </div>
+
+        <!-- Bulk Mode Form (Default) -->
+        <div id="bulkMode">
+            {% include 'components/forms/bulk_create.html' %}
+        </div>
+
+        <!-- Single Mode Form (Hidden by default) -->
+        <div id="singleMode" style="display: none;">
+            {% include 'components/forms/search.html' %}
+            <div id="search-result"></div>
+        </div>
+    </div>
+
+    {% include 'components/common/scripts.html' %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bulkModeBtn = document.getElementById('bulkModeBtn');
+            const singleModeBtn = document.getElementById('singleModeBtn');
+            const bulkMode = document.getElementById('bulkMode');
+            const singleMode = document.getElementById('singleMode');
+            
+            // Set default active mode (Bulk)
+            bulkModeBtn.classList.add('active');
+            
+            bulkModeBtn.addEventListener('click', function() {
+                bulkModeBtn.classList.add('active');
+                singleModeBtn.classList.remove('active');
+                bulkMode.style.display = 'block';
+                singleMode.style.display = 'none';
+            });
+            
+            singleModeBtn.addEventListener('click', function() {
+                singleModeBtn.classList.add('active');
+                bulkModeBtn.classList.remove('active');
+                singleMode.style.display = 'block';
+                bulkMode.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<!-- templates/components/forms/search.html -->
+<form hx-post="/records/search" hx-target="#result-container" class="search-form">
+    <input type="text" name="bill_id" placeholder="Nhập Bill ID để tìm kiếm..." class="search-input" required>
+    <button type="submit" class="btn btn-primary">
+        <span class="btn-text">🔍 Tìm kiếm</span>
+        <span class="htmx-indicator spinner"></span>
+    </button>
+</form>

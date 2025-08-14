@@ -1,28 +1,29 @@
-<!-- FILE: templates/_transport_dropdown.html -->
+<!-- Transport Provider Dropdown Component -->
 <div class="transport-dropdown-component">
     <div class="transport-search">
         <input type="text" 
                class="form-control transport-search-input" 
-               placeholder="Gõ để tìm đơn vị vận chuyển..."
+               placeholder="Gõ để tìm đơn vị vận chuyển..." 
                autocomplete="off">
         
+        <!-- Hidden input chứa ID thực sự để submit -->
         <input type="hidden" 
-               name="Đơn vị vận chuyển" 
+               name="{{ name if name else 'Đơn vị vận chuyển' }}" 
                class="transport-hidden-input"
-               {% if record and record.fields.get('Đơn vị vận chuyển') %}
+               {% if record and record.fields.get("Đơn vị vận chuyển") %}
                value="{{ record.fields.get('Đơn vị vận chuyển') }}"
                {% endif %}>
         
         <div class="transport-dropdown">
             <div class="transport-dropdown-info">
-                <small>Gõ ít nhất 1 ký tự để tìm kiếm</small>
+                <small>Nhập tên đơn vị vận chuyển để tìm kiếm</small>
             </div>
             
             {% for provider in transport_providers %}
             <div class="transport-option" 
                  data-value="{{ provider.id }}" 
                  data-name="{{ provider.name }}">
-                <div>{{ provider.name }}</div>
+                {{ provider.name }}
             </div>
             {% endfor %}
         </div>

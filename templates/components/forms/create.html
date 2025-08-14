@@ -1,0 +1,31 @@
+<!-- templates/components/forms/create.html -->
+<form hx-post="/records/" hx-target="#result-container">
+    <h3>📝 Thêm mới bản ghi cho Bill ID: {{ api_data.ID }}</h3>
+    
+    <!-- Hidden fields from API -->
+    {% for key, value in api_data.items() %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+    {% endfor %}
+    
+    <!-- Editable fields -->
+    {% for field in creatable_fields %}
+        <div class="form-group">
+            <label class="form-label">{{ field }}:</label>
+            
+            {% if field == "Người bàn giao" %}
+                {% include "components/dropdowns/employee.html" %}
+            {% elif field == "Đơn vị vận chuyển" %}
+                {% include "components/dropdowns/transport.html" %}
+            {% else %}
+                <input type="text" name="{{ field }}" class="form-control">
+            {% endif %}
+        </div>
+    {% endfor %}
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-success">
+            <span class="btn-text">💾 Thêm mới</span>
+            <span class="htmx-indicator spinner"></span>
+        </button>
+    </div>
+</form>

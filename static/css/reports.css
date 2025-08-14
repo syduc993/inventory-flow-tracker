@@ -1,0 +1,257 @@
+/* static/css/reports.css - Report Styles */
+
+.report-header {
+    margin-bottom: 32px;
+}
+
+.date-selector {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.date-form {
+    display: flex;
+    gap: 16px;
+    align-items: end;
+}
+
+.date-form .form-group {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.date-form .btn {
+    width: auto !important;
+    white-space: nowrap;
+}
+
+.report-nav {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.report-nav .btn {
+    width: auto !important;
+    padding: 8px 16px;
+}
+
+/* Summary cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+}
+
+.summary-card h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #1976d2;
+}
+
+.summary-card p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Report sections */
+.report-section {
+    margin-bottom: 32px;
+}
+
+.report-section h2 {
+    color: #1976d2;
+    margin-bottom: 16px;
+    font-size: 1.5rem;
+}
+
+/* Tables */
+.table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.report-table th,
+.report-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.report-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+}
+
+.report-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+/* Transport and route specific styles */
+.transport-name,
+.route-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.transport-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.transport-tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* Progress bars */
+.progress-bar {
+    position: relative;
+    background: #e0e0e0;
+    border-radius: 10px;
+    height: 20px;
+    width: 100px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #4caf50, #81c784);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .date-form {
+        flex-direction: column;
+    }
+    
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .report-nav {
+        flex-direction: column;
+    }
+    
+    .transport-list {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobile optimizations for daily report */
+@media (max-width: 767px) {
+    .container {
+        padding: 12px;
+        margin: 10px;
+    }
+    
+    .title {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .report-table {
+        font-size: 11px;
+    }
+    
+    .report-table th,
+    .report-table td {
+        padding: 4px 6px; /* Thu nhỏ padding */
+        word-break: keep-all; /* Không break word */
+        white-space: nowrap; /* Không xuống dòng */
+    }
+    
+    /* Riêng cột tuyến đường - cho phép scroll ngang */
+    .route-name {
+        min-width: 120px;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .transport-list {
+        flex-direction: row; /* Giữ ngang thay vì xuống dòng */
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+    
+    .transport-tag {
+        margin: 2px 0;
+    }
+    
+    /* Container cho phép scroll ngang */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .stat-number {
+        font-size: 16px !important;
+    }
+    
+    .report-stats {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}

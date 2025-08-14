@@ -1,0 +1,33 @@
+<!-- Employee Dropdown Component -->
+<div class="employee-dropdown-component">
+    <div class="employee-search">
+        <input type="text" 
+               class="form-control employee-search-input" 
+               placeholder="Gõ để tìm nhân viên..." 
+               autocomplete="off">
+        
+        <!-- Hidden input chứa ID thực sự để submit -->
+        <input type="hidden" 
+               name="{{ name if name else 'Người bàn giao' }}" 
+               class="employee-hidden-input"
+               {% if record and record.fields.get("ID người bàn giao") %}
+               value="{{ record.fields.get('ID người bàn giao') }}"
+               {% endif %}>
+        
+        <div class="employee-dropdown">
+            <div class="employee-dropdown-info">
+                <small>Nhập tên hoặc mã nhân viên để tìm kiếm</small>
+            </div>
+            
+            {% for emp in employees %}
+            <div class="employee-option" 
+                 data-value="{{ emp.id }}" 
+                 data-name="{{ emp.name }}"
+                 data-department="{{ emp.department or 'N/A' }}">
+                <strong>{{ emp.name }}</strong> ({{ emp.id }})
+                <small>Phòng ban: {{ emp.department or 'Chưa rõ' }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

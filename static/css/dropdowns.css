@@ -1,0 +1,136 @@
+/* static/css/dropdowns.css - Dropdown Styles */
+
+/* Dropdown components */
+.employee-dropdown-component,
+.transport-dropdown-component,
+.depot-dropdown-component {
+    width: 100%;
+}
+
+.employee-search,
+.transport-search,
+.depot-search {
+    position: relative;
+    width: 100%;
+}
+
+/* Dropdown inputs */
+.employee-search-input,
+.transport-search-input,
+.depot-search-input {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.employee-search-input:focus,
+.transport-search-input:focus,
+.depot-search-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Dropdown containers */
+.employee-dropdown,
+.transport-dropdown,
+.depot-dropdown {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 2px;
+}
+
+/* Transport dropdown show state */
+.transport-dropdown.show {
+    display: block !important;
+}
+
+/* Dropdown options */
+.employee-option,
+.transport-option,
+.depot-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.employee-option:hover,
+.transport-option:hover,
+.depot-option:hover {
+    background-color: #f5f5f5;
+}
+
+.employee-option:last-child,
+.transport-option:last-child,
+.depot-option:last-child {
+    border-bottom: none;
+}
+
+.employee-option.selected,
+.transport-option.selected,
+.depot-option.selected {
+    background-color: #e3f2fd;
+    font-weight: 500;
+}
+
+.employee-option small,
+.depot-option small {
+    font-size: 11px;
+    color: #666;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Dropdown info sections */
+.employee-dropdown-info,
+.transport-dropdown-info,
+.depot-dropdown-info {
+    padding: 8px 16px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* Scrollbar styles */
+.employee-dropdown::-webkit-scrollbar,
+.transport-dropdown::-webkit-scrollbar,
+.depot-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.employee-dropdown::-webkit-scrollbar-track,
+.transport-dropdown::-webkit-scrollbar-track,
+.depot-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.employee-dropdown::-webkit-scrollbar-thumb,
+.transport-dropdown::-webkit-scrollbar-thumb,
+.depot-dropdown::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.employee-dropdown::-webkit-scrollbar-thumb:hover,
+.transport-dropdown::-webkit-scrollbar-thumb:hover,
+.depot-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

@@ -11,7 +11,6 @@ EMPLOYEE_JSON_PATH = "employees.json" # File JSON sẽ được lưu ở thư m�
 
 logging.basicConfig(level=logging.INFO)
 
-
 def update_employee_json_file():
     """
     Gọi API 1Office để lấy danh sách nhân viên đang hoạt động,
@@ -94,4 +93,3 @@ def get_employee_list_from_file():
     except (IOError, json.JSONDecodeError) as e:
         logging.error(f"Lỗi khi đọc hoặc phân tích file {EMPLOYEE_JSON_PATH}: {e}")
         return [] # Trả về rỗng nếu file bị lỗi
-

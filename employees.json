@@ -260,6 +260,11 @@
         "department": "Cửa hàng 567 Quang Trung, Hồ Chí Minh"
     },
     {
+        "id": "AM.0881",
+        "name": "Kiều Thị Thanh Tâm",
+        "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
+    },
+    {
         "id": "AM.0302",
         "name": "La Thị Thanh Hường",
         "department": "Cửa hàng 154 Quang Trung"
@@ -385,11 +390,6 @@
         "department": "Kho Tổng Cửa hàng"
     },
     {
-        "id": "AM.0991",
-        "name": "Lê Trọng Quân",
-        "department": "Cửa hàng 175 Chùa Bộc"
-    },
-    {
         "id": "AM.0850",
         "name": "Lê Tô Hữu Lộc",
         "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
@@ -428,11 +428,6 @@
         "id": "283",
         "name": "Lại Thị Mỹ Linh",
         "department": "Kho TikTok"
-    },
-    {
-        "id": "AM.1032",
-        "name": "Lại Thị Thiêm Anh",
-        "department": "Cửa hàng 128 Trần Hưng Đạo, Bắc Ninh"
     },
     {
         "id": "AM.0913",
@@ -560,11 +555,6 @@
         "department": "Cửa hàng 42 Bến Nghé, Huế"
     },
     {
-        "id": "AM.1027",
-        "name": "Nguyễn Nam Phương",
-        "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
-    },
-    {
         "id": "AM.0735",
         "name": "Nguyễn Ngọc Anh Tuấn",
         "department": "Kho Nguyên phụ liệu"
@@ -593,11 +583,6 @@
         "id": "AM.0942",
         "name": "Nguyễn Quốc Tồn",
         "department": "Cửa hàng 225 Võ Văn Ngân, Hồ Chí Minh"
-    },
-    {
-        "id": "AM.0856",
-        "name": "Nguyễn Thanh Lâm",
-        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
     },
     {
         "id": "AM.1002",
@@ -658,11 +643,6 @@
         "id": "AM.0084",
         "name": "Nguyễn Thị Huệ",
         "department": "Kho Nguyên phụ liệu"
-    },
-    {
-        "id": "AM.0122",
-        "name": "Nguyễn Thị Hương",
-        "department": "Cửa hàng 110 Nhổn"
     },
     {
         "id": "AM.0175",
@@ -853,11 +833,6 @@
         "id": "AM.1047",
         "name": "Nguyễn Tuấn Thi",
         "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
-    },
-    {
-        "id": "AM.1059",
-        "name": "Nguyễn Tùng Anh",
-        "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
     },
     {
         "id": "AM.0776",
@@ -1090,6 +1065,11 @@
         "department": "Cửa hàng 195 Quang Trung, Sơn Tây"
     },
     {
+        "id": "AM.1066",
+        "name": "Phạm Thị Mai Linh",
+        "department": "Cửa hàng 61 Đinh Tiên Hoàng, Ninh Bình"
+    },
+    {
         "id": "AM.1057",
         "name": "Phạm Thị Phương Linh",
         "department": "Cửa hàng 122 Trần Hưng Đạo, Thái Bình"
@@ -1150,6 +1130,11 @@
         "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
     },
     {
+        "id": "AM.1065",
+        "name": "Trương Công Thao",
+        "department": "Cửa hàng 61 Đinh Tiên Hoàng, Ninh Bình"
+    },
+    {
         "id": "AM.0860",
         "name": "Trương Quốc Hoàng",
         "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
@@ -1190,6 +1175,11 @@
         "department": "Cửa hàng 42 Bến Nghé, Huế"
     },
     {
+        "id": "AM.1069",
+        "name": "Trương thị hạnh",
+        "department": "Cửa hàng 61 Đinh Tiên Hoàng, Ninh Bình"
+    },
+    {
         "id": "AM.0891",
         "name": "Trần Anh Dũng",
         "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
@@ -1198,11 +1188,6 @@
         "id": "AM.1008",
         "name": "Trần Bảo Minh",
         "department": "Cửa hàng 1363 Phạm Văn Thuận, Biên Hòa, Đồng Nai"
-    },
-    {
-        "id": "AM.0986",
-        "name": "Trần Duyên Trường",
-        "department": "Cửa hàng 57 Hàn Thuyên, Nam Định"
     },
     {
         "id": "AM.0979",
@@ -1325,6 +1310,11 @@
         "department": "Cửa hàng 300 Lê Lợi, Hải Phòng"
     },
     {
+        "id": "AM.1067",
+        "name": "Tạ Thị Bích Loan",
+        "department": "Cửa hàng 61 Đinh Tiên Hoàng, Ninh Bình"
+    },
+    {
         "id": "AM.0769",
         "name": "Vi Hoàng Anh",
         "department": "Cửa hàng 156 Lương Ngọc Quyến, Thái Nguyên"
@@ -1355,6 +1345,11 @@
         "department": "Cửa hàng 436 Lê Duẩn, Đà Nẵng"
     },
     {
+        "id": "AM.1064",
+        "name": "Vũ Hải Chung",
+        "department": "Cửa hàng 61 Đinh Tiên Hoàng, Ninh Bình"
+    },
+    {
         "id": "AM.0877",
         "name": "Vũ Mai Hạnh",
         "department": "Cửa hàng 581 Lê Thánh Tông, Quảng Ninh"
@@ -1373,6 +1368,11 @@
         "id": "AM.0964",
         "name": "Vũ Thị Khánh Linh",
         "department": "Cửa hàng 58 Trần Hưng Đạo, Hải Dương"
+    },
+    {
+        "id": "AM.1068",
+        "name": "Vũ Thị Thương",
+        "department": "Cửa hàng 61 Đinh Tiên Hoàng, Ninh Bình"
     },
     {
         "id": "AM.0466",

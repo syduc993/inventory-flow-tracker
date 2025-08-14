@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - IMEX Distribution Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+        
+        .login-btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
+        }
+        
+        .login-btn:hover {
+            background: #1565c0;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(25, 118, 210, 0.3);
+        }
+        
+        .feature-list {
+            margin-top: 40px;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .feature-list h4 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+        
+        .feature-list li {
+            color: #666;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">📦</div>
+        <h1 class="title">IMEX Distribution Tracker</h1>
+        <p class="subtitle">Vui lòng đăng nhập để tiếp tục</p>
+        
+        <a href="/auth/lark" class="login-btn">
+            <span>🚀</span>
+            Đăng nhập với Lark
+        </a>
+        
+        <div class="feature-list">
+            <h4>✨ Tính năng chính:</h4>
+            <ul>
+                <li>🔍 Tìm kiếm và tạo bản ghi IMEX</li>
+                <li>📝 Quản lý thông tin giao nhận</li>
+                <li>📊 Bulk import nhiều Bill ID</li>
+                <li>🔄 Đồng bộ dữ liệu thời gian thực</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

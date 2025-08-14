@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không có quyền truy cập - IMEX Distribution Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .error-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            color: #e74c3c;
+            margin-bottom: 16px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .error-message {
+            color: #666;
+            margin-bottom: 32px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .user-info {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .back-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .help-section {
+            margin-top: 32px;
+            padding: 20px;
+            background: #e8f4fd;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .help-section h4 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .help-section p {
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">🚫</div>
+        <h1 class="error-title">Không có quyền truy cập</h1>
+        
+        {% if user_name %}
+        <div class="user-info">
+            <strong>👋 Xin chào, {{ user_name }}!</strong><br>
+            <small>Tài khoản của bạn chưa được cấp quyền truy cập.</small>
+        </div>
+        {% endif %}
+        
+        <div class="error-message">
+            {% if error %}
+                {{ error }}
+            {% else %}
+                Bạn không có quyền truy cập vào hệ thống này. Vui lòng liên hệ với quản trị viên để được cấp quyền.
+            {% endif %}
+        </div>
+        
+        <a href="/login" class="back-btn">
+            <span>⬅️</span>
+            Quay lại trang đăng nhập
+        </a>
+        
+        <div class="help-section">
+            <h4>💡 Cần hỗ trợ?</h4>
+            <p>
+                Nếu bạn cho rằng đây là lỗi, vui lòng liên hệ với đội IT để được hỗ trợ thêm. 
+                Hãy cung cấp thông tin tài khoản và thời gian xảy ra lỗi.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

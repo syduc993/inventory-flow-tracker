@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo hàng ngày</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/main.css') }}">
+    <style>
+        /* Mobile-first responsive styles */
+        .mobile-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .btn-filter {
+            flex: 1;
+            padding: 10px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .btn-clear {
+            flex: 1;
+            padding: 10px;
+            background: #666;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .report-stats {
+            display: flex;
+            justify-content: space-between;
+            background: #e3f2fd;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1976d2;
+            display: block;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .empty-state .emoji {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
+        
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        
+        .report-table th,
+        .report-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .report-table th {
+            background: #f5f5f5;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .mobile-filters {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: end;
+            }
+            
+            .filter-group {
+                flex: 1;
+                min-width: 200px;
+            }
+            
+            .filter-actions {
+                flex: 0 0 auto;
+                margin-top: 0;
+                align-items: end;
+            }
+            
+            .btn-filter,
+            .btn-clear {
+                width: 80px;
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ✅ SỬA: Sử dụng component navbar chung -->
+        {% include "components/common/header.html" %}
+        
+        <div class="page-content">
+            <h1 class="title">📊 Báo cáo hàng ngày</h1>
+            
+            <!-- Date and Filters -->
+            <form method="get" class="mobile-filters">
+                <div class="filter-group">
+                    <label class="filter-label">📅 Ngày:</label>
+                    <input type="date" name="date" value="{{ date_str }}" class="filter-select" required>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">👤 Nhân viên:</label>
+                    <select name="employee" class="filter-select">
+                        <option value="">Tất cả nhân viên</option>
+                        {% for emp in all_employees %}
+                        <option value="{{ emp.id }}" {% if current_filters.employee == emp.id %}selected{% endif %}>
+                            {{ emp.name }} ({{ emp.id }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">📤 Kho xuất:</label>
+                    <select name="from_depot" class="filter-select">
+                        <option value="">Tất cả kho xuất</option>
+                        {% for depot in all_depots %}
+                        <option value="{{ depot.id }}" {% if current_filters.from_depot == depot.id %}selected{% endif %}>
+                            {{ depot.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">📥 Kho đến:</label>
+                    <select name="to_depot" class="filter-select">
+                        <option value="">Tất cả kho đến</option>
+                        {% for depot in all_depots %}
+                        <option value="{{ depot.id }}" {% if current_filters.to_depot == depot.id %}selected{% endif %}>
+                            {{ depot.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter">🔍 Lọc</button>
+                    <a href="{{ url_for('daily_report_page') }}?date={{ date_str }}" class="btn-clear">🗑️ Xóa</a>
+                </div>
+            </form>
+            
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% else %}
+                <!-- Quick Stats -->
+                <div class="report-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ report_data.transport_summary|length }}</span>
+                        <span>Đơn vị vận chuyển</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ report_data.route_summary|length }}</span>
+                        <span>Tuyến đường</span>
+                    </div>
+                </div>
+                
+                {% if report_data.total_records == 0 %}
+                    <div class="empty-state">
+                        <span class="emoji">📭</span>
+                        <h3>Chưa có hoạt động</h3>
+                        <p>Không có dữ liệu cho các bộ lọc đã chọn trong ngày {{ report_date.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                {% else %}
+                    <!-- Transport Providers Section -->
+                    <div class="report-section">
+                        <h2>🚛 Đơn vị vận chuyển</h2>
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên đơn vị</th>
+                                        <th class="text-center">Số đơn</th>
+                                        <th class="text-center">Số bao/tải</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transport in report_data.transport_summary %}
+                                    <tr>
+                                        <td class="transport-name">{{ transport.name }}</td>
+                                        <td class="text-center">{{ transport.count }}</td>
+                                        <td class="text-center">{{ transport.quantity }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Routes Section -->
+                    <div class="report-section">
+                        <h2>📍 Tuyến đường</h2>
+                        <div class="table-container">
+                            <table class="report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tuyến đường</th>
+                                        <th class="text-center">Số đơn</th>
+                                        <th class="text-center">Số bao/tải</th>
+                                        <th>Đơn vị vận chuyển</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for route in report_data.route_summary %}
+                                    <tr>
+                                        <td class="route-name">{{ route.route }}</td>
+                                        <td class="text-center">{{ route.count }}</td>
+                                        <td class="text-center">{{ route.quantity }}</td>
+                                        <td>
+                                            <div class="transport-list">
+                                                {% for provider in route.transport_providers %}
+                                                <span class="transport-tag">{{ provider }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    
+    {% include "components/common/scripts.html" %}
+</body>
+</html>
