@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-14 13:41:52
+Thời gian tạo: 2025-08-14 13:56:41
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -123,7 +123,7 @@ src\utils\transport_provider.py (3208 bytes)
 static\css\components.css (2734 bytes)
 static\css\dropdowns.css (3053 bytes)
 static\css\forms.css (3176 bytes)
-static\css\main.css (5462 bytes)
+static\css\main.css (5508 bytes)
 static\css\reports.css (4757 bytes)
 static\js\app.js (1253 bytes)
 static\js\bulk-form.js (7517 bytes)
@@ -3218,13 +3218,16 @@ body {
 
 /* ✅ SỬA: Navbar Styles - bắt buộc giữ 1 dòng */
 .navbar {
+    margin: -24px -24px 24px -24px;
+    border-radius: 8px 8px 0 0;
+    background: #1976d2;
+}
+
+.navbar-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #1976d2;
     padding: 10px 16px;
-    margin: -24px -24px 24px -24px;
-    border-radius: 8px 8px 0 0;
     flex-wrap: nowrap;
     min-height: 44px;
     overflow: hidden; /* Ngăn content tràn ra */
@@ -3309,7 +3312,7 @@ body {
 
 /* ✅ Mobile responsiveness - vẫn bắt buộc 1 dòng */
 @media (max-width: 768px) {
-    .navbar {
+    .navbar-container {
         padding: 8px 12px;
         gap: 4px;
         min-height: 40px;
@@ -3341,7 +3344,7 @@ body {
 
 /* ✅ Cho màn hình rất nhỏ - vẫn giữ 1 dòng */
 @media (max-width: 480px) {
-    .navbar {
+    .navbar-container {
         padding: 6px 8px;
     }
     

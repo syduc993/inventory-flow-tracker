@@ -7,7 +7,8 @@ import os
 
 # --- CẤU HÌNH ---
 PERSONNEL_API_BASE_URL = "https://minham.1office.vn/api/personnel/profile/gets?access_token=4467770316793457d8e1ad273033229"
-EMPLOYEE_JSON_PATH = "employees.json" # File JSON sẽ được lưu ở thư mục gốc của dự án
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+EMPLOYEE_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "employees.json")
 
 logging.basicConfig(level=logging.INFO)
 

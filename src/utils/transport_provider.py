@@ -5,9 +5,10 @@ import logging
 import json
 import os
 
-# Cấu hình
+# Cập nhật đường dẫn
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-TRANSPORT_PROVIDERS_JSON_PATH = os.path.join(PROJECT_ROOT, "transport_providers.json")
+TRANSPORT_PROVIDERS_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "transport_providers.json")
+
 
 def get_transport_providers_from_larkbase(app_token, table_id="tblDefault"):
     """

@@ -5,9 +5,10 @@ import logging
 import json
 import os
 
-# Cấu hình
+# Cập nhật đường dẫn
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DEPOT_JSON_PATH = os.path.join(PROJECT_ROOT, "depots.json")
+DEPOT_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "depots.json")
+
 
 # Thông tin API
 DEPOT_API_URL = "https://pos.open.nhanh.vn/api/store/depot"

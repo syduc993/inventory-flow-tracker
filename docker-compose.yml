@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - LARK_APP_ID=${LARK_APP_ID}
+      - LARK_APP_SECRET=${LARK_APP_SECRET}
+      - MAIN_APP_TOKEN=${MAIN_APP_TOKEN}
+      - SECRET_KEY=${SECRET_KEY}
+      - REDIRECT_URI=${REDIRECT_URI}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
