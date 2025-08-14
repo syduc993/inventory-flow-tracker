@@ -3,6 +3,7 @@
 @import url('./forms.css'); 
 @import url('./dropdowns.css');
 @import url('./reports.css');
+@import url('./daily-report.css');
 
 * {
     box-sizing: border-box;

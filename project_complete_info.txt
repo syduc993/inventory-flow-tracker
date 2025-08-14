@@ -1,12 +1,13 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-14 13:56:41
+Thời gian tạo: 2025-08-14 14:40:22
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
 📁 CẤU TRÚC THU MỤC
 --------------------------------------------------
+├── 📁 data/
 ├── 📁 src/
 │   ├── 📁 auth/
 │   │   ├── 📄 __init__.py
@@ -42,6 +43,7 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ├── 📁 static/
 │   ├── 📁 css/
 │   │   ├── 📄 components.css
+│   │   ├── 📄 daily-report.css
 │   │   ├── 📄 dropdowns.css
 │   │   ├── 📄 forms.css
 │   │   ├── 📄 main.css
@@ -81,19 +83,19 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ├── 📄 main.py
 ├── 📄 project_complete_info.txt
 ├── 📄 README.md
-├── 📄 requirements.txt
+└── 📄 requirements.txt
 
 
 📄 DANH SÁCH TẤT CẢ FILE
 --------------------------------------------------
-.gitignore (0 bytes)
-docker-compose.yml (0 bytes)
-Dockerfile (0 bytes)
+.gitignore (628 bytes)
+docker-compose.yml (365 bytes)
+Dockerfile (590 bytes)
 Get detail code.ipynb (9334 bytes)
 main.py (253 bytes)
 project_complete_info.txt (0 bytes)
-README.md (0 bytes)
-requirements.txt (0 bytes)
+README.md (432 bytes)
+requirements.txt (154 bytes)
 src\auth\__init__.py (0 bytes)
 src\auth\auth_middleware.py (2761 bytes)
 src\auth\lark_oauth.py (6808 bytes)
@@ -115,12 +117,13 @@ src\services\report_service.py (16764 bytes)
 src\services\transport_service.py (609 bytes)
 src\utils\__init__.py (0 bytes)
 src\utils\api.py (2109 bytes)
-src\utils\cache.py (3902 bytes)
+src\utils\cache.py (3956 bytes)
 src\utils\config.py (5056 bytes)
-src\utils\depot.py (3395 bytes)
+src\utils\depot.py (3422 bytes)
 src\utils\larkbase.py (5635 bytes)
-src\utils\transport_provider.py (3208 bytes)
+src\utils\transport_provider.py (3235 bytes)
 static\css\components.css (2734 bytes)
+static\css\daily-report.css (2426 bytes)
 static\css\dropdowns.css (3053 bytes)
 static\css\forms.css (3176 bytes)
 static\css\main.css (5508 bytes)
@@ -141,11 +144,11 @@ templates\components\forms\bulk_create.html (4075 bytes)
 templates\components\forms\create.html (1201 bytes)
 templates\components\forms\search.html (439 bytes)
 templates\components\forms\update.html (0 bytes)
-templates\pages\daily_report.html (11204 bytes)
+templates\pages\daily_report.html (7817 bytes)
 templates\pages\index.html (2404 bytes)
 templates\pages\view_only.html (0 bytes)
 
-Tổng cộng: 58 file
+Tổng cộng: 59 file
 
 💻 NỘI DUNG TẤT CẢ FILE CODE
 ================================================================================
@@ -153,6 +156,22 @@ Tổng cộng: 58 file
 ============================================================
 FILE: docker-compose.yml
 ============================================================
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - LARK_APP_ID=${LARK_APP_ID}
+      - LARK_APP_SECRET=${LARK_APP_SECRET}
+      - MAIN_APP_TOKEN=${MAIN_APP_TOKEN}
+      - SECRET_KEY=${SECRET_KEY}
+      - REDIRECT_URI=${REDIRECT_URI}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
 
 ============================================================
 
@@ -181,12 +200,36 @@ FILE: project_complete_info.txt
 ============================================================
 FILE: README.md
 ============================================================
+# Inventory Flow Tracker
+
+Hệ thống theo dõi luồng hàng hóa với tích hợp Lark và Nhanh.vn API.
+
+## Tính năng
+
+- ✅ Xác thực qua Lark OAuth
+- ✅ Tìm kiếm và tạo records từ Bill ID
+- ✅ Tạo hàng loạt records
+- ✅ Báo cáo hàng ngày với bộ lọc
+- ✅ Quản lý dropdown cho nhân viên, depot, vận chuyển
+- ✅ Responsive design
+
+## Cài đặt
+
+### 1. Clone repository
 
 ============================================================
 
 ============================================================
 FILE: requirements.txt
 ============================================================
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+jinja2==3.1.2
+python-multipart==0.0.6
+httpx==0.25.2
+pyjwt==2.8.0
+python-dotenv==1.0.0
+requests==2.31.0
 
 ============================================================
 
@@ -2047,7 +2090,8 @@ import os
 
 # --- CẤU HÌNH ---
 PERSONNEL_API_BASE_URL = "https://minham.1office.vn/api/personnel/profile/gets?access_token=4467770316793457d8e1ad273033229"
-EMPLOYEE_JSON_PATH = "employees.json" # File JSON sẽ được lưu ở thư mục gốc của dự án
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+EMPLOYEE_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "employees.json")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -2286,9 +2330,10 @@ import logging
 import json
 import os
 
-# Cấu hình
+# Cập nhật đường dẫn
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DEPOT_JSON_PATH = os.path.join(PROJECT_ROOT, "depots.json")
+DEPOT_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "depots.json")
+
 
 # Thông tin API
 DEPOT_API_URL = "https://pos.open.nhanh.vn/api/store/depot"
@@ -2542,9 +2587,10 @@ import logging
 import json
 import os
 
-# Cấu hình
+# Cập nhật đường dẫn
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-TRANSPORT_PROVIDERS_JSON_PATH = os.path.join(PROJECT_ROOT, "transport_providers.json")
+TRANSPORT_PROVIDERS_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "transport_providers.json")
+
 
 def get_transport_providers_from_larkbase(app_token, table_id="tblDefault"):
     """
@@ -2781,6 +2827,154 @@ button.htmx-request {
 .status-valid { color: #4caf50; font-weight: 500; }
 .status-invalid { color: #f44336; font-weight: 500; }
 .status-error { color: #ff9800; }
+
+============================================================
+
+============================================================
+FILE: static\css\daily-report.css
+============================================================
+/* static/css/daily-report.css */
+
+/* Mobile-first responsive styles */
+.mobile-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+}
+
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-filter {
+    flex: 1;
+    padding: 10px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-clear {
+    flex: 1;
+    padding: 10px;
+    background: #666;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.report-stats {
+    display: flex;
+    justify-content: space-between;
+    background: #e3f2fd;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1976d2;
+    display: block;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.empty-state .emoji {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.report-table th,
+.report-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.report-table th {
+    background: #f5f5f5;
+    font-weight: 500;
+    position: sticky;
+    top: 0;
+}
+
+@media (min-width: 768px) {
+    .mobile-filters {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: end;
+    }
+    
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .filter-actions {
+        flex: 0 0 auto;
+        margin-top: 0;
+        align-items: end;
+    }
+    
+    .btn-filter,
+    .btn-clear {
+        width: 80px;
+        flex: none;
+    }
+}
 
 ============================================================
 
@@ -4332,10 +4526,10 @@ export function showValidationError(message) {
 
 📊 THỐNG KÊ
 ------------------------------
-Tổng số file: 58
-File code: 40
+Tổng số file: 59
+File code: 41
 Các loại file code:
-  .css: 5 file
+  .css: 6 file
   .js: 4 file
   .md: 1 file
   .py: 27 file
