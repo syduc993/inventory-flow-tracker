@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Báo cáo hàng ngày</title>
     <link rel="stylesheet" href="/static/css/main.css">
-
 </head>
 <body>
     <div class="container">
@@ -122,6 +121,7 @@
                                         <th class="text-center">Số đơn</th>
                                         <th class="text-center">Số bao/tải</th>
                                         <th>Đơn vị vận chuyển</th>
+                                        <th class="text-center">Xuất Excel</th> <!-- ✅ THÊM cột này -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -136,6 +136,17 @@
                                                 <span class="transport-tag">{{ provider }}</span>
                                                 {% endfor %}
                                             </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <!-- ✅ THÊM nút xuất cho từng tuyến -->
+                                            {% set route_parts = route.route.split(' → ') %}
+                                            {% if route_parts|length == 2 %}
+                                            <a href="/reports/daily/export-route?from_depot={{ route_parts[0]|urlencode }}&to_depot={{ route_parts[1]|urlencode }}{% if date_str %}&date={{ date_str }}{% endif %}{% if current_filters.employee %}&employee={{ current_filters.employee }}{% endif %}" 
+                                               class="btn btn-success btn-export-route"
+                                               title="Xuất Excel tuyến {{ route.route }}">
+                                                📊
+                                            </a>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                     {% endfor %}

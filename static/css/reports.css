@@ -380,3 +380,50 @@
     }
 }
 
+/* Route export button */
+.btn-export-route {
+    background: #4caf50 !important;
+    color: white !important;
+    text-decoration: none !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-size: 16px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 32px;
+    height: 28px;
+    transition: all 0.2s ease;
+}
+
+.btn-export-route:hover {
+    background: #45a049 !important;
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+    .btn-export-route {
+        font-size: 14px !important;
+        padding: 3px 6px !important;
+        min-width: 28px;
+        height: 24px;
+    }
+}
+
+/* Ensure table column widths */
+.report-table th:last-child,
+.report-table td:last-child {
+    width: 80px;
+    min-width: 80px;
+}
+
+@media (max-width: 767px) {
+    .report-table th:last-child,
+    .report-table td:last-child {
+        width: 60px;
+        min-width: 60px;
+    }
+}

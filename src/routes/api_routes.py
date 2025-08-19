@@ -11,6 +11,12 @@ from src.services.depot_service import DepotService
 from src.core.dependencies import get_current_user, templates, get_record_service, get_employee_service, get_transport_service, get_depot_service
 
 router = APIRouter(tags=["api"])
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()]
+)
+
 logger = logging.getLogger(__name__)
 
 @router.get("/", response_class=HTMLResponse)
@@ -35,10 +41,19 @@ async def read_root(
 async def validate_bill_id(
     request: Request, 
     bill_id: str = Form(...),
+    from_depot: str = Form(None),
+    to_depot: str = Form(None),
     record_service: RecordService = Depends(get_record_service)
 ):
     """Validate single bill ID - chỉ dùng cho bulk form"""
     try:
+        # ✅ THÊM: Kiểm tra bắt buộc có Kho đi/Kho đến
+        if not from_depot or not to_depot:
+            return JSONResponse({
+                "valid": False,
+                "message": "Cần chọn Kho đi và Kho đến trước"
+            })
+        
         imex_items = record_service.get_api_data(bill_id)
         if not imex_items:
             return JSONResponse({
@@ -47,12 +62,36 @@ async def validate_bill_id(
             })
         
         example_item = imex_items[0]
-        quantity = int(example_item.get("realQuantity") or 0)
+        
+        # Validate status phải thuộc [3,4,5,6]
+        status_str = example_item.get("status", "")
+        try:
+            status = int(status_str) if status_str else None
+        except ValueError:
+            status = None
+        
+        if status not in [3, 4, 5, 6]:
+            return JSONResponse({
+                "valid": False,
+                "message": "Status không hợp lệ"
+            })
+        
+        # Validate kho đi/kho đến với thông tin chung
+        if example_item.get("fromDepotId", "") != from_depot:
+            return JSONResponse({
+                "valid": False,
+                "message": "Không đúng kho đi"
+            })
+        
+        if example_item.get("toDepotId", "") != to_depot:
+            return JSONResponse({
+                "valid": False,
+                "message": "Không đúng kho đến"
+            })
         
         return JSONResponse({
             "valid": True,
             "message": "ID hợp lệ",
-            "quantity": quantity,
             "from_depot": example_item.get("fromDepotName", ""),
             "to_depot": example_item.get("toDepotName", "")
         })
@@ -60,7 +99,7 @@ async def validate_bill_id(
     except Exception as e:
         return JSONResponse({
             "valid": False,
-            "message": f"Lỗi kiểm tra: {str(e)}"
+            "message": "Lỗi kiểm tra"
         })
 
 @router.post("/bulk-create-records", response_class=HTMLResponse)
@@ -80,8 +119,23 @@ async def bulk_create_records(
         transport_provider = body.get("transport_provider", "")
         bill_data = body.get("bill_data", [])
         
-        if not all([from_depot, to_depot, handover_person]):
-            return HTMLResponse('<div class="error">❌ Thiếu thông tin bắt buộc</div>')
+        # ✅ SỬA: Tất cả thông tin đều bắt buộc
+        if not from_depot:
+            return HTMLResponse('<div class="error">❌ Thiếu thông tin kho đi</div>')
+        if not to_depot:
+            return HTMLResponse('<div class="error">❌ Thiếu thông tin kho đến</div>')
+        if not handover_person:
+            return HTMLResponse('<div class="error">❌ Thiếu thông tin người bàn giao</div>')
+        if not transport_provider:
+            return HTMLResponse('<div class="error">❌ Thiếu thông tin đơn vị vận chuyển</div>')
+        
+        # ✅ SỬA: Validate số lượng bắt buộc cho tất cả Bill ID
+        for item in bill_data:
+            bill_id = item.get("bill_id")
+            quantity = item.get("quantity", 0)
+            
+            if not quantity or quantity == 0:
+                return HTMLResponse(f'<div class="error">❌ Bill ID "{bill_id}": Bắt buộc nhập số lượng bao/tải</div>')
         
         # Validate depots
         from_valid, from_name = depot_service.validate_depot(from_depot)
@@ -114,7 +168,7 @@ async def bulk_create_records(
                 "ID kho đến": example_item.get("toDepotId", ""),
                 "Kho đến": example_item.get("toDepotName", ""),
                 "Số lượng": int(example_item.get("realQuantity") or 0),
-                "Số lượng bao/tải giao": int(quantity) if quantity else 0,
+                "Số lượng bao/tải giao": int(quantity),
                 "Người bàn giao": handover_person,
                 "Đơn vị vận chuyển": transport_provider,
                 "Ngày bàn giao": int(time.time() * 1000)

@@ -38,10 +38,12 @@ def fetch_imex_details(bill_id: int) -> list[dict] | None:
                         "fromDepotId": item.get("fromDepotId", ""),
                         "fromDepotName": item.get("fromDepotName", ""),
                         "toDepotId": item.get("toDepotId", ""),
-                        "toDepotName": item.get("toDepotName", "")
+                        "toDepotName": item.get("toDepotName", ""),
+                        "status": item.get("status", "")
                     })
                 return result
         except Exception as e:
             logging.error(f"Lỗi khi parse JSON: {e}")
             return None
     return None
+

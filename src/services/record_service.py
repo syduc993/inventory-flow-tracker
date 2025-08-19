@@ -24,12 +24,6 @@ class RecordService:
         # Danh sách các trường cần chuyển đổi thành số
         numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
         
-        # Debug: In ra toàn bộ form_data
-        logging.info("=== FORM DATA DEBUG ===")
-        for key, value in form_data.items():
-            logging.info(f"Key: '{key}' = Value: '{value}'")
-        logging.info("=== END DEBUG ===")
-        
         for key, value in form_data.items():
             if key in numeric_fields and value:
                 try:
