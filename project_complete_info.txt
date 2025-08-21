@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-14 17:23:03
+Thời gian tạo: 2025-08-21 16:49:37
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -107,12 +107,12 @@ src\routes\api_routes.py (8172 bytes)
 src\routes\auth_routes.py (4183 bytes)
 src\routes\record_routes.py (4731 bytes)
 src\routes\refresh_routes.py (3074 bytes)
-src\routes\report_routes.py (7566 bytes)
+src\routes\report_routes.py (11459 bytes)
 src\services\__init__.py (0 bytes)
 src\services\depot_service.py (769 bytes)
 src\services\employee_service.py (399 bytes)
 src\services\record_service.py (4809 bytes)
-src\services\report_service.py (16764 bytes)
+src\services\report_service.py (13778 bytes)
 src\services\transport_service.py (609 bytes)
 src\utils\__init__.py (0 bytes)
 src\utils\api.py (2170 bytes)
@@ -125,7 +125,7 @@ static\css\components.css (2734 bytes)
 static\css\dropdowns.css (3053 bytes)
 static\css\forms.css (3176 bytes)
 static\css\main.css (5508 bytes)
-static\css\reports.css (6885 bytes)
+static\css\reports.css (8024 bytes)
 static\js\app.js (1253 bytes)
 static\js\bulk-form.js (26032 bytes)
 static\js\dropdown.js (15965 bytes)
@@ -142,7 +142,7 @@ templates\components\forms\bulk_create.html (4075 bytes)
 templates\components\forms\create.html (1201 bytes)
 templates\components\forms\search.html (439 bytes)
 templates\components\forms\update.html (0 bytes)
-templates\pages\daily_report.html (7649 bytes)
+templates\pages\daily_report.html (8786 bytes)
 templates\pages\index.html (2404 bytes)
 templates\pages\view_only.html (0 bytes)
 
@@ -1277,14 +1277,21 @@ async def refresh_depots_endpoint(
 ============================================================
 FILE: src\routes\report_routes.py
 ============================================================
-# # src/routes/report_routes.py - Report Routes
-# from fastapi import APIRouter, Request, Query, Depends
-# from fastapi.responses import HTMLResponse
+# # src/routes/report_routes.py
+# from fastapi import APIRouter, Request, Query, Depends, HTTPException
+# from fastapi.responses import HTMLResponse, StreamingResponse
 # from datetime import datetime, timedelta
 # import logging
+# import io
 
 # from src.services.report_service import ReportService
 # from src.core.dependencies import get_current_user, templates, get_report_service
+
+
+# router = APIRouter(prefix="/reports", tags=["reports"])
+# logger = logging.getLogger(__name__)
+
+
 
 # router = APIRouter(prefix="/reports", tags=["reports"])
 # logger = logging.getLogger(__name__)
@@ -1293,9 +1300,12 @@ FILE: src\routes\report_routes.py
 # async def daily_report_page(
 #     request: Request,
 #     date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+#     employee: str = Query(None, description="ID nhân viên"),
+#     from_depot: str = Query(None, description="ID kho đi"),
+#     to_depot: str = Query(None, description="ID kho đến"),
 #     report_service: ReportService = Depends(get_report_service)
 # ):
-#     """Trang báo cáo hàng ngày của nhân viên"""
+#     """Trang báo cáo hàng ngày với bộ lọc"""
 #     user = get_current_user(request)
     
 #     # Nếu không có date parameter, sử dụng ngày hôm nay
@@ -1306,8 +1316,18 @@ FILE: src\routes\report_routes.py
 #         # Validate date format
 #         report_date = datetime.strptime(date, '%Y-%m-%d')
         
-#         # Lấy dữ liệu báo cáo
-#         report_data = report_service.get_daily_report(user['user_id'], date)
+#         # Lấy dữ liệu báo cáo với filters
+#         report_data = report_service.get_daily_report(
+#             user_id=None,  # Không filter theo user nữa
+#             date_str=date,
+#             employee_filter=employee,
+#             from_depot_filter=from_depot,
+#             to_depot_filter=to_depot
+#         )
+        
+#         # Lấy danh sách để làm filter options
+#         all_employees = report_service.get_all_employees()
+#         all_depots = report_service.get_all_depots()
         
 #         # Tạo context cho template
 #         context = {
@@ -1316,7 +1336,14 @@ FILE: src\routes\report_routes.py
 #             "report_date": report_date,
 #             "date_str": date,
 #             "report_data": report_data,
-#             "today": datetime.now().strftime('%Y-%m-%d')
+#             "today": datetime.now().strftime('%Y-%m-%d'),
+#             "all_employees": all_employees,
+#             "all_depots": all_depots,
+#             "current_filters": {
+#                 "employee": employee,
+#                 "from_depot": from_depot,
+#                 "to_depot": to_depot
+#             }
 #         }
         
 #         return templates.TemplateResponse("pages/daily_report.html", context)
@@ -1327,7 +1354,10 @@ FILE: src\routes\report_routes.py
 #             "request": request,
 #             "user": user,
 #             "error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD",
-#             "today": datetime.now().strftime('%Y-%m-%d')
+#             "today": datetime.now().strftime('%Y-%m-%d'),
+#             "all_employees": [],
+#             "all_depots": [],
+#             "current_filters": {}
 #         }
 #         return templates.TemplateResponse("pages/daily_report.html", context)
         
@@ -1337,65 +1367,90 @@ FILE: src\routes\report_routes.py
 #             "request": request,
 #             "user": user,
 #             "error": f"Lỗi khi tạo báo cáo: {str(e)}",
-#             "today": datetime.now().strftime('%Y-%m-%d')
+#             "today": datetime.now().strftime('%Y-%m-%d'),
+#             "all_employees": [],
+#             "all_depots": [],
+#             "current_filters": {}
 #         }
 #         return templates.TemplateResponse("pages/daily_report.html", context)
 
-# @router.get("/weekly", response_class=HTMLResponse)
-# async def weekly_report_page(
+# @router.get("/daily/export-route")
+# async def export_route_report(
 #     request: Request,
-#     week_start: str = Query(None, description="Ngày bắt đầu tuần (YYYY-MM-DD)"),
+#     from_depot: str = Query(..., description="Tên kho đi"),
+#     to_depot: str = Query(..., description="Tên kho đến"),
+#     date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+#     employee: str = Query(None, description="ID nhân viên"),
 #     report_service: ReportService = Depends(get_report_service)
 # ):
-#     """Trang báo cáo tuần của nhân viên"""
+#     """Xuất báo cáo theo tuyến đường cụ thể ra Excel"""
 #     user = get_current_user(request)
     
-#     # Nếu không có week_start, sử dụng tuần hiện tại
-#     if not week_start:
-#         today = datetime.now()
-#         start_of_week = today - timedelta(days=today.weekday())
-#         week_start = start_of_week.strftime('%Y-%m-%d')
-    
 #     try:
-#         # Validate date format
-#         start_date = datetime.strptime(week_start, '%Y-%m-%d')
-#         end_date = start_date + timedelta(days=6)
+#         excel_buffer, record_count = report_service.export_route_records_to_excel(
+#             from_depot=from_depot,
+#             to_depot=to_depot,
+#             user_id=None,
+#             date_str=date,
+#             employee_filter=employee
+#         )
         
-#         # Lấy dữ liệu báo cáo tuần
-#         report_data = report_service.get_weekly_report(user['user_id'], week_start)
+#         if not excel_buffer:
+#             raise HTTPException(status_code=404, detail="Không có dữ liệu cho tuyến đường này")
         
-#         context = {
-#             "request": request,
-#             "user": user,
-#             "start_date": start_date,
-#             "end_date": end_date,
-#             "week_start": week_start,
-#             "report_data": report_data
-#         }
+#         # Tạo tên file
+#         route_name = f"{from_depot}_to_{to_depot}".replace(" ", "_")
+#         filename = f"tuyen_{route_name}_{date or 'tat_ca'}.xlsx"
         
-#         return templates.TemplateResponse("pages/weekly_report.html", context)
+#         return StreamingResponse(
+#             io.BytesIO(excel_buffer.read()),
+#             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#             headers={"Content-Disposition": f"attachment; filename={filename}"}
+#         )
         
 #     except Exception as e:
-#         logger.error(f"Error generating weekly report: {e}")
-#         context = {
-#             "request": request,
-#             "user": user,
-#             "error": f"Lỗi khi tạo báo cáo tuần: {str(e)}"
-#         }
-#         return templates.TemplateResponse("pages/weekly_report.html", context)
-
+#         logger.error(f"Error exporting route report: {e}")
+#         raise HTTPException(status_code=500, detail=f"Lỗi xuất báo cáo tuyến: {str(e)}")
 
 # src/routes/report_routes.py
-from fastapi import APIRouter, Request, Query, Depends
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request, Query, Depends, HTTPException
+from fastapi.responses import HTMLResponse, StreamingResponse
 from datetime import datetime, timedelta
 import logging
+import io
+import re
+import unicodedata
 
 from src.services.report_service import ReportService
 from src.core.dependencies import get_current_user, templates, get_report_service
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 logger = logging.getLogger(__name__)
+
+def create_safe_filename(from_depot, to_depot, date_str):
+    """Tạo tên file an toàn, loại bỏ ký tự đặc biệt tiếng Việt"""
+    def normalize_text(text):
+        # Normalize Unicode và convert sang ASCII
+        normalized = unicodedata.normalize('NFD', text)
+        # Loại bỏ dấu và chỉ giữ ASCII
+        ascii_text = ''.join(c for c in normalized if unicodedata.category(c) != 'Mn')
+        # Thay thế khoảng trắng và ký tự đặc biệt bằng _
+        safe_text = re.sub(r'[^A-Za-z0-9]+', '_', ascii_text)
+        # Loại bỏ _ ở đầu và cuối
+        return safe_text.strip('_')
+    
+    
+    safe_from = normalize_text(from_depot)
+    safe_to = normalize_text(to_depot)
+    
+    # Tạo tên file
+    filename = f"tuyen_{safe_from}_to_{safe_to}_{date_str or 'tat_ca'}.xlsx"
+    
+    # Đảm bảo filename không quá dài
+    if len(filename) > 100:
+        filename = f"tuyen_route_{date_str or 'tat_ca'}.xlsx"
+    
+    return filename
 
 @router.get("/daily", response_class=HTMLResponse)
 async def daily_report_page(
@@ -1474,6 +1529,43 @@ async def daily_report_page(
             "current_filters": {}
         }
         return templates.TemplateResponse("pages/daily_report.html", context)
+
+@router.get("/daily/export-route")
+async def export_route_report(
+    request: Request,
+    from_depot: str = Query(..., description="Tên kho đi"),
+    to_depot: str = Query(..., description="Tên kho đến"),
+    date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+    employee: str = Query(None, description="ID nhân viên"),
+    report_service: ReportService = Depends(get_report_service)
+):
+    """Xuất báo cáo theo tuyến đường cụ thể ra Excel"""
+    user = get_current_user(request)
+    
+    try:
+        excel_buffer, record_count = report_service.export_route_records_to_excel(
+            from_depot=from_depot,
+            to_depot=to_depot,
+            user_id=None,
+            date_str=date,
+            employee_filter=employee
+        )
+        
+        if not excel_buffer:
+            raise HTTPException(status_code=404, detail="Không có dữ liệu cho tuyến đường này")
+        
+        # Sử dụng helper function để tạo tên file an toàn
+        filename = create_safe_filename(from_depot, to_depot, date)
+        
+        return StreamingResponse(
+            io.BytesIO(excel_buffer.read()),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error exporting route report: {e}")
+        raise HTTPException(status_code=500, detail=f"Lỗi xuất báo cáo tuyến: {str(e)}")
 
 ============================================================
 
@@ -1648,184 +1740,6 @@ class RecordService:
 ============================================================
 FILE: src\services\report_service.py
 ============================================================
-# # src/services/report_service.py
-# from datetime import datetime, timedelta
-# from collections import defaultdict
-# from src.utils.larkbase import larkbase_get_all
-# import logging
-# import json
-
-# logger = logging.getLogger(__name__)
-
-# class ReportService:
-#     def __init__(self, app_token, table_id):
-#         self.app_token = app_token
-#         self.table_id = table_id
-
-#     def get_daily_report(self, user_id, date_str):
-#         """Lấy báo cáo hàng ngày cho user"""
-#         try:
-#             # Parse date
-#             report_date = datetime.strptime(date_str, '%Y-%m-%d')
-#             start_timestamp = int(report_date.timestamp() * 1000)
-#             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
-            
-#             # ✅ THÊM: Lấy employee ID tương ứng với Lark user ID
-#             employee_id = self._get_employee_id_from_user_id(user_id)
-#             if not employee_id:
-#                 logger.warning(f"Không tìm thấy employee ID cho user {user_id}")
-#                 return self._empty_report_data()
-            
-#             logger.info(f"Mapping: Lark user {user_id} -> Employee ID {employee_id}")
-            
-#             # Lấy tất cả records
-#             all_records = larkbase_get_all(self.app_token, self.table_id)
-            
-#             # Filter records của employee trong ngày
-#             user_records = []
-#             for record in all_records:
-#                 fields = record.get('fields', {})
-                
-#                 # ✅ SỬA: Check employee ID thay vì user ID
-#                 record_user_id = fields.get('ID người bàn giao', '')
-#                 if record_user_id != employee_id:
-#                     continue
-                
-#                 # Check date
-#                 handover_date = fields.get('Ngày bàn giao')
-#                 if not handover_date:
-#                     continue
-                    
-#                 try:
-#                     handover_timestamp = int(handover_date)
-#                     if start_timestamp <= handover_timestamp < end_timestamp:
-#                         user_records.append(fields)
-#                 except (ValueError, TypeError):
-#                     continue
-            
-#             logger.info(f"Found {len(user_records)} records for employee {employee_id} on {date_str}")
-            
-#             # Tính toán thống kê
-#             return self._calculate_daily_statistics(user_records)
-            
-#         except Exception as e:
-#             logger.error(f"Error getting daily report: {e}")
-#             return self._empty_report_data()
-
-#     def _get_employee_id_from_user_id(self, lark_user_id):
-#         """Mapping tạm thời để test"""
-#         # ✅ TEST: Hardcode mapping cho user hiện tại
-#         user_mapping = {
-#             'ou_04bf3b2ad306e6bb53f5fe06ad8e492c': 'AM.0051'  # DA. Lê Sỹ Đức -> AM.0051
-#         }
-#         return user_mapping.get(lark_user_id)
-
-#     def _empty_report_data(self):
-#         """Trả về dữ liệu rỗng cho báo cáo"""
-#         return {
-#             'total_records': 0,
-#             'total_quantity': 0,
-#             'transport_providers': {},
-#             'routes': {},
-#             'transport_summary': [],
-#             'route_summary': []
-#         }
-
-
-#     def _calculate_daily_statistics(self, records):
-#         """Tính toán thống kê từ danh sách records"""
-#         if not records:
-#             return {
-#                 'total_records': 0,
-#                 'total_quantity': 0,
-#                 'transport_providers': {},
-#                 'routes': {},
-#                 'transport_summary': [],
-#                 'route_summary': []
-#             }
-        
-#         transport_stats = defaultdict(lambda: {'count': 0, 'quantity': 0})
-#         route_stats = defaultdict(lambda: {'count': 0, 'quantity': 0, 'transport_providers': set()})
-        
-#         total_quantity = 0
-        
-#         for fields in records:
-#             # Số lượng bao/tải - thử nhiều tên field
-#             quantity = 0
-#             quantity_field = (fields.get('Số lượng bao/tải giao') or 
-#                              fields.get('SoLuongBaoTaiGiao') or 
-#                              fields.get('HandoverQuantity') or 
-#                              fields.get('Quantity', 0))
-            
-#             try:
-#                 if isinstance(quantity_field, str):
-#                     quantity = int(quantity_field) if quantity_field.isdigit() else 0
-#                 elif isinstance(quantity_field, (int, float)):
-#                     quantity = int(quantity_field)
-#                 total_quantity += quantity
-#             except (ValueError, TypeError):
-#                 logger.warning(f"Error parsing quantity: {quantity_field}")
-#                 pass
-            
-#             # Đơn vị vận chuyển - thử nhiều tên field
-#             transport_provider = (fields.get('Đơn vị vận chuyển') or 
-#                                  fields.get('DonViVanChuyen') or 
-#                                  fields.get('TransportProvider') or 
-#                                  'Không rõ').strip()
-            
-#             if transport_provider:
-#                 transport_stats[transport_provider]['count'] += 1
-#                 transport_stats[transport_provider]['quantity'] += quantity
-            
-#             # Route (kho đi -> kho đến) - thử nhiều tên field
-#             from_depot = (fields.get('Kho đi') or 
-#                          fields.get('KhoDi') or 
-#                          fields.get('FromDepot') or 
-#                          'Không rõ').strip()
-            
-#             to_depot = (fields.get('Kho đến') or 
-#                        fields.get('KhoDen') or 
-#                        fields.get('ToDepot') or 
-#                        'Không rõ').strip()
-            
-#             route_key = f"{from_depot} → {to_depot}"
-            
-#             route_stats[route_key]['count'] += 1
-#             route_stats[route_key]['quantity'] += quantity
-#             if transport_provider:
-#                 route_stats[route_key]['transport_providers'].add(transport_provider)
-        
-#         # Chuyển đổi sang format cho template
-#         transport_summary = []
-#         for provider, stats in transport_stats.items():
-#             transport_summary.append({
-#                 'name': provider,
-#                 'count': stats['count'],
-#                 'quantity': stats['quantity']
-#             })
-        
-#         route_summary = []
-#         for route, stats in route_stats.items():
-#             route_summary.append({
-#                 'route': route,
-#                 'count': stats['count'],
-#                 'quantity': stats['quantity'],
-#                 'transport_providers': list(stats['transport_providers'])
-#             })
-        
-#         # Sắp xếp theo số lượng giảm dần
-#         transport_summary.sort(key=lambda x: x['quantity'], reverse=True)
-#         route_summary.sort(key=lambda x: x['quantity'], reverse=True)
-        
-#         return {
-#             'total_records': len(records),
-#             'total_quantity': total_quantity,
-#             'transport_providers': dict(transport_stats),
-#             'routes': dict(route_stats),
-#             'transport_summary': transport_summary,
-#             'route_summary': route_summary
-#         }
-
 # src/services/report_service.py
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -2042,6 +1956,107 @@ class ReportService:
             'transport_summary': transport_summary,
             'route_summary': route_summary
         }
+
+    def export_route_records_to_excel(self, from_depot, to_depot, user_id=None, date_str=None, employee_filter=None):
+        """Xuất records của một tuyến đường cụ thể ra Excel"""
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Font, PatternFill, Alignment
+            from datetime import datetime, timedelta
+            import io
+            
+            # Lấy dữ liệu báo cáo theo filters
+            if date_str:
+                report_date = datetime.strptime(date_str, '%Y-%m-%d')
+                start_timestamp = int(report_date.timestamp() * 1000)
+                end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
+            else:
+                start_timestamp = 0
+                end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
+            
+            # Lấy tất cả records
+            all_records = larkbase_get_all(self.app_token, self.table_id)
+            
+            # Filter records theo tuyến đường cụ thể
+            route_records = []
+            for record in all_records:
+                fields = record.get('fields', {})
+                
+                # Filter by date nếu có
+                if date_str:
+                    handover_date = fields.get('Ngày bàn giao')
+                    if handover_date:
+                        try:
+                            handover_timestamp = int(handover_date)
+                            if not (start_timestamp <= handover_timestamp < end_timestamp):
+                                continue
+                        except (ValueError, TypeError):
+                            continue
+                
+                # Filter by employee nếu có
+                if employee_filter:
+                    record_employee_id = fields.get('ID người bàn giao', '')
+                    if record_employee_id != employee_filter:
+                        continue
+                
+                # ✅ QUAN TRỌNG: Filter theo tuyến đường cụ thể
+                record_from_depot = fields.get('Kho đi', '').strip()
+                record_to_depot = fields.get('Kho đến', '').strip()
+                
+                if record_from_depot == from_depot and record_to_depot == to_depot:
+                    route_records.append(fields)
+            
+            if not route_records:
+                return None, 0
+            
+            # Tạo workbook
+            wb = Workbook()
+            ws = wb.active
+            ws.title = f"{from_depot} → {to_depot}"
+            
+            # Header style
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
+            header_alignment = Alignment(horizontal="center", vertical="center")
+            
+            # Set headers
+            headers = ["ID", "Số lượng bao/tải giao", "ID người bàn giao", "Người bàn giao"]
+            for col, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = header_alignment
+            
+            # Add data
+            for row, fields in enumerate(route_records, 2):
+                ws.cell(row=row, column=1, value=fields.get('ID', ''))
+                ws.cell(row=row, column=2, value=fields.get('Số lượng bao/tải giao', 0))
+                ws.cell(row=row, column=3, value=fields.get('ID người bàn giao', ''))
+                ws.cell(row=row, column=4, value=fields.get('Người bàn giao', ''))
+            
+            # Auto-fit columns
+            for column in ws.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)
+                ws.column_dimensions[column_letter].width = adjusted_width
+            
+            # Save to BytesIO
+            excel_buffer = io.BytesIO()
+            wb.save(excel_buffer)
+            excel_buffer.seek(0)
+            
+            return excel_buffer, len(route_records)
+            
+        except Exception as e:
+            logger.error(f"Error creating route Excel export: {e}")
+            return None, 0
 
 ============================================================
 
@@ -3865,6 +3880,53 @@ FILE: static\css\reports.css
     }
 }
 
+/* Route export button */
+.btn-export-route {
+    background: #4caf50 !important;
+    color: white !important;
+    text-decoration: none !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    font-size: 16px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 32px;
+    height: 28px;
+    transition: all 0.2s ease;
+}
+
+.btn-export-route:hover {
+    background: #45a049 !important;
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+    .btn-export-route {
+        font-size: 14px !important;
+        padding: 3px 6px !important;
+        min-width: 28px;
+        height: 24px;
+    }
+}
+
+/* Ensure table column widths */
+.report-table th:last-child,
+.report-table td:last-child {
+    width: 80px;
+    min-width: 80px;
+}
+
+@media (max-width: 767px) {
+    .report-table th:last-child,
+    .report-table td:last-child {
+        width: 60px;
+        min-width: 60px;
+    }
+}
 
 ============================================================
 
