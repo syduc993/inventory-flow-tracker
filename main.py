@@ -1,4 +1,4 @@
-# main.py - Entry Point (Fixed)
+# main.py - Entry Point (Đã tối ưu)
 import uvicorn
 import os
 from src.core.app import create_app
