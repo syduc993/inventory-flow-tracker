@@ -141,3 +141,35 @@ def larkbase_delete_record(app_token, table_id, record_id):
     except Exception as e:
         logging.error(f"Lỗi ngoại lệ khi xóa: {e}")
         return False, str(e)
+
+# src/utils/larkbase.py
+def larkbase_batch_write_data(app_token, table_id, records_data):
+    """Ghi nhiều records cùng lúc"""
+    token = larkbase_get_token()
+    if not token:
+        return False, "Không thể xác thực với Larkbase."
+    
+    try:
+        url = f"{API_HOST}/{app_token}/tables/{table_id}/records/batch_create"
+        
+        # Chuyển đổi format cho batch API
+        records = [{"fields": record} for record in records_data]
+        
+        resp = requests.post(
+            url, 
+            headers=get_headers(token), 
+            json={"records": records}
+        )
+        
+        res_json = resp.json()
+        if resp.status_code == 200 and res_json.get('code') == 0:
+            created_count = len(res_json.get('data', {}).get('records', []))
+            return True, f"Thêm thành công {created_count} bản ghi"
+        else:
+            error_msg = res_json.get('msg', resp.text)
+            logging.error(f"Lỗi API batch create: {error_msg}")
+            return False, error_msg
+            
+    except Exception as e:
+        logging.error(f"Lỗi batch create: {e}")
+        return False, str(e)

@@ -1,106 +1,204 @@
 <div class="bulk-form-container">
-    <!-- Common Fields Section -->
-    <div class="common-fields-section">
-        <h4>📋 Thông tin chung</h4>
-        
-        <div class="form-group">
-            <label class="form-label">Kho đi:</label>
-            <div class="input-with-refresh">
-                <div>
-                    {% set name = "from_depot" %}
-                    {% include "components/dropdowns/depot.html" %}
+    <!-- ✅ SỬA LỖI 1: Cải thiện structure của common fields section -->
+    <div class="common-fields-section elevation-1">
+        <h4>1. Thông tin chung</h4>
+        <div class="common-fields-grid">
+            <div class="form-group">
+                <label class="form-label">Từ kho</label>
+                <div class="input-with-refresh">
+                    <div id="from-depot-dropdown-container">
+                        {% with field_name='from_depot', placeholder='Chọn kho đi' %}
+                            {% include "components/dropdowns/depot.html" %}
+                        {% endwith %}
+                    </div>
+                    <button class="btn btn-primary" 
+                            hx-post="/refresh/depots" 
+                            hx-target="#from-depot-dropdown-container"
+                            hx-swap="outerHTML"
+                            hx-indicator="#from-depot-spinner">
+                        <span class="btn-text">🔄</span>
+                        <span id="from-depot-spinner" class="spinner htmx-indicator"></span>
+                    </button>
                 </div>
-                <button type="button" class="btn btn-primary form-btn-refresh" 
-                        hx-post="/refresh/depots" 
-                        hx-target=".refresh-status-container">
-                    <span class="btn-text">🔄 Làm mới</span>
-                    <span class="htmx-indicator spinner"></span>
-                </button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Đến kho</label>
+                <div class="input-with-refresh">
+                    <div id="to-depot-dropdown-container">
+                        {% with field_name='to_depot', placeholder='Chọn kho đến' %}
+                            {% include "components/dropdowns/depot.html" %}
+                        {% endwith %}
+                    </div>
+                    <button class="btn btn-primary" 
+                            hx-post="/refresh/depots" 
+                            hx-target="#to-depot-dropdown-container"
+                            hx-swap="outerHTML"
+                            hx-indicator="#to-depot-spinner">
+                        <span class="btn-text">🔄</span>
+                        <span id="to-depot-spinner" class="spinner htmx-indicator"></span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Người bàn giao</label>
+                <div class="input-with-refresh">
+                    <div id="employee-dropdown-container">
+                        {% with field_name='handover_person', placeholder='Tìm nhân viên...' %}
+                            {% include "components/dropdowns/employee.html" %}
+                        {% endwith %}
+                    </div>
+                    <button class="btn btn-primary" 
+                            hx-post="/refresh/employees" 
+                            hx-target="#employee-dropdown-container"
+                            hx-swap="outerHTML"
+                            hx-indicator="#employee-spinner">
+                        <span class="btn-text">🔄</span>
+                        <span id="employee-spinner" class="spinner htmx-indicator"></span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Đơn vị vận chuyển</label>
+                <div class="input-with-refresh">
+                    <div id="transport-dropdown-container">
+                        {% with field_name='transport_provider', placeholder='Tìm đơn vị vận chuyển...' %}
+                            {% include "components/dropdowns/transport.html" %}
+                        {% endwith %}
+                    </div>
+                    <button class="btn btn-primary" 
+                            hx-post="/refresh/transport-providers" 
+                            hx-target="#transport-dropdown-container"
+                            hx-swap="outerHTML"
+                            hx-indicator="#transport-spinner">
+                        <span class="btn-text">🔄</span>
+                        <span id="transport-spinner" class="spinner htmx-indicator"></span>
+                    </button>
+                </div>
             </div>
         </div>
-
-        <div class="form-group">
-            <label class="form-label">Kho đến:</label>
-            {% set name = "to_depot" %}
-            {% include "components/dropdowns/depot.html" %}
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Người bàn giao:</label>
-            <div class="input-with-refresh">
-                <div>
-                    {% set name = "handover_person" %}
-                    {% include "components/dropdowns/employee.html" %}
-                </div>
-                <button type="button" class="btn btn-primary form-btn-refresh" 
-                        hx-post="/refresh/employees" 
-                        hx-target=".refresh-status-container">
-                    <span class="btn-text">🔄 Làm mới</span>
-                    <span class="htmx-indicator spinner"></span>
-                </button>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Đơn vị vận chuyển:</label>
-            <div class="input-with-refresh">
-                <div>
-                    {% set name = "transport_provider" %}
-                    {% include "components/dropdowns/transport.html" %}
-                </div>
-                <button type="button" class="btn btn-primary form-btn-refresh-transport" 
-                        hx-post="/refresh/transport-providers" 
-                        hx-target=".refresh-status-container">
-                    <span class="btn-text">🔄 Làm mới</span>
-                    <span class="htmx-indicator spinner"></span>
-                </button>
-            </div>
-        </div>
-        
-        <div class="refresh-status-container"></div>
     </div>
 
-    <!-- Bill IDs Section -->
     <div class="bill-ids-section">
-        <h4>📦 Danh sách Bill ID</h4>
-        
-        <!-- ✅ BỎ: table-actions với nút "Kiểm tra tất cả" -->
-        
-        <table class="bill-table" id="billTable">
-            <thead>
-                <tr>
-                    <th>Bill ID</th>
-                    <th>Số lượng bao/tải</th>
-                    <th>Trạng thái</th>
-                    <th>Xóa</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows will be added dynamically -->
-            </tbody>
-        </table>
-        
-        <!-- ✅ SỬA: Di chuyển nút "Thêm dòng" xuống dưới bảng -->
-        <div class="table-actions" style="margin-top: 16px;">
-            <button type="button" class="btn btn-success btn-small" onclick="addBillRow()">
-                ➕ Thêm dòng
+        <h4>2. Danh sách Bill ID</h4>
+
+        <div class="table-container">
+            <table class="bill-table" id="billTable">
+                <thead>
+                    <tr>
+                        <!-- ✅ SỬA: Thay thế inline style bằng class -->
+                        <th class="th-bill-id">Bill ID</th>
+                        <th class="th-quantity">SL tải</th>
+                        <th class="th-status">Trạng thái</th>
+                        <th class="th-action">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be added dynamically here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ✅ THAY ĐỔI CHÍNH: Di chuyển table-actions xuống dưới bảng -->
+        <div class="table-actions">
+            <button type="button" class="btn btn-primary btn-small" onclick="addSingleBillRow()">
+                ➕ Thêm ID đơn lẻ
             </button>
+            <button type="button" 
+                    id="groupedBillBtn"
+                    class="btn btn-success btn-small" 
+                    onclick="showGroupedBillModal()"
+                    data-target="#groupedBillModal">
+                📦 Thêm ID gộp tải
+            </button>
+        </div>
+
+        <div class="total-summary">
+            <strong>Tổng cộng:</strong> <span id="totalBills">0</span> Bill ID, <span id="totalLoads">0</span> bao/tải.
         </div>
     </div>
 
     <div class="form-actions">
-        <button type="button" class="btn btn-success" id="submitBtn" onclick="submitBulkForm()">
-            <span class="btn-text">💾 Tạo tất cả bản ghi</span>
-            <span class="htmx-indicator spinner"></span>
+        <button id="submitBtn" type="button" class="btn btn-primary" onclick="submitBulkForm()">
+             <span class="btn-text">Lưu tất cả</span>
+             <span class="spinner htmx-indicator"></span>
         </button>
     </div>
-
-    <div id="bulk-result-container"></div>
+    
+    <div id="bulk-result-container" style="margin-top: 20px;"></div>
 </div>
 
+<!-- ✅ SỬA: Modal có cột Trạng thái cho validation real-time, KHÔNG có cột STT -->
+<div id="groupedBillModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>Nhập các Bill ID gộp chung tải</h4>
+            <span class="close" onclick="closeGroupedBillModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="table-container modal-table-container">
+                <table class="modal-bill-table" id="modalBillTable">
+                    <thead>
+                        <tr>
+                            <!-- ✅ SỬA: Thay thế inline style bằng class -->
+                            <th class="th-bill-id">Bill ID</th>
+                            <th class="th-status">Trạng thái</th>
+                            <th class="th-action">Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalBillTbody">
+                        <!-- Modal rows will be added here -->
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-primary btn-small modal-add-row-btn" onclick="addModalBillRow()">
+                ➕ Thêm dòng
+            </button>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-success" onclick="addGroupedBillRows()">Lưu nhóm</button>
+            <button type="button" class="btn btn-secondary" onclick="closeGroupedBillModal()">Hủy</button>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ SỬA LỖI CHÍNH: Loại bỏ script conflict, chỉ giữ khởi tạo đơn giản -->
 <script>
-// Add initial row when page loads
-document.addEventListener('DOMContentLoaded', () => {
-    addBillRow();
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        // Chỉ khởi tạo row đầu tiên, không override modal functions
+        setTimeout(() => {
+            if (typeof addSingleBillRow === 'function') {
+                const tbody = document.querySelector('#billTable tbody');
+                if (tbody && tbody.rows.length === 0) {
+                    addSingleBillRow();
+                }
+            }
+        }, 100);
+        
+        // Close modal khi click backdrop
+        const modal = document.getElementById('groupedBillModal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    if (typeof closeGroupedBillModal === 'function') {
+                        closeGroupedBillModal();
+                    }
+                }
+            });
+        }
+        
+        // Close modal với Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('groupedBillModal');
+                if (modal && modal.classList.contains('show')) {
+                    if (typeof closeGroupedBillModal === 'function') {
+                        closeGroupedBillModal();
+                    }
+                }
+            }
+        });
+    });
 </script>

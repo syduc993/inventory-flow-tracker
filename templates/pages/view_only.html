@@ -1,0 +1,46 @@
+<!-- templates/pages/view_only.html -->
+<div class="record-details">
+    <h4>📋 Thông tin Bill ID: {{ record.fields.ID }}</h4>
+    
+    <div class="detail-row">
+        <span class="detail-label">Kho đi:</span>
+        <span class="detail-value">{{ record.fields['Kho đi'] }} ({{ record.fields['ID kho đi'] }})</span>
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Kho đến:</span>
+        <span class="detail-value">{{ record.fields['Kho đến'] }} ({{ record.fields['ID kho đến'] }})</span>
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Số lượng:</span>
+        <span class="detail-value">{{ record.fields['Số lượng'] }} bao/tải</span>
+    </div>
+    
+    {% if record.fields.get('Người bàn giao') %}
+    <div class="detail-row">
+        <span class="detail-label">Người bàn giao:</span>
+        <span class="detail-value">{{ record.fields['Người bàn giao'] }}</span>
+    </div>
+    {% endif %}
+    
+    {% if record.fields.get('Đơn vị vận chuyển') %}
+    <div class="detail-row">
+        <span class="detail-label">Đơn vị vận chuyển:</span>
+        <span class="detail-value">{{ record.fields['Đơn vị vận chuyển'] }}</span>
+    </div>
+    {% endif %}
+    
+    {% if record.fields.get('Ngày bàn giao') %}
+    <div class="detail-row">
+        <span class="detail-label">Ngày bàn giao:</span>
+        <span class="detail-value">{{ format_ts(record.fields['Ngày bàn giao']) }}</span>
+    </div>
+    {% endif %}
+    
+    <div class="record-actions" style="margin-top: 20px; text-align: center;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('search-result').innerHTML = ''">
+            ✖️ Đóng
+        </button>
+    </div>
+</div>

@@ -141,9 +141,15 @@ button.htmx-request {
     padding: 8px;
 }
 
+/* Đảm bảo tất cả status cell đều căn giữa */
 .status-cell {
     text-align: center;
     min-width: 120px;
+}
+.bill-table th:nth-child(3),
+.bill-table td:nth-child(3) {
+    width: 22%;
+    text-align: center; /* SỬA: đảm bảo header và cell cột Trạng thái căn giữa */
 }
 
 .status-pending { color: #666; }
@@ -151,3 +157,270 @@ button.htmx-request {
 .status-valid { color: #4caf50; font-weight: 500; }
 .status-invalid { color: #f44336; font-weight: 500; }
 .status-error { color: #ff9800; }
+/* Modal styles - Updated to match template structure */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Background overlay tối */
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex !important;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #1976d2;
+}
+
+.close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.close:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.modal-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    background: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Modal table styles */
+.modal-table-container {
+    margin: 16px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.modal-bill-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.modal-bill-table th,
+.modal-bill-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.modal-bill-table th {
+    background-color: #f5f5f5;
+    font-weight: 500;
+}
+
+.modal-bill-table input {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 14px;
+}
+
+.modal-add-row-btn {
+    margin-top: 12px;
+}
+
+/* Additional styles for better modal appearance */
+.total-summary {
+    background: #e3f2fd;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-top: 16px;
+    text-align: center;
+    font-size: 14px;
+    color: #1976d2;
+}
+
+.common-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 12px 16px;
+    }
+    
+    .common-fields-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+/* Ensure modal appears above other elements */
+.modal {
+    z-index: 9999;
+}
+
+/* Grouped row styling */
+.grouped-row {
+    background-color: #f0f8ff;
+}
+
+.grouped-quantity-cell {
+    background-color: #e3f2fd !important;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.grouped-quantity-cell .text-muted {
+    display: block;
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Button secondary style for modal */
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* === SỬA: Áp dụng cho tất cả màn hình === */
+.bill-table {
+    table-layout: fixed; /* Bắt buộc để width hoạt động */
+    width: 100%;
+}
+
+/* === Chiều rộng cột cho tất cả màn hình === */
+.bill-table th:nth-child(1), /* Cột ID */
+.bill-table td:nth-child(1) {
+    width: 60%;
+}
+
+.bill-table th:nth-child(2), /* Cột SL tải */  
+.bill-table td:nth-child(2) {
+    width: 8%; /* ✅ Giảm từ 5% lên 8% để đủ chứa số */
+    text-align: center;
+}
+
+/* SỬA: Đảm bảo cột Trạng thái trên desktop căn giữa */
+.bill-table th:nth-child(3),
+.bill-table td:nth-child(3) {
+    width: 22%;
+    text-align: center;
+}
+
+.bill-table th:nth-child(4), /* Cột Xóa */
+.bill-table td:nth-child(4) {
+    width: 10%;
+    text-align: center;
+}
+
+/* === Mobile responsive (giữ nguyên phần này) === */
+@media (max-width: 768px) {
+    .bill-table {
+        table-layout: fixed; 
+        width: 100%;
+    }
+
+    /* === Phân chia lại chiều rộng các cột === */
+    .bill-table th:nth-child(1),
+    .bill-table td:nth-child(1) { width: 18%; }
+    
+    .bill-table th:nth-child(2), 
+    .bill-table td:nth-child(2) { 
+        width: 12%; /* ✅ Tăng từ 5% lên 12% cho mobile */
+        text-align: center;
+    }
+    
+    /* SỬA: Đảm bảo cột Trạng thái trên mobile căn giữa */
+    .bill-table th:nth-child(3),
+    .bill-table td:nth-child(3) { width: 18%; text-align: center; }
+    
+    .bill-table th:nth-child(4),
+    .bill-table td:nth-child(4) { width: 9%; text-align: center; }
+
+    /* Giảm padding và font-size chung cho bảng trên mobile */
+    .bill-table th,
+    .bill-table td {
+        padding: 8px 5px;
+        font-size: 13px;
+        vertical-align: middle;
+        word-wrap: break-word;
+    }
+
+    /* Tối ưu input và button trong bảng */
+    .bill-table .form-control {
+        font-size: 13px;
+        padding: 6px 4px;
+    }
+
+    .bill-table .btn-small {
+        padding: 5px;
+        font-size: 12px;
+    }
+}

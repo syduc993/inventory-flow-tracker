@@ -19,14 +19,26 @@
     font-size: 14px;
 }
 
+/* Sửa: đồng nhất height input và button trong search-form */
+.form-control,
+.search-input,
+.search-form .btn {
+    height: 44px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    line-height: 20px;
+    /* giữ nguyên các thuộc tính cũ */
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
 .form-control,
 .search-input {
     width: 100% !important;
-    box-sizing: border-box;
-    padding: 12px 16px;
+    padding-left: 16px;
+    padding-right: 16px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 16px;
     transition: border-color 0.2s;
 }
 
@@ -37,7 +49,7 @@
     box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-/* Buttons */
+/* ✅ SỬA: Buttons với responsive text handling */
 .btn {
     width: 100% !important;
     box-sizing: border-box;
@@ -51,8 +63,53 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     min-width: unset;
-    white-space: nowrap;
+    white-space: normal; /* ✅ SỬA: Cho phép xuống dòng */
     height: auto;
+    text-align: center;
+    line-height: 1.2; /* ✅ THÊM: Cải thiện line height */
+}
+
+/* Căn chỉnh cho mọi nút trong search-form */
+.search-form .btn {
+    height: 44px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .btn {
+        font-size: 12px;
+        padding: 10px 12px;
+        letter-spacing: 0.3px;
+    }
+    .search-form .btn,
+    .form-control,
+    .search-input {
+        height: 38px;
+        font-size: 14px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn {
+        font-size: 11px;
+        padding: 8px 10px;
+        letter-spacing: 0.2px;
+    }
+    .search-form .btn,
+    .form-control,
+    .search-input {
+        height: 32px;
+        font-size: 13px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
 }
 
 .btn-primary {
@@ -88,6 +145,7 @@
     padding: 6px 12px !important;
     font-size: 12px;
     flex: 0 0 auto;
+    white-space: nowrap; /* ✅ Giữ nowrap cho button nhỏ */
 }
 
 /* Form actions */
@@ -99,6 +157,7 @@
     margin-bottom: 8px;
 }
 
+/* ✅ SỬA: Button group với responsive gap */
 .btn-group {
     display: flex;
     gap: 8px;
@@ -107,6 +166,14 @@
 
 .btn-group .btn {
     flex: 1;
+    min-width: 0; /* ✅ THÊM: Cho phép flex shrink */
+}
+
+/* ✅ THÊM: Responsive gap cho button group */
+@media (max-width: 480px) {
+    .btn-group {
+        gap: 4px;
+    }
 }
 
 /* Input with refresh button */
@@ -126,6 +193,23 @@
     min-width: 120px;
 }
 
+/* ✅ THÊM: Responsive input with refresh */
+@media (max-width: 480px) {
+    .input-with-refresh {
+        gap: 4px;
+    }
+    
+    .input-with-refresh .btn {
+        min-width: 80px;
+        font-size: 10px;
+        padding: 8px 6px;
+    }
+
+    .input-with-refresh .form-control {
+        padding: 8px 8px;
+        font-size: 14px; 
+    }
+}
 /* Refresh container */
 .refresh-container {
     width: 100%;

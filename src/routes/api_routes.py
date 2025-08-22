@@ -133,7 +133,6 @@ async def bulk_create_records(
         for item in bill_data:
             bill_id = item.get("bill_id")
             quantity = item.get("quantity", 0)
-            
             if not quantity or quantity == 0:
                 return HTMLResponse(f'<div class="error">❌ Bill ID "{bill_id}": Bắt buộc nhập số lượng bao/tải</div>')
         
@@ -146,21 +145,53 @@ async def bulk_create_records(
         if not to_valid:
             return HTMLResponse(f'<div class="error">❌ Kho đến không hợp lệ: {to_name}</div>')
         
-        results = []
+        # ✅ SỬA: Counters cho summary - không lưu từng thông báo nữa
         success_count = 0
+        error_count = 0
+        total_count = len(bill_data)
+        error_samples = []  # Chỉ lưu mẫu lỗi để hiển thị
+        
+        # ✅ SỬA: Chuẩn bị data cho batch creation
+        records_to_create = []
+        valid_bill_ids = []
         
         for item in bill_data:
             bill_id = item.get("bill_id")
             quantity = item.get("quantity", 0)
             
-            # Validate bill ID
             imex_items = record_service.get_api_data(bill_id)
             if not imex_items:
-                results.append(f"❌ {bill_id}: ID không hợp lệ")
+                error_count += 1
+                if len(error_samples) < 3:  # Chỉ lưu 3 mẫu lỗi đầu tiên
+                    error_samples.append(f"{bill_id}: ID không hợp lệ")
                 continue
-            
-            # Create record
+
             example_item = imex_items[0]
+
+            # Kiểm tra status
+            status_str = example_item.get("status", "")
+            try:
+                status = int(status_str) if status_str else None
+            except ValueError:
+                status = None
+
+            if status not in [3, 4, 5, 6]:
+                error_count += 1
+                if len(error_samples) < 3:
+                    error_samples.append(f"{bill_id}: ID chưa được duyệt")
+                continue
+            if example_item.get("fromDepotId", "") != from_depot:
+                error_count += 1
+                if len(error_samples) < 3:
+                    error_samples.append(f"{bill_id}: Không đúng kho đi")
+                continue
+            if example_item.get("toDepotId", "") != to_depot:
+                error_count += 1
+                if len(error_samples) < 3:
+                    error_samples.append(f"{bill_id}: Không đúng kho đến")
+                continue
+
+            # Chuẩn bị record data cho batch creation
             record_data = {
                 "ID": bill_id,
                 "ID kho đi": example_item.get("fromDepotId", ""),
@@ -174,21 +205,60 @@ async def bulk_create_records(
                 "Ngày bàn giao": int(time.time() * 1000)
             }
             
-            success, message = record_service.create_record(record_data)
-            if success:
-                results.append(f"✅ {bill_id}: Thành công")
-                success_count += 1
+            records_to_create.append(record_data)
+            valid_bill_ids.append(bill_id)
+
+        # ✅ SỬA: Sử dụng batch creation thay vì tạo từng record
+        if records_to_create:
+            batch_success, batch_message = record_service.batch_create_records(records_to_create)
+            
+            if batch_success:
+                # Batch thành công - tất cả records hợp lệ đều được tạo
+                success_count = len(valid_bill_ids)
             else:
-                results.append(f"❌ {bill_id}: {message}")
+                # Batch thất bại - fallback về tạo từng record
+                logger.warning(f"Batch creation failed: {batch_message}, falling back to individual creation")
+                
+                for i, record_data in enumerate(records_to_create):
+                    bill_id = valid_bill_ids[i]
+                    success, message = record_service.create_record(record_data)
+                    if success:
+                        success_count += 1
+                    else:
+                        error_count += 1
+                        if len(error_samples) < 3:
+                            error_samples.append(f"{bill_id}: {message}")
+
+        # ✅ SỬA: Format kết quả ngắn gọn - không liệt kê từng ID
+        if success_count == total_count:
+            # Tất cả thành công
+            result_html = f'<div class="success">📊 Hoàn thành: {success_count}/{total_count} bản ghi thành công</div>'
+        elif success_count > 0 and error_count > 0:
+            # Một phần thành công
+            result_html = f'<div class="info">📊 Hoàn thành: {success_count}/{total_count} bản ghi thành công'
+            result_html += f'<br>❌ {error_count} bản ghi thất bại'
+            
+            # Chỉ hiển thị mẫu lỗi nếu có
+            if error_samples:
+                result_html += f'<br><small>Ví dụ lỗi: {"; ".join(error_samples)}'
+                if error_count > len(error_samples):
+                    result_html += f' và {error_count - len(error_samples)} lỗi khác'
+                result_html += '</small>'
+            
+            result_html += '</div>'
+        else:
+            # Tất cả thất bại
+            result_html = f'<div class="error">❌ Không thể tạo bản ghi nào ({error_count}/{total_count} thất bại)'
+            
+            # Hiển thị mẫu lỗi
+            if error_samples:
+                result_html += f'<br>Lỗi: {"; ".join(error_samples)}'
+                if error_count > len(error_samples):
+                    result_html += f' và {error_count - len(error_samples)} lỗi khác'
+            
+            result_html += '</div>'
         
-        # Format results
-        result_html = f'<div class="success">📊 Hoàn thành: {success_count}/{len(bill_data)} bản ghi thành công</div>'
-        result_html += '<div class="info"><ul>'
-        for result in results:
-            result_html += f'<li>{result}</li>'
-        result_html += '</ul></div>'
-        
-        logger.info(f"User {user.get('name')} bulk created {success_count} records")
+        logger.info(f"User {user.get('name')} bulk created {success_count}/{total_count} records")
         return HTMLResponse(result_html)
         
     except Exception as e:

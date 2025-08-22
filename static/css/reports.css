@@ -222,12 +222,11 @@
         white-space: nowrap; /* Không xuống dòng */
     }
     
-    /* Riêng cột tuyến đường - cho phép scroll ngang */
+    /* Riêng cột tuyến đường - hiển thị đầy đủ nội dung */
     .route-name {
-        min-width: 120px;
-        max-width: 140px;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        min-width: 150px;
+        white-space: nowrap;
+        word-break: keep-all;
     }
 
     .transport-list {
@@ -255,7 +254,6 @@
         font-size: 12px;
     }
 }
-
 
 /* Mobile-first responsive filters */
 .mobile-filters {
