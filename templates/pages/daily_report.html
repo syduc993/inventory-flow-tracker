@@ -131,10 +131,9 @@
                                         <td class="text-center">{{ route.count }}</td>
                                         <td class="text-center">{{ route.quantity }}</td>
                                         <td>
+                                            <!-- ✅ SỬA: Hiển thị transport_provider thay vì loop transport_providers -->
                                             <div class="transport-list">
-                                                {% for provider in route.transport_providers %}
-                                                <span class="transport-tag">{{ provider }}</span>
-                                                {% endfor %}
+                                                <span class="transport-tag">{{ route.transport_provider }}</span>
                                             </div>
                                         </td>
                                         <td class="text-center">
