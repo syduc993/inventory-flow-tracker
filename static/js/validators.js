@@ -19,7 +19,7 @@ export function showValidationError(message) {
     errorDiv.textContent = message;
     errorDiv.style.cssText = `
         position: fixed;
-        top: 20px;
+        bottom: 20px;
         right: 20px;
         background: #f44336;
         color: white;
@@ -34,4 +34,39 @@ export function showValidationError(message) {
     setTimeout(() => {
         errorDiv.remove();
     }, 3000);
+}
+
+export function showRefreshNotification(message, type = 'success', duration = 3000) {
+    const existing = document.querySelector('.refresh-notification');
+    if (existing) {
+        existing.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = `refresh-notification ${type}`;
+    
+    notification.innerHTML = `
+        <span style="margin-right: 8px;">${type === 'success' ? '✅' : '❌'}</span>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Force reflow
+    notification.offsetHeight;
+    
+    // Show animation
+    requestAnimationFrame(() => {
+        notification.classList.add('show');
+    });
+    
+    // Auto hide
+    setTimeout(() => {
+        notification.classList.add('hide');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 400);
+    }, duration);
 }

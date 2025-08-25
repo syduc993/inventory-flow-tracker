@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-22 18:46:40
+Thời gian tạo: 2025-08-25 10:19:53
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -89,59 +89,59 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 .gitignore (628 bytes)
 docker-compose.yml (365 bytes)
 Dockerfile (590 bytes)
-Get detail code.ipynb (9335 bytes)
+Get detail code.ipynb (9334 bytes)
 main.py (253 bytes)
 project_complete_info.txt (0 bytes)
 README.md (432 bytes)
 requirements.txt (193 bytes)
 src\auth\__init__.py (0 bytes)
-src\auth\auth_middleware.py (2761 bytes)
-src\auth\lark_oauth.py (6808 bytes)
+src\auth\auth_middleware.py (8925 bytes)
+src\auth\lark_oauth.py (22567 bytes)
 src\auth\session_manager.py (3876 bytes)
 src\core\__init__.py (0 bytes)
 src\core\app.py (2075 bytes)
 src\core\dependencies.py (2258 bytes)
 src\routes\__init__.py (0 bytes)
-src\routes\api_routes.py (11715 bytes)
+src\routes\api_routes.py (19957 bytes)
 src\routes\auth_routes.py (4183 bytes)
 src\routes\record_routes.py (9277 bytes)
-src\routes\refresh_routes.py (3074 bytes)
+src\routes\refresh_routes.py (5111 bytes)
 src\routes\report_routes.py (6079 bytes)
 src\services\__init__.py (0 bytes)
 src\services\depot_service.py (769 bytes)
 src\services\employee_service.py (399 bytes)
-src\services\record_service.py (6839 bytes)
+src\services\record_service.py (9173 bytes)
 src\services\report_service.py (28564 bytes)
 src\services\transport_service.py (609 bytes)
 src\utils\__init__.py (0 bytes)
 src\utils\api.py (2170 bytes)
-src\utils\cache.py (3956 bytes)
-src\utils\config.py (5056 bytes)
-src\utils\depot.py (3422 bytes)
+src\utils\cache.py (3913 bytes)
+src\utils\config.py (5082 bytes)
+src\utils\depot.py (3382 bytes)
 src\utils\larkbase.py (6822 bytes)
-src\utils\transport_provider.py (3235 bytes)
-static\css\components.css (8698 bytes)
+src\utils\transport_provider.py (3181 bytes)
+static\css\components.css (10454 bytes)
 static\css\dropdowns.css (3053 bytes)
-static\css\forms.css (5203 bytes)
-static\css\main.css (5508 bytes)
+static\css\forms.css (5425 bytes)
+static\css\main.css (5781 bytes)
 static\css\reports.css (8009 bytes)
-static\js\app.js (1253 bytes)
-static\js\bulk-form.js (17406 bytes)
-static\js\dropdown.js (15965 bytes)
-static\js\validators.js (1173 bytes)
+static\js\app.js (1471 bytes)
+static\js\bulk-form.js (27351 bytes)
+static\js\dropdown.js (15968 bytes)
+static\js\validators.js (2170 bytes)
 templates\auth\login.html (3373 bytes)
 templates\auth\unauthorized.html (3976 bytes)
 templates\components\common\footer.html (0 bytes)
 templates\components\common\header.html (706 bytes)
-templates\components\common\scripts.html (2053 bytes)
+templates\components\common\scripts.html (1226 bytes)
 templates\components\dropdowns\depot.html (1191 bytes)
 templates\components\dropdowns\employee.html (1391 bytes)
 templates\components\dropdowns\transport.html (1292 bytes)
-templates\components\forms\bulk_create.html (9322 bytes)
+templates\components\forms\bulk_create.html (9940 bytes)
 templates\components\forms\create.html (1201 bytes)
 templates\components\forms\search.html (895 bytes)
 templates\components\forms\update.html (0 bytes)
-templates\pages\daily_report.html (8786 bytes)
+templates\pages\daily_report.html (8774 bytes)
 templates\pages\index.html (2404 bytes)
 templates\pages\view_only.html (1858 bytes)
 
@@ -240,7 +240,79 @@ FILE: src\auth\__init__.py
 ============================================================
 FILE: src\auth\auth_middleware.py
 ============================================================
+# # src/auth/auth_middleware.py
+# import logging
+# from typing import List
+# from fastapi import Request, Response, HTTPException
+# from fastapi.responses import RedirectResponse
+# from starlette.middleware.base import BaseHTTPMiddleware
+# from .session_manager import SessionManager
+
+# logger = logging.getLogger(__name__)
+
+# class AuthMiddleware(BaseHTTPMiddleware):
+#     def __init__(self, app, session_manager: SessionManager, public_paths: List[str] = None):
+#         super().__init__(app)
+#         self.session_manager = session_manager
+#         # ✅ SỬA: Sync public paths với main.py để tránh inconsistency
+#         self.public_paths = public_paths or [
+#             "/login",
+#             "/auth/callback",
+#             "/auth/lark",  # ← THÊM: Đảm bảo consistent với main.py
+#             "/health",
+#             "/static",
+#             "/favicon.ico"
+#         ]
+
+#     def is_public_path(self, path: str) -> bool:
+#         """Kiểm tra xem path có phải là public không"""
+#         return any(path.startswith(public_path) for public_path in self.public_paths)
+
+#     async def dispatch(self, request: Request, call_next):
+#         # Skip auth cho public paths
+#         if self.is_public_path(request.url.path):
+#             return await call_next(request)
+
+#         # Lấy session token từ cookie
+#         session_token = request.cookies.get("session_token")
+        
+#         if not session_token:
+#             logger.info(f"No session token, redirecting to login: {request.url.path}")
+#             return RedirectResponse(url="/login", status_code=302)
+
+#         # Verify token
+#         user_info = self.session_manager.get_user_from_token(session_token)
+#         if not user_info:
+#             logger.info(f"Invalid session token, redirecting to login: {request.url.path}")
+#             response = RedirectResponse(url="/login", status_code=302)
+#             response.delete_cookie("session_token")
+#             return response
+
+#         # Thêm user info vào request state
+#         request.state.user = user_info
+        
+#         # Try to refresh token if needed
+#         refreshed_token = self.session_manager.refresh_token_if_needed(session_token)
+        
+#         response = await call_next(request)
+        
+#         # Set refreshed token if available
+#         if refreshed_token and refreshed_token != session_token:
+#             response.set_cookie(
+#                 "session_token", 
+#                 refreshed_token, 
+#                 httponly=True,
+#                 secure=False,  # Set True in production with HTTPS
+#                 samesite="lax",
+#                 max_age=24*60*60  # 24 hours
+#             )
+#             logger.info("Session token refreshed and set in cookie")
+
+#         return response
+
 # src/auth/auth_middleware.py
+
+
 import logging
 from typing import List
 from fastapi import Request, Response, HTTPException
@@ -250,72 +322,324 @@ from .session_manager import SessionManager
 
 logger = logging.getLogger(__name__)
 
+
 class AuthMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware xử lý authentication cho toàn bộ ứng dụng FastAPI
+    
+    Chức năng chính:
+    - Kiểm tra session token từ cookie cho tất cả requests
+    - Redirect user đến trang login nếu chưa authenticate
+    - Bỏ qua kiểm tra cho các public paths
+    - Tự động refresh token khi cần thiết
+    - Inject user info vào request state
+    
+    Flow xử lý:
+    1. Kiểm tra xem path có phải public không
+    2. Lấy session token từ cookie
+    3. Verify token với SessionManager
+    4. Thêm user info vào request state
+    5. Refresh token nếu cần và set cookie mới
+    """
+    
     def __init__(self, app, session_manager: SessionManager, public_paths: List[str] = None):
+        """
+        Khởi tạo Authentication Middleware
+        
+        Args:
+            app: FastAPI application instance
+            session_manager: SessionManager instance để verify tokens
+            public_paths: List các paths không cần authentication
+        """
         super().__init__(app)
         self.session_manager = session_manager
-        # ✅ SỬA: Sync public paths với main.py để tránh inconsistency
+        
+        # ✅ STEP 1: Thiết lập danh sách public paths mặc định
         self.public_paths = public_paths or [
-            "/login",
-            "/auth/callback",
-            "/auth/lark",  # ← THÊM: Đảm bảo consistent với main.py
-            "/health",
-            "/static",
-            "/favicon.ico"
+            "/login",           # Trang đăng nhập
+            "/auth/callback",   # OAuth callback endpoint
+            "/auth/lark",       # ← THÊM: Đảm bảo consistent với main.py
+            "/health",          # Health check endpoint
+            "/static",          # Static files (CSS, JS, images)
+            "/favicon.ico"      # Favicon request
         ]
 
     def is_public_path(self, path: str) -> bool:
-        """Kiểm tra xem path có phải là public không"""
+        """
+        Kiểm tra xem path có phải là public path không cần authentication
+        
+        Args:
+            path: Request path cần kiểm tra
+            
+        Returns:
+            bool: True nếu là public path, False nếu cần authentication
+            
+        Logic:
+        - Sử dụng startswith để match prefix paths (vd: /static/*)
+        - Return True ngay khi tìm thấy match đầu tiên
+        """
+        # ✅ STEP 1: Duyệt qua từng public path để kiểm tra
         return any(path.startswith(public_path) for public_path in self.public_paths)
 
     async def dispatch(self, request: Request, call_next):
-        # Skip auth cho public paths
+        """
+        Main middleware function xử lý authentication cho mỗi request
+        
+        Args:
+            request: FastAPI Request object
+            call_next: Next middleware/route handler
+            
+        Returns:
+            Response: HTTP response (có thể là redirect hoặc từ route handler)
+            
+        Flow xử lý:
+        1. Kiểm tra public path → skip auth nếu đúng
+        2. Lấy session token từ cookie
+        3. Verify token với SessionManager
+        4. Inject user info vào request state
+        5. Process request và refresh token nếu cần
+        6. Set refreshed token vào cookie response
+        
+        Error Handling:
+        - No token → redirect to /login
+        - Invalid token → redirect to /login + clear cookie
+        - Token refresh fails → log warning nhưng vẫn proceed
+        """
+        
+        # ✅ STEP 1: Bỏ qua authentication cho public paths
         if self.is_public_path(request.url.path):
+            # Không cần auth cho public endpoints
             return await call_next(request)
 
-        # Lấy session token từ cookie
+        # ✅ STEP 2: Lấy session token từ HTTP cookie
         session_token = request.cookies.get("session_token")
         
+        # ❌ ERROR CASE 1: Không có session token
         if not session_token:
-            logger.info(f"No session token, redirecting to login: {request.url.path}")
+            logger.info(f"🔍 No session token, redirecting to login: {request.url.path}")
             return RedirectResponse(url="/login", status_code=302)
 
-        # Verify token
+        # ✅ STEP 3: Verify token với SessionManager
         user_info = self.session_manager.get_user_from_token(session_token)
+        
+        # ❌ ERROR CASE 2: Token không hợp lệ hoặc đã hết hạn
         if not user_info:
-            logger.info(f"Invalid session token, redirecting to login: {request.url.path}")
+            logger.info(f"❌ Invalid session token, redirecting to login: {request.url.path}")
+            # Tạo redirect response và xóa cookie không hợp lệ
             response = RedirectResponse(url="/login", status_code=302)
             response.delete_cookie("session_token")
             return response
 
-        # Thêm user info vào request state
+        # ✅ STEP 4: Inject user info vào request state để routes có thể sử dụng
         request.state.user = user_info
         
-        # Try to refresh token if needed
+        # ✅ STEP 5: Thử refresh token nếu sắp hết hạn
+             # Check và refresh token proactively
         refreshed_token = self.session_manager.refresh_token_if_needed(session_token)
         
+        # ✅ STEP 6: Tiếp tục xử lý request với middleware/route handler tiếp theo
         response = await call_next(request)
         
-        # Set refreshed token if available
+        # ✅ STEP 7: Set refreshed token vào cookie nếu có token mới
         if refreshed_token and refreshed_token != session_token:
+            # Cập nhật cookie với token mới được refresh
             response.set_cookie(
                 "session_token", 
                 refreshed_token, 
-                httponly=True,
-                secure=False,  # Set True in production with HTTPS
-                samesite="lax",
-                max_age=24*60*60  # 24 hours
+                httponly=True,      # Bảo mật: chỉ server có thể đọc
+                secure=False,       # Set True in production với HTTPS
+                samesite="lax",     # CSRF protection
+                max_age=24*60*60    # 24 giờ expiry
             )
-            logger.info("Session token refreshed and set in cookie")
+            logger.info("✅ Session token refreshed and set in cookie")
 
         return response
+
 
 ============================================================
 
 ============================================================
 FILE: src\auth\lark_oauth.py
 ============================================================
+# # src/auth/lark_oauth.py
+# import httpx
+# import json
+# import logging
+# from typing import Optional, Tuple, Dict, Any
+# from urllib.parse import urlencode
+# import time
+
+# logger = logging.getLogger(__name__)
+
+# class LarkOAuthService:
+#     def __init__(self, app_id: str, app_secret: str, base_url: str, redirect_uri: str):
+#         self.app_id = app_id
+#         self.app_secret = app_secret
+#         self.base_url = base_url
+#         self.redirect_uri = redirect_uri
+#         self._app_access_token = None
+#         self._token_expires_at = 0
+
+#     def generate_oauth_url(self, state: str = None) -> str:
+#         """Tạo URL OAuth để redirect user đến Lark"""
+#         params = {
+#             'app_id': self.app_id,
+#             'redirect_uri': self.redirect_uri,
+#             'response_type': 'code',
+#             'scope': 'contact:user.id:readonly'
+#         }
+#         if state:
+#             params['state'] = state
+        
+#         oauth_url = f"{self.base_url}/authen/v1/authorize?" + urlencode(params)
+#         logger.info(f"Generated OAuth URL: {oauth_url}")
+#         return oauth_url
+
+#     async def get_app_access_token(self) -> Optional[str]:
+#         """Lấy app_access_token từ Lark"""
+#         # Check cache
+#         if self._app_access_token and time.time() < self._token_expires_at:
+#             return self._app_access_token
+
+#         url = f"{self.base_url}/auth/v3/app_access_token/internal"
+#         payload = {
+#             "app_id": self.app_id,
+#             "app_secret": self.app_secret
+#         }
+        
+#         try:
+#             async with httpx.AsyncClient() as client:
+#                 response = await client.post(url, json=payload, timeout=10)
+#                 response.raise_for_status()
+                
+#                 data = response.json()
+#                 if data.get('code') == 0:
+#                     token = data.get('app_access_token')
+#                     expires_in = data.get('expire', 7200)  # Default 2 hours
+                    
+#                     # Cache token
+#                     self._app_access_token = token
+#                     self._token_expires_at = time.time() + expires_in - 300  # 5 min buffer
+                    
+#                     logger.info("Successfully obtained app_access_token")
+#                     return token
+#                 else:
+#                     logger.error(f"Failed to get app_access_token: {data}")
+#                     return None
+                    
+#         except Exception as e:
+#             logger.error(f"Error getting app_access_token: {e}")
+#             return None
+
+#     async def exchange_code_for_token(self, code: str) -> Optional[str]:
+#         """Đổi authorization code thành user_access_token"""
+#         app_token = await self.get_app_access_token()
+#         if not app_token:
+#             return None
+
+#         url = f"{self.base_url}/authen/v1/oidc/access_token"
+#         headers = {
+#             "Authorization": f"Bearer {app_token}",
+#             "Content-Type": "application/json"
+#         }
+#         payload = {
+#             "grant_type": "authorization_code",
+#             "code": code
+#         }
+        
+#         try:
+#             async with httpx.AsyncClient() as client:
+#                 response = await client.post(url, headers=headers, json=payload, timeout=10)
+#                 response.raise_for_status()
+                
+#                 data = response.json()
+#                 if data.get('code') == 0:
+#                     return data.get('data', {}).get('access_token')
+#                 else:
+#                     logger.error(f"Failed to exchange code: {data}")
+#                     return None
+                    
+#         except Exception as e:
+#             logger.error(f"Error exchanging code: {e}")
+#             return None
+
+#     async def get_user_info(self, user_access_token: str) -> Optional[Dict[str, Any]]:
+#         """Lấy thông tin user từ user_access_token"""
+#         url = f"{self.base_url}/authen/v1/user_info"
+#         headers = {
+#             "Authorization": f"Bearer {user_access_token}"
+#         }
+        
+#         try:
+#             async with httpx.AsyncClient() as client:
+#                 response = await client.get(url, headers=headers, timeout=10)
+#                 response.raise_for_status()
+                
+#                 data = response.json()
+#                 if data.get('code') == 0:
+#                     return data.get('data')
+#                 else:
+#                     logger.error(f"Failed to get user info: {data}")
+#                     return None
+                    
+#         except Exception as e:
+#             logger.error(f"Error getting user info: {e}")
+#             return None
+
+#     async def check_user_permission(self, open_id: str, app_token: str, table_id: str) -> Tuple[bool, str]:
+#         """Kiểm tra quyền user trong Larkbase table"""
+#         app_access_token = await self.get_app_access_token()
+#         if not app_access_token:
+#             return False, "Không thể xác thực với Lark"
+
+#         url = f"{self.base_url}/bitable/v1/apps/{app_token}/tables/{table_id}/records/search"
+#         headers = {
+#             "Authorization": f"Bearer {app_access_token}",
+#             "Content-Type": "application/json"
+#         }
+#         payload = {
+#             "filter": {
+#                 "conjunction": "and",
+#                 "conditions": [
+#                     {
+#                         "field_name": "Người",
+#                         "operator": "contains", 
+#                         "value": [open_id]
+#                     },
+#                     {
+#                         "field_name": "Trạng thái",
+#                         "operator": "is",
+#                         "value": ["Kích hoạt"]
+#                     }
+#                 ]
+#             }
+#         }
+        
+#         try:
+#             async with httpx.AsyncClient() as client:
+#                 response = await client.post(url, headers=headers, json=payload, timeout=10)
+#                 response.raise_for_status()
+                
+#                 data = response.json()
+#                 if data.get('code') == 0:
+#                     items = data.get('data', {}).get('items', [])
+#                     if items:
+#                         return True, "User có quyền truy cập"
+#                     else:
+#                         return False, "User không có quyền truy cập hoặc chưa được kích hoạt"
+#                 else:
+#                     logger.error(f"Failed to check permissions: {data}")
+#                     return False, f"Lỗi kiểm tra quyền: {data.get('msg', 'Unknown error')}"
+                    
+#         except Exception as e:
+#             logger.error(f"Error checking permissions: {e}")
+#             return False, f"Lỗi hệ thống: {str(e)}"
+
+
+
 # src/auth/lark_oauth.py
+
+
 import httpx
 import json
 import logging
@@ -325,36 +649,111 @@ import time
 
 logger = logging.getLogger(__name__)
 
+
 class LarkOAuthService:
+    """
+    Service xử lý OAuth authentication với Lark/Feishu platform
+    
+    Chức năng chính:
+    - Tạo OAuth URL để redirect user đến Lark login
+    - Lấy và cache app_access_token từ Lark API
+    - Đổi authorization code thành user_access_token
+    - Lấy thông tin user từ Lark API
+    - Kiểm tra quyền user trong Larkbase table
+    
+    OAuth Flow:
+    1. Generate OAuth URL → User login trên Lark
+    2. Lark callback với code → Exchange code for token
+    3. Use token để get user info
+    4. Check user permission trong Larkbase
+    
+    Token Management:
+    - Cache app_access_token với expiry time
+    - Auto refresh khi token sắp hết hạn
+    """
+    
     def __init__(self, app_id: str, app_secret: str, base_url: str, redirect_uri: str):
+        """
+        Khởi tạo Lark OAuth Service
+        
+        Args:
+            app_id: Lark app ID từ developer console
+            app_secret: Lark app secret từ developer console  
+            base_url: Base URL của Lark API (https://open.feishu.cn/open-apis)
+            redirect_uri: Callback URL sau khi user login thành công
+        """
+        # ✅ STEP 1: Lưu thông tin app credentials
         self.app_id = app_id
         self.app_secret = app_secret
         self.base_url = base_url
         self.redirect_uri = redirect_uri
-        self._app_access_token = None
-        self._token_expires_at = 0
+        
+        # ✅ STEP 2: Khởi tạo token cache để tránh gọi API liên tục
+        self._app_access_token = None  # Cache app token
+        self._token_expires_at = 0     # Thời gian hết hạn token
+
 
     def generate_oauth_url(self, state: str = None) -> str:
-        """Tạo URL OAuth để redirect user đến Lark"""
+        """
+        Tạo OAuth URL để redirect user đến Lark login page
+        
+        Args:
+            state: Optional state parameter để verify callback
+            
+        Returns:
+            str: Complete OAuth URL cho Lark authorization
+            
+        OAuth Parameters:
+        - app_id: ID của Lark app
+        - redirect_uri: URL callback sau khi login
+        - response_type: 'code' để nhận authorization code
+        - scope: Quyền truy cập cần thiết (contact:user.id:readonly)
+        - state: Tham số bảo mật để verify callback
+        """
+        # ✅ STEP 1: Chuẩn bị parameters cho OAuth URL
         params = {
             'app_id': self.app_id,
             'redirect_uri': self.redirect_uri,
-            'response_type': 'code',
-            'scope': 'contact:user.id:readonly'
+            'response_type': 'code',  # Authorization Code Flow
+            'scope': 'contact:user.id:readonly'  # Quyền đọc thông tin user cơ bản
         }
+        
+        # ✅ STEP 2: Thêm state parameter nếu có (để bảo mật)
         if state:
             params['state'] = state
         
+        # ✅ STEP 3: Build complete OAuth URL với encoded parameters
         oauth_url = f"{self.base_url}/authen/v1/authorize?" + urlencode(params)
-        logger.info(f"Generated OAuth URL: {oauth_url}")
+        logger.info(f"🔍 Generated OAuth URL: {oauth_url}")
         return oauth_url
 
+
     async def get_app_access_token(self) -> Optional[str]:
-        """Lấy app_access_token từ Lark"""
-        # Check cache
+        """
+        Lấy app_access_token từ Lark API với caching mechanism
+        
+        Returns:
+            Optional[str]: App access token hoặc None nếu thất bại
+            
+        API Endpoint: /auth/v3/app_access_token/internal
+        Method: POST
+        
+        Caching Strategy:
+        - Cache token với expiry time
+        - Return cached token nếu còn hạn
+        - Refresh token khi sắp hết hạn (buffer 5 phút)
+        
+        Error Handling:
+        - Network timeout (10s)
+        - API error response
+        - JSON parsing errors
+        """
+        # ✅ STEP 1: Kiểm tra cache - return nếu token còn hạn
         if self._app_access_token and time.time() < self._token_expires_at:
+            # Token còn hạn, không cần gọi API
             return self._app_access_token
 
+        # ✅ STEP 2: Chuẩn bị request để lấy token mới
         url = f"{self.base_url}/auth/v3/app_access_token/internal"
         payload = {
             "app_id": self.app_id,
@@ -362,132 +761,249 @@ class LarkOAuthService:
         }
         
         try:
+            # ✅ STEP 3: Gọi Lark API để lấy app access token
             async with httpx.AsyncClient() as client:
+                # Đang request app access token từ Lark
                 response = await client.post(url, json=payload, timeout=10)
-                response.raise_for_status()
+                response.raise_for_status()  # Raise exception cho HTTP errors
                 
+                # ✅ STEP 4: Parse response và kiểm tra kết quả
                 data = response.json()
-                if data.get('code') == 0:
+                if data.get('code') == 0:  # Lark API success code
                     token = data.get('app_access_token')
-                    expires_in = data.get('expire', 7200)  # Default 2 hours
+                    expires_in = data.get('expire', 7200)  # Default 2 giờ
                     
-                    # Cache token
+                    # ✅ STEP 5: Cache token với expiry time (buffer 5 phút)
                     self._app_access_token = token
                     self._token_expires_at = time.time() + expires_in - 300  # 5 min buffer
                     
-                    logger.info("Successfully obtained app_access_token")
+                    logger.info("✅ Successfully obtained app_access_token")
                     return token
                 else:
-                    logger.error(f"Failed to get app_access_token: {data}")
+                    # ❌ ERROR CASE 1: API trả về lỗi
+                    logger.error(f"❌ Failed to get app_access_token: {data}")
                     return None
                     
         except Exception as e:
-            logger.error(f"Error getting app_access_token: {e}")
+            # ❌ ERROR CASE 2: Network hoặc parsing error
+            logger.error(f"❌ Error getting app_access_token: {e}")
             return None
+
 
     async def exchange_code_for_token(self, code: str) -> Optional[str]:
-        """Đổi authorization code thành user_access_token"""
+        """
+        Đổi authorization code thành user_access_token
+        
+        Args:
+            code: Authorization code từ Lark callback
+            
+        Returns:
+            Optional[str]: User access token hoặc None nếu thất bại
+            
+        API Endpoint: /authen/v1/oidc/access_token
+        Method: POST
+        Headers: Authorization Bearer với app_access_token
+        
+        Flow:
+        1. Lấy app_access_token trước
+        2. Sử dụng app token để exchange code
+        3. Return user access token
+        
+        Error Handling:
+        - Không lấy được app token
+        - Code không hợp lệ hoặc đã hết hạn
+        - Network errors
+        """
+        # ✅ STEP 1: Lấy app access token trước (required để call API)
         app_token = await self.get_app_access_token()
         if not app_token:
+            # ❌ ERROR CASE 1: Không lấy được app token
+            logger.error("❌ Cannot get app_access_token, aborting code exchange")
             return None
 
+        # ✅ STEP 2: Chuẩn bị request để exchange code
         url = f"{self.base_url}/authen/v1/oidc/access_token"
         headers = {
-            "Authorization": f"Bearer {app_token}",
+            "Authorization": f"Bearer {app_token}",  # Required app token auth
             "Content-Type": "application/json"
         }
         payload = {
-            "grant_type": "authorization_code",
-            "code": code
+            "grant_type": "authorization_code",  # OAuth standard grant type
+            "code": code  # Code từ callback
         }
         
         try:
+            # ✅ STEP 3: Gọi API để exchange code thành user token
             async with httpx.AsyncClient() as client:
+                # Đang exchange authorization code
                 response = await client.post(url, headers=headers, json=payload, timeout=10)
                 response.raise_for_status()
                 
+                # ✅ STEP 4: Parse response và extract user token
                 data = response.json()
-                if data.get('code') == 0:
-                    return data.get('data', {}).get('access_token')
+                if data.get('code') == 0:  # Success
+                    user_token = data.get('data', {}).get('access_token')
+                    logger.info("✅ Successfully exchanged code for user token")
+                    return user_token
                 else:
-                    logger.error(f"Failed to exchange code: {data}")
+                    # ❌ ERROR CASE 2: Code không hợp lệ hoặc đã hết hạn
+                    logger.error(f"❌ Failed to exchange code: {data}")
                     return None
                     
         except Exception as e:
-            logger.error(f"Error exchanging code: {e}")
+            # ❌ ERROR CASE 3: Network hoặc server error
+            logger.error(f"❌ Error exchanging code: {e}")
             return None
 
+
     async def get_user_info(self, user_access_token: str) -> Optional[Dict[str, Any]]:
-        """Lấy thông tin user từ user_access_token"""
+        """
+        Lấy thông tin user từ user_access_token
+        
+        Args:
+            user_access_token: Token của user sau khi exchange code
+            
+        Returns:
+            Optional[Dict]: User info dictionary hoặc None nếu thất bại
+            
+        API Endpoint: /authen/v1/user_info
+        Method: GET  
+        Headers: Authorization Bearer với user_access_token
+        
+        Response Data:
+        - open_id: Unique user ID trong Lark
+        - name: Tên hiển thị của user
+        - email: Email của user (nếu có)
+        - avatar_url: URL ảnh đại diện
+        
+        Error Handling:
+        - Token không hợp lệ hoặc hết hạn
+        - User không tồn tại
+        - Network errors
+        """
+        # ✅ STEP 1: Chuẩn bị request để lấy user info
         url = f"{self.base_url}/authen/v1/user_info"
         headers = {
-            "Authorization": f"Bearer {user_access_token}"
+            "Authorization": f"Bearer {user_access_token}"  # User token auth
         }
         
         try:
+            # ✅ STEP 2: Gọi API để lấy thông tin user
             async with httpx.AsyncClient() as client:
+                # Đang lấy thông tin user từ Lark
                 response = await client.get(url, headers=headers, timeout=10)
                 response.raise_for_status()
                 
+                # ✅ STEP 3: Parse response và extract user data
                 data = response.json()
-                if data.get('code') == 0:
-                    return data.get('data')
+                if data.get('code') == 0:  # Success
+                    user_info = data.get('data')
+                    logger.info("✅ Successfully retrieved user info")
+                    return user_info
                 else:
-                    logger.error(f"Failed to get user info: {data}")
+                    # ❌ ERROR CASE 1: Token không hợp lệ hoặc user không tồn tại
+                    logger.error(f"❌ Failed to get user info: {data}")
                     return None
                     
         except Exception as e:
-            logger.error(f"Error getting user info: {e}")
+            # ❌ ERROR CASE 2: Network hoặc server error
+            logger.error(f"❌ Error getting user info: {e}")
             return None
 
+
     async def check_user_permission(self, open_id: str, app_token: str, table_id: str) -> Tuple[bool, str]:
-        """Kiểm tra quyền user trong Larkbase table"""
+        """
+        Kiểm tra quyền user trong Larkbase table để authorize access
+        
+        Args:
+            open_id: Unique user ID từ Lark
+            app_token: App token của Larkbase (khác với app_access_token)
+            table_id: ID của bảng permission trong Larkbase
+            
+        Returns:
+            Tuple[bool, str]: (có_quyền, thông_báo)
+            
+        API Endpoint: /bitable/v1/apps/{app_token}/tables/{table_id}/records/search
+        Method: POST
+        Headers: Authorization Bearer với app_access_token
+        
+        Search Logic:
+        - Tìm record có cột "Người" chứa open_id
+        - Và cột "Trạng thái" = "Kích hoạt"
+        - Return True nếu tìm thấy record phù hợp
+        
+        Permission Table Structure:
+        - Người: Multi-select field chứa open_id của users
+        - Trạng thái: Select field ("Kích hoạt"/"Vô hiệu hóa")
+        
+        Error Handling:
+        - Không lấy được app access token
+        - Table hoặc app_token không tồn tại
+        - Network timeout
+        - Permission denied
+        """
+        # ✅ STEP 1: Lấy app access token để authenticate với Larkbase API
         app_access_token = await self.get_app_access_token()
         if not app_access_token:
+            # ❌ ERROR CASE 1: Không thể authenticate với Lark
             return False, "Không thể xác thực với Lark"
 
+        # ✅ STEP 2: Chuẩn bị request để search permission records
         url = f"{self.base_url}/bitable/v1/apps/{app_token}/tables/{table_id}/records/search"
         headers = {
             "Authorization": f"Bearer {app_access_token}",
             "Content-Type": "application/json"
         }
+        
+        # ✅ STEP 3: Build search filter để tìm user permission
         payload = {
             "filter": {
-                "conjunction": "and",
+                "conjunction": "and",  # Tất cả conditions phải đúng
                 "conditions": [
                     {
-                        "field_name": "Người",
-                        "operator": "contains", 
-                        "value": [open_id]
+                        "field_name": "Người",        # Field chứa user list
+                        "operator": "contains",       # User có trong list
+                        "value": [open_id]           # Open ID cần check
                     },
                     {
-                        "field_name": "Trạng thái",
-                        "operator": "is",
-                        "value": ["Kích hoạt"]
+                        "field_name": "Trạng thái",   # Field trạng thái permission
+                        "operator": "is",             # Exact match
+                        "value": ["Kích hoạt"]       # Chỉ user đang active
                     }
                 ]
             }
         }
         
         try:
+            # ✅ STEP 4: Gọi Larkbase API để search permission
             async with httpx.AsyncClient() as client:
+                # Đang kiểm tra quyền user trong Larkbase
                 response = await client.post(url, headers=headers, json=payload, timeout=10)
                 response.raise_for_status()
                 
+                # ✅ STEP 5: Parse response và kiểm tra kết quả
                 data = response.json()
-                if data.get('code') == 0:
+                if data.get('code') == 0:  # API call success
                     items = data.get('data', {}).get('items', [])
+                    
                     if items:
+                        # ✅ SUCCESS: Tìm thấy permission record
+                        logger.info(f"✅ User {open_id} has access permission")
                         return True, "User có quyền truy cập"
                     else:
+                        # ❌ NO PERMISSION: Không tìm thấy record hoặc user chưa active
+                        logger.warning(f"❌ User {open_id} denied access - not found or inactive")
                         return False, "User không có quyền truy cập hoặc chưa được kích hoạt"
                 else:
-                    logger.error(f"Failed to check permissions: {data}")
+                    # ❌ ERROR CASE 2: API error (table không tồn tại, permission denied, etc.)
+                    logger.error(f"❌ Failed to check permissions: {data}")
                     return False, f"Lỗi kiểm tra quyền: {data.get('msg', 'Unknown error')}"
                     
         except Exception as e:
-            logger.error(f"Error checking permissions: {e}")
+            # ❌ ERROR CASE 3: Network timeout hoặc server error
+            logger.error(f"❌ Error checking permissions: {e}")
             return False, f"Lỗi hệ thống: {str(e)}"
+
 
 ============================================================
 
@@ -843,6 +1359,171 @@ async def validate_bill_id(
             "message": "Lỗi kiểm tra"
         })
 
+# @router.post("/bulk-create-records", response_class=HTMLResponse)
+# async def bulk_create_records(
+#     request: Request,
+#     record_service: RecordService = Depends(get_record_service),
+#     depot_service: DepotService = Depends(get_depot_service)
+# ):
+#     """Create multiple records at once"""
+#     user = get_current_user(request)
+    
+#     try:
+#         body = await request.json()
+#         from_depot = body.get("from_depot")
+#         to_depot = body.get("to_depot") 
+#         handover_person = body.get("handover_person")
+#         transport_provider = body.get("transport_provider", "")
+#         bill_data = body.get("bill_data", [])
+        
+#         # ✅ SỬA: Tất cả thông tin đều bắt buộc
+#         if not from_depot:
+#             return HTMLResponse('<div class="error">❌ Thiếu thông tin kho đi</div>')
+#         if not to_depot:
+#             return HTMLResponse('<div class="error">❌ Thiếu thông tin kho đến</div>')
+#         if not handover_person:
+#             return HTMLResponse('<div class="error">❌ Thiếu thông tin người bàn giao</div>')
+#         if not transport_provider:
+#             return HTMLResponse('<div class="error">❌ Thiếu thông tin đơn vị vận chuyển</div>')
+        
+#         # ✅ SỬA: Validate số lượng bắt buộc cho tất cả Bill ID
+#         for item in bill_data:
+#             bill_id = item.get("bill_id")
+#             quantity = item.get("quantity", 0)
+#             if not quantity or quantity == 0:
+#                 return HTMLResponse(f'<div class="error">❌ Bill ID "{bill_id}": Bắt buộc nhập số lượng bao/tải</div>')
+        
+#         # Validate depots
+#         from_valid, from_name = depot_service.validate_depot(from_depot)
+#         to_valid, to_name = depot_service.validate_depot(to_depot)
+        
+#         if not from_valid:
+#             return HTMLResponse(f'<div class="error">❌ Kho đi không hợp lệ: {from_name}</div>')
+#         if not to_valid:
+#             return HTMLResponse(f'<div class="error">❌ Kho đến không hợp lệ: {to_name}</div>')
+        
+#         # ✅ SỬA: Counters cho summary - không lưu từng thông báo nữa
+#         success_count = 0
+#         error_count = 0
+#         total_count = len(bill_data)
+#         error_samples = []  # Chỉ lưu mẫu lỗi để hiển thị
+        
+#         # ✅ SỬA: Chuẩn bị data cho batch creation
+#         records_to_create = []
+#         valid_bill_ids = []
+        
+#         for item in bill_data:
+#             bill_id = item.get("bill_id")
+#             quantity = item.get("quantity", 0)
+            
+#             imex_items = record_service.get_api_data(bill_id)
+#             if not imex_items:
+#                 error_count += 1
+#                 if len(error_samples) < 3:  # Chỉ lưu 3 mẫu lỗi đầu tiên
+#                     error_samples.append(f"{bill_id}: ID không hợp lệ")
+#                 continue
+
+#             example_item = imex_items[0]
+
+#             # Kiểm tra status
+#             status_str = example_item.get("status", "")
+#             try:
+#                 status = int(status_str) if status_str else None
+#             except ValueError:
+#                 status = None
+
+#             if status not in [3, 4, 5, 6]:
+#                 error_count += 1
+#                 if len(error_samples) < 3:
+#                     error_samples.append(f"{bill_id}: ID chưa được duyệt")
+#                 continue
+#             if example_item.get("fromDepotId", "") != from_depot:
+#                 error_count += 1
+#                 if len(error_samples) < 3:
+#                     error_samples.append(f"{bill_id}: Không đúng kho đi")
+#                 continue
+#             if example_item.get("toDepotId", "") != to_depot:
+#                 error_count += 1
+#                 if len(error_samples) < 3:
+#                     error_samples.append(f"{bill_id}: Không đúng kho đến")
+#                 continue
+
+#             # Chuẩn bị record data cho batch creation
+#             record_data = {
+#                 "ID": bill_id,
+#                 "ID kho đi": example_item.get("fromDepotId", ""),
+#                 "Kho đi": example_item.get("fromDepotName", ""),
+#                 "ID kho đến": example_item.get("toDepotId", ""),
+#                 "Kho đến": example_item.get("toDepotName", ""),
+#                 "Số lượng": int(example_item.get("realQuantity") or 0),
+#                 "Số lượng bao/tải giao": int(quantity),
+#                 "Người bàn giao": handover_person,
+#                 "Đơn vị vận chuyển": transport_provider,
+#                 "Ngày bàn giao": int(time.time() * 1000)
+#             }
+            
+#             records_to_create.append(record_data)
+#             valid_bill_ids.append(bill_id)
+
+#         # ✅ SỬA: Sử dụng batch creation thay vì tạo từng record
+#         if records_to_create:
+#             batch_success, batch_message = record_service.batch_create_records(records_to_create)
+            
+#             if batch_success:
+#                 # Batch thành công - tất cả records hợp lệ đều được tạo
+#                 success_count = len(valid_bill_ids)
+#             else:
+#                 # Batch thất bại - fallback về tạo từng record
+#                 logger.warning(f"Batch creation failed: {batch_message}, falling back to individual creation")
+                
+#                 for i, record_data in enumerate(records_to_create):
+#                     bill_id = valid_bill_ids[i]
+#                     success, message = record_service.create_record(record_data)
+#                     if success:
+#                         success_count += 1
+#                     else:
+#                         error_count += 1
+#                         if len(error_samples) < 3:
+#                             error_samples.append(f"{bill_id}: {message}")
+
+#         # ✅ SỬA: Format kết quả ngắn gọn - không liệt kê từng ID
+#         if success_count == total_count:
+#             # Tất cả thành công
+#             result_html = f'<div class="success">📊 Hoàn thành: {success_count}/{total_count} bản ghi thành công</div>'
+#         elif success_count > 0 and error_count > 0:
+#             # Một phần thành công
+#             result_html = f'<div class="info">📊 Hoàn thành: {success_count}/{total_count} bản ghi thành công'
+#             result_html += f'<br>❌ {error_count} bản ghi thất bại'
+            
+#             # Chỉ hiển thị mẫu lỗi nếu có
+#             if error_samples:
+#                 result_html += f'<br><small>Ví dụ lỗi: {"; ".join(error_samples)}'
+#                 if error_count > len(error_samples):
+#                     result_html += f' và {error_count - len(error_samples)} lỗi khác'
+#                 result_html += '</small>'
+            
+#             result_html += '</div>'
+#         else:
+#             # Tất cả thất bại
+#             result_html = f'<div class="error">❌ Không thể tạo bản ghi nào ({error_count}/{total_count} thất bại)'
+            
+#             # Hiển thị mẫu lỗi
+#             if error_samples:
+#                 result_html += f'<br>Lỗi: {"; ".join(error_samples)}'
+#                 if error_count > len(error_samples):
+#                     result_html += f' và {error_count - len(error_samples)} lỗi khác'
+            
+#             result_html += '</div>'
+        
+#         logger.info(f"User {user.get('name')} bulk created {success_count}/{total_count} records")
+#         return HTMLResponse(result_html)
+        
+#     except Exception as e:
+#         logger.error(f"Error in bulk create: {e}")
+#         return HTMLResponse(f'<div class="error">❌ Lỗi hệ thống: {str(e)}</div>')
+
+
+
 @router.post("/bulk-create-records", response_class=HTMLResponse)
 async def bulk_create_records(
     request: Request,
@@ -899,6 +1580,9 @@ async def bulk_create_records(
         for item in bill_data:
             bill_id = item.get("bill_id")
             quantity = item.get("quantity", 0)
+            # ✅ THÊM: Lấy thêm bag_quantity và group_id từ JavaScript
+            bag_quantity = item.get("bag_quantity", 0)
+            group_id = item.get("group_id")  # Group ID từ JavaScript (có thể là None cho single records)
             
             imex_items = record_service.get_api_data(bill_id)
             if not imex_items:
@@ -932,7 +1616,7 @@ async def bulk_create_records(
                     error_samples.append(f"{bill_id}: Không đúng kho đến")
                 continue
 
-            # Chuẩn bị record data cho batch creation
+            # ✅ SỬA: Chuẩn bị record data cho batch creation với Group Bill support
             record_data = {
                 "ID": bill_id,
                 "ID kho đi": example_item.get("fromDepotId", ""),
@@ -945,6 +1629,13 @@ async def bulk_create_records(
                 "Đơn vị vận chuyển": transport_provider,
                 "Ngày bàn giao": int(time.time() * 1000)
             }
+            
+            # ✅ THÊM: Thêm thông tin Group Bill nếu có
+            if bag_quantity > 0:
+                record_data["Số lượng bao"] = int(bag_quantity)
+            
+            if group_id:
+                record_data["Group ID"] = group_id
             
             records_to_create.append(record_data)
             valid_bill_ids.append(bill_id)
@@ -959,16 +1650,7 @@ async def bulk_create_records(
             else:
                 # Batch thất bại - fallback về tạo từng record
                 logger.warning(f"Batch creation failed: {batch_message}, falling back to individual creation")
-                
-                for i, record_data in enumerate(records_to_create):
-                    bill_id = valid_bill_ids[i]
-                    success, message = record_service.create_record(record_data)
-                    if success:
-                        success_count += 1
-                    else:
-                        error_count += 1
-                        if len(error_samples) < 3:
-                            error_samples.append(f"{bill_id}: {message}")
+                return HTMLResponse(f'<div class="error">❌ Lỗi batch create: {batch_message}</div>')
 
         # ✅ SỬA: Format kết quả ngắn gọn - không liệt kê từng ID
         if success_count == total_count:
@@ -1005,6 +1687,10 @@ async def bulk_create_records(
     except Exception as e:
         logger.error(f"Error in bulk create: {e}")
         return HTMLResponse(f'<div class="error">❌ Lỗi hệ thống: {str(e)}</div>')
+
+
+
+
 
 @router.get("/health")
 async def health_check():
@@ -1374,86 +2060,120 @@ async def delete_record_endpoint(
 ============================================================
 FILE: src\routes\refresh_routes.py
 ============================================================
-# src/routes/refresh_routes.py - Data Refresh Routes
+# FILE: src/routes/refresh_routes.py (FINAL & CORRECT PARTIAL UPDATE VERSION)
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse
+# ✅ SỬA: Dùng lại Response và thêm templates để render HTML
+from fastapi.responses import Response 
+from src.core.dependencies import templates # Thêm templates
 import time
 import logging
+import json
 
 from src.services.employee_service import EmployeeService
 from src.services.transport_service import TransportProviderService
 from src.services.depot_service import DepotService
 from src.core.dependencies import get_current_user, get_employee_service, get_transport_service, get_depot_service
+from src.utils.config import TABLE_IDS
 
 router = APIRouter(prefix="/refresh", tags=["refresh"])
 logger = logging.getLogger(__name__)
 
-@router.post("/employees", response_class=HTMLResponse)
+# =================================================================================
+# === HÀM REFRESH NHÂN VIÊN (TRẢ VỀ PARTIAL HTML) =================================
+# =================================================================================
+@router.post("/employees")
 async def refresh_employees_endpoint(
     request: Request,
     employee_service: EmployeeService = Depends(get_employee_service)
 ):
-    """Endpoint để làm mới danh sách nhân viên"""
-    user = get_current_user(request)
-    logger.info(f"User {user.get('name')} refreshing employees")
-    
     try:
-        time.sleep(0.5)
-        
         success, message = employee_service.refresh_employees()
-        
-        if success:
-            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
-        else:
-            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
-            
+        event_data = {"message": message, "type": "success" if success else "error"}
     except Exception as e:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
+        event_data = {"message": f"Lỗi hệ thống: {str(e)}", "type": "error"}
 
-@router.post("/transport-providers", response_class=HTMLResponse)
+    headers = {"HX-Trigger": json.dumps({"show-refresh-notification": event_data})}
+    
+    # ✅ SỬA: Render lại component dropdown với dữ liệu mới và trả về HTML
+    new_employees = employee_service.get_employees()
+    context = {
+        "request": request, 
+        "employees": new_employees, 
+        "field_name": "handover_person", 
+        "placeholder": "Tìm nhân viên..."
+    }
+    # Dùng lại TemplateResponse để render và gửi header
+    return templates.TemplateResponse(
+        "components/dropdowns/employee.html",
+        context,
+        headers=headers
+    )
+
+# =================================================================================
+# === HÀM REFRESH ĐƠN VỊ VẬN CHUYỂN (TRẢ VỀ PARTIAL HTML) ==========================
+# =================================================================================
+@router.post("/transport-providers")
 async def refresh_transport_providers_endpoint(
     request: Request,
     transport_service: TransportProviderService = Depends(get_transport_service)
 ):
-    """Endpoint để làm mới danh sách đơn vị vận chuyển"""
-    user = get_current_user(request)
-    logger.info(f"User {user.get('name')} refreshing transport providers")
-    
     try:
         time.sleep(0.5)
-        
-        success, message = transport_service.refresh_transport_providers("tblyiELQIi6M1j1r")
-        
-        if success:
-            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
-        else:
-            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
-            
+        table_id = TABLE_IDS.get('TRANSPORT_PROVIDERS_TABLE_ID', 'tblyiELQIi6M1j1r')
+        success, message = transport_service.refresh_transport_providers(table_id)
+        event_data = {"message": message, "type": "success" if success else "error"}
     except Exception as e:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
+        event_data = {"message": f"Lỗi hệ thống: {str(e)}", "type": "error"}
+            
+    headers = {"HX-Trigger": json.dumps({"show-refresh-notification": event_data})}
+    
+    # ✅ SỬA: Render lại component dropdown với dữ liệu mới và trả về HTML
+    new_providers = transport_service.get_transport_providers()
+    context = {
+        "request": request,
+        "transport_providers": new_providers,
+        "field_name": "transport_provider",
+        "placeholder": "Tìm đơn vị vận chuyển..."
+    }
+    return templates.TemplateResponse(
+        "components/dropdowns/transport.html",
+        context,
+        headers=headers
+    )
 
-@router.post("/depots", response_class=HTMLResponse)
+# =================================================================================
+# === HÀM REFRESH KHO (TRẢ VỀ PARTIAL HTML) ========================================
+# =================================================================================
+@router.post("/depots")
 async def refresh_depots_endpoint(
     request: Request,
     depot_service: DepotService = Depends(get_depot_service)
 ):
-    """Endpoint để làm mới danh sách depot"""
-    user = get_current_user(request)
-    logger.info(f"User {user.get('name')} refreshing depots")
-    
     try:
         time.sleep(0.5)
-        
         success, message = depot_service.refresh_depots()
-        
-        if success:
-            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
-        else:
-            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
-            
+        event_data = {"message": message, "type": "success" if success else "error"}
     except Exception as e:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
+        event_data = {"message": f"Lỗi hệ thống: {str(e)}", "type": "error"}
 
+    headers = {"HX-Trigger": json.dumps({"show-refresh-notification": event_data})}
+
+    # ✅ SỬA: Render lại component dropdown với dữ liệu mới và trả về HTML
+    new_depots = depot_service.get_depots()
+    # Chú ý: cần truyền cả field_name và placeholder, ta có thể tạm hardcode
+    # hoặc tìm cách truyền từ frontend, nhưng hardcode là đơn giản nhất.
+    # Ta sẽ giả định field_name và placeholder dựa trên context.
+    context = {
+        "request": request,
+        "depots": new_depots,
+        "field_name": "depot", # Tên chung, không ảnh hưởng nhiều
+        "placeholder": "Chọn kho..."
+    }
+    return templates.TemplateResponse(
+        "components/dropdowns/depot.html",
+        context,
+        headers=headers
+    )
 ============================================================
 
 ============================================================
@@ -1735,8 +2455,50 @@ class RecordService:
         
         return larkbase_write_data(self.app_token, self.table_id, new_record)
 
-    def batch_create_records(self, records_data):
-        """Tạo nhiều records cùng lúc"""
+    # def batch_create_records(self, records_data):
+    #     """Tạo nhiều records cùng lúc"""
+    #     from src.utils.larkbase import larkbase_batch_write_data
+        
+    #     processed_records = []
+        
+    #     for record_data in records_data:
+    #         processed_record = {}
+            
+    #         # Xử lý như create_record bình thường
+    #         numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
+            
+    #         for key, value in record_data.items():
+    #             if key in numeric_fields and value:
+    #                 try:
+    #                     processed_record[key] = int(value) if value else 0
+    #                 except (ValueError, TypeError):
+    #                     processed_record[key] = 0
+    #             elif key == "Người bàn giao":
+    #                 if value:
+    #                     processed_record["ID người bàn giao"] = value
+    #                     # Lấy tên nhân viên
+    #                     from src.services.employee_service import EmployeeService
+    #                     employee_service = EmployeeService()
+    #                     employees = employee_service.get_employees()
+                        
+    #                     employee_name = ""
+    #                     for emp in employees:
+    #                         if emp.get('id') == value:
+    #                             employee_name = emp.get('name', '')
+    #                             break
+                        
+    #                     processed_record["Người bàn giao"] = employee_name or value
+    #                 continue
+    #             elif value and key not in ["Người bàn giao_hidden"]:
+    #                 processed_record[key] = value
+            
+    #         processed_record["Ngày bàn giao"] = int(time.time() * 1000)
+    #         processed_records.append(processed_record)
+        
+    #     return larkbase_batch_write_data(self.app_token, self.table_id, processed_records)
+
+    def batch_create_records(self, records_data, extra_group_id=None):
+        """Tạo nhiều records cùng lúc với Group ID"""
         from src.utils.larkbase import larkbase_batch_write_data
         
         processed_records = []
@@ -1744,7 +2506,7 @@ class RecordService:
         for record_data in records_data:
             processed_record = {}
             
-            # Xử lý như create_record bình thường
+            # Xử lý existing fields
             numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
             
             for key, value in record_data.items():
@@ -1756,7 +2518,7 @@ class RecordService:
                 elif key == "Người bàn giao":
                     if value:
                         processed_record["ID người bàn giao"] = value
-                        # Lấy tên nhân viên
+                        # Get employee name
                         from src.services.employee_service import EmployeeService
                         employee_service = EmployeeService()
                         employees = employee_service.get_employees()
@@ -1769,7 +2531,12 @@ class RecordService:
                         
                         processed_record["Người bàn giao"] = employee_name or value
                     continue
-                elif value and key not in ["Người bàn giao_hidden"]:
+                elif key == "group_id":
+                    # ✅ THÊM: Xử lý Group ID
+                    if value:
+                        processed_record["Group ID"] = value
+                    continue
+                elif value and key not in ["Người bàn giao_hidden", "group_id"]:
                     processed_record[key] = value
             
             processed_record["Ngày bàn giao"] = int(time.time() * 1000)
@@ -2635,7 +3402,7 @@ def update_employee_json_file():
     try:
         with open(EMPLOYEE_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(active_employees, f, ensure_ascii=False, indent=4)
-        msg = f"Cập nhật thành công! Đã lưu {len(active_employees)} nhân viên vào file {EMPLOYEE_JSON_PATH}."
+        msg = f"Cập nhật thành công {len(active_employees)} nhân viên"
         logging.info(msg)
         return True, msg
     except IOError as e:
@@ -2719,6 +3486,7 @@ LARKBASE_FIELDS = [
     "Kho đi", 
     "ID kho đến",
     "Kho đến",
+    "Số lượng bao",
     "Số lượng bao/tải giao", 
     "ID người bàn giao",
     "Người bàn giao",
@@ -2885,7 +3653,7 @@ def update_depot_json_file():
         with open(DEPOT_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(depots, f, ensure_ascii=False, indent=4)
         
-        msg = f"Cập nhật thành công! Đã lưu {len(depots)} depot vào file {DEPOT_JSON_PATH}."
+        msg = f"Cập nhật thành công {len(depots)} depot"
         logging.info(msg)
         return True, msg
         
@@ -3162,7 +3930,7 @@ def update_transport_providers_json_file(app_token, table_id="tblDefault"):
         with open(TRANSPORT_PROVIDERS_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(providers, f, ensure_ascii=False, indent=4)
         
-        msg = f"Cập nhật thành công! Đã lưu {len(providers)} nhà cung cấp vào file {TRANSPORT_PROVIDERS_JSON_PATH}."
+        msg = f"Cập nhật thành công {len(providers)} nhà cung cấp"
         logging.info(msg)
         return True, msg
         
@@ -3551,29 +4319,91 @@ button.htmx-request {
 /* === Chiều rộng cột cho tất cả màn hình === */
 .bill-table th:nth-child(1), /* Cột ID */
 .bill-table td:nth-child(1) {
-    width: 60%;
+    width: 40%;
 }
 
-.bill-table th:nth-child(2), /* Cột SL tải */  
+
+.bill-table th:nth-child(2), /* Cột SL bao */  
 .bill-table td:nth-child(2) {
-    width: 8%; /* ✅ Giảm từ 5% lên 8% để đủ chứa số */
+    width: 15%;
+    text-align: center;
+}
+
+.bill-table th:nth-child(3), /* Cột SL tải */  
+.bill-table td:nth-child(3) {
+    width: 15%;
     text-align: center;
 }
 
 /* SỬA: Đảm bảo cột Trạng thái trên desktop căn giữa */
-.bill-table th:nth-child(3),
-.bill-table td:nth-child(3) {
+.bill-table th:nth-child(4),
+.bill-table td:nth-child(4) {
     width: 22%;
     text-align: center;
 }
 
-.bill-table th:nth-child(4), /* Cột Xóa */
-.bill-table td:nth-child(4) {
+.bill-table th:nth-child(5), /* Cột Xóa */
+.bill-table td:nth-child(5) {
     width: 10%;
     text-align: center;
 }
 
-/* === Mobile responsive (giữ nguyên phần này) === */
+
+
+/* SỬA: Refresh notification styles - đảm bảo hiển thị đúng */
+.refresh-notification {
+    position: fixed !important;
+    top: 80px !important;
+    right: 20px !important;
+    z-index: 99999 !important; /* Tăng z-index cao hơn */
+    max-width: 300px !important;
+    margin: 0 !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25) !important; /* Tăng shadow */
+    font-weight: 500 !important;
+    transform: translateX(350px); /* Bắt đầu ở ngoài màn hình */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    opacity: 0; /* Bắt đầu với opacity 0 */
+}
+
+.refresh-notification.show {
+    transform: translateX(0) !important;
+    opacity: 1 !important; /* Hiển thị khi có class show */
+}
+
+.refresh-notification.hide {
+    transform: translateX(350px) !important;
+    opacity: 0 !important;
+}
+
+/* Màu sắc cho notification */
+.refresh-notification.success {
+    background: linear-gradient(135deg, #4caf50, #45a049) !important;
+    color: white !important;
+    border: 1px solid #4caf50 !important;
+}
+
+.refresh-notification.error {
+    background: linear-gradient(135deg, #f44336, #d32f2f) !important;
+    color: white !important;
+    border: 1px solid #f44336 !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .refresh-notification {
+        top: 70px !important;
+        right: 10px !important;
+        left: 10px !important;
+        max-width: none !important;
+        text-align: center !important;
+    }
+}
+
+
+
+/* === Mobile responsive === */
 @media (max-width: 768px) {
     .bill-table {
         table-layout: fixed; 
@@ -3583,19 +4413,25 @@ button.htmx-request {
     /* === Phân chia lại chiều rộng các cột === */
     .bill-table th:nth-child(1),
     .bill-table td:nth-child(1) { width: 18%; }
-    
+
     .bill-table th:nth-child(2), 
     .bill-table td:nth-child(2) { 
-        width: 12%; /* ✅ Tăng từ 5% lên 12% cho mobile */
+        width: 12%;
+        text-align: center;
+    }
+
+    .bill-table th:nth-child(3), 
+    .bill-table td:nth-child(3) { 
+        width: 12%;
         text-align: center;
     }
     
     /* SỬA: Đảm bảo cột Trạng thái trên mobile căn giữa */
-    .bill-table th:nth-child(3),
-    .bill-table td:nth-child(3) { width: 18%; text-align: center; }
-    
     .bill-table th:nth-child(4),
-    .bill-table td:nth-child(4) { width: 9%; text-align: center; }
+    .bill-table td:nth-child(4) { width: 18%; text-align: center; }
+    
+    .bill-table th:nth-child(5),
+    .bill-table td:nth-child(5) { width: 9%; text-align: center; }
 
     /* Giảm padding và font-size chung cho bảng trên mobile */
     .bill-table th,
@@ -3786,7 +4622,7 @@ FILE: static\css\forms.css
     font-size: 14px;
 }
 
-/* Sửa: đồng nhất height input và button trong search-form */
+/* Đồng nhất height input và button trong search-form */
 .form-control,
 .search-input,
 .search-form .btn {
@@ -3794,7 +4630,6 @@ FILE: static\css\forms.css
     padding-top: 12px;
     padding-bottom: 12px;
     line-height: 20px;
-    /* giữ nguyên các thuộc tính cũ */
     box-sizing: border-box;
     font-size: 16px;
 }
@@ -3816,9 +4651,9 @@ FILE: static\css\forms.css
     box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-/* ✅ SỬA: Buttons với responsive text handling */
+/* Buttons với responsive text handling */
 .btn {
-    width: 100% !important;
+    width: 100%; /* Bỏ !important để class khác ghi đè */
     box-sizing: border-box;
     padding: 12px 16px;
     border: none;
@@ -3830,10 +4665,10 @@ FILE: static\css\forms.css
     text-transform: uppercase;
     letter-spacing: 0.5px;
     min-width: unset;
-    white-space: normal; /* ✅ SỬA: Cho phép xuống dòng */
-    height: auto;
+    white-space: normal;
+    height: auto; 
     text-align: center;
-    line-height: 1.2; /* ✅ THÊM: Cải thiện line height */
+    line-height: 1.2;
 }
 
 /* Căn chỉnh cho mọi nút trong search-form */
@@ -3912,7 +4747,7 @@ FILE: static\css\forms.css
     padding: 6px 12px !important;
     font-size: 12px;
     flex: 0 0 auto;
-    white-space: nowrap; /* ✅ Giữ nowrap cho button nhỏ */
+    white-space: nowrap;
 }
 
 /* Form actions */
@@ -3924,7 +4759,7 @@ FILE: static\css\forms.css
     margin-bottom: 8px;
 }
 
-/* ✅ SỬA: Button group với responsive gap */
+/* Button group với responsive gap */
 .btn-group {
     display: flex;
     gap: 8px;
@@ -3933,10 +4768,9 @@ FILE: static\css\forms.css
 
 .btn-group .btn {
     flex: 1;
-    min-width: 0; /* ✅ THÊM: Cho phép flex shrink */
+    min-width: 0;
 }
 
-/* ✅ THÊM: Responsive gap cho button group */
 @media (max-width: 480px) {
     .btn-group {
         gap: 4px;
@@ -3947,72 +4781,51 @@ FILE: static\css\forms.css
 .input-with-refresh {
     display: flex;
     gap: 8px;
-    align-items: flex-start;
+    /* ✅ SỬA: Căn giữa theo chiều dọc để nút và input thẳng hàng */
+    align-items: center; 
 }
 
 .input-with-refresh > div {
     flex: 1;
 }
 
-.input-with-refresh .btn {
-    width: auto !important;
-    white-space: nowrap;
-    min-width: 120px;
+/* ======================================================================== */
+/* === ✅ FIX CUỐI CÙNG: Định nghĩa class mới cho nút refresh icon === */
+/* ======================================================================== */
+.btn-refresh-icon {
+    /* Ép nút thành hình vuông, kích thước bằng chiều cao ô input */
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important; 
+    
+    padding: 0 !important; /* Bỏ padding để kiểm soát kích thước tuyệt đối */
+    flex-shrink: 0; /* Ngăn nút bị co lại trong flex container */
+    font-size: 1.2rem; /* Tăng kích thước icon một chút */
 }
 
-/* ✅ THÊM: Responsive input with refresh */
+/* Responsive sizes cho nút icon */
+@media (max-width: 768px) {
+    .btn-refresh-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+    }
+}
+
 @media (max-width: 480px) {
     .input-with-refresh {
         gap: 4px;
     }
-    
-    .input-with-refresh .btn {
-        min-width: 80px;
-        font-size: 10px;
-        padding: 8px 6px;
-    }
-
-    .input-with-refresh .form-control {
-        padding: 8px 8px;
-        font-size: 14px; 
+    .btn-refresh-icon {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        font-size: 1rem;
     }
 }
-/* Refresh container */
-.refresh-container {
-    width: 100%;
-    margin-bottom: 16px;
-}
+/* ======================================================================== */
 
-.refresh-status-container {
-    font-size: 12px;
-    margin-top: 4px;
-    min-height: 18px;
-    text-align: center;
-    padding-right: 0;
-}
-
-.btn-refresh,
-.form-btn-refresh,
-.form-btn-refresh-transport {
-    width: 100% !important;
-}
-
-.btn-refresh .spinner,
-.form-btn-refresh .spinner,
-.form-btn-refresh-transport .spinner {
-    width: 14px;
-    height: 14px;
-    border-width: 2px;
-    border-top-color: #fff;
-}
-
-.btn-refresh:hover,
-.form-btn-refresh:hover,
-.form-btn-refresh-transport:hover {
-    background-color: rgba(25, 118, 210, 0.8);
-}
-
-/* HTMX indicators */
+/* Các quy tắc HTMX giữ nguyên */
 #htmx-indicator,
 .htmx-indicator.global {
     display: none;
@@ -4033,6 +4846,18 @@ button.htmx-request .htmx-indicator {
     flex: 0 0 auto;
 }
 
+/* Khối này vẫn hữu ích cho các nút có chữ khác */
+.btn.htmx-request,
+button.htmx-request {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn.htmx-request .btn-text,
+button.htmx-request .btn-text {
+    display: none;
+}
 ============================================================
 
 ============================================================
@@ -4083,13 +4908,13 @@ body {
 /* Notification styles */
 .notification-popup {
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
     z-index: 9999;
     padding: 16px 20px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateX(400px);
+    transform: translateY(400px);
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     max-width: 350px;
     font-weight: 500;
@@ -4101,12 +4926,23 @@ body {
 }
 
 .notification-popup.show {
-    transform: translateX(0);
+    transform: translateY(0);
 }
 
 .notification-popup.hide {
-    transform: translateX(400px);
+    transform: translateY(400px);
     opacity: 0;
+}
+
+/* ✅ THÊM: Responsive cho mobile */
+@media (max-width: 768px) {
+    .notification-popup {
+        bottom: 10px;
+        right: 10px;
+        left: 10px; /* ✅ THÊM: Full width trên mobile */
+        max-width: none;
+        text-align: center;
+    }
 }
 
 /* User info */
@@ -4745,12 +5581,15 @@ FILE: static\js\app.js
 // static/js/app.js - Main Application Logic
 import DropdownManager from './dropdown.js';
 import BulkFormManager from './bulk-form.js';
-import { showNotification, showValidationError } from './validators.js';
+import { showNotification, showValidationError, showRefreshNotification } from './validators.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize managers
     const dropdownManager = new DropdownManager();
     const bulkFormManager = new BulkFormManager();
+    
+    // ✅ SỬA: Gán hàm vào window để <script> trong HTML có thể gọi
+    window.showRefreshNotification = showRefreshNotification;
     
     // Global click handler to hide dropdowns
     document.addEventListener('click', (e) => {
@@ -4761,7 +5600,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // HTMX event handlers
+    // HTMX event handlers (giữ lại để xử lý lỗi chung)
     document.body.addEventListener('htmx:afterRequest', function(evt) {
         if (evt.detail.failed) {
             console.error("Yêu cầu HTMX thất bại:", evt.detail.xhr);
@@ -4857,6 +5696,23 @@ class BulkFormManager {
         }
     }
 
+    // addSingleBillRow() {
+    //     const tbody = document.querySelector('#billTable tbody');
+    //     if (!tbody) return;
+    //     this.rowCounter++;
+    //     const row = document.createElement('tr');
+    //     row.id = `row-${this.rowCounter}`;
+    //     row.classList.add('single-row');
+    //     row.innerHTML = `
+    //         <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
+    //         <td><input type="number" class="form-control quantity-input" placeholder="SL tải" min="1" required oninput="updateTotalSummary()"></td>
+    //         <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
+    //         <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
+    //     `;
+    //     tbody.appendChild(row);
+    //     this.updateTotalSummary();
+    // }
+    
     addSingleBillRow() {
         const tbody = document.querySelector('#billTable tbody');
         if (!tbody) return;
@@ -4866,6 +5722,7 @@ class BulkFormManager {
         row.classList.add('single-row');
         row.innerHTML = `
             <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
+            <td><input type="number" class="form-control bag-quantity-input" placeholder="SL bao" min="0"></td>
             <td><input type="number" class="form-control quantity-input" placeholder="SL tải" min="1" required oninput="updateTotalSummary()"></td>
             <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
             <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
@@ -4873,7 +5730,9 @@ class BulkFormManager {
         tbody.appendChild(row);
         this.updateTotalSummary();
     }
-    
+
+
+
     addModalBillRow() {
         const modalTbody = document.getElementById('modalBillTbody');
         if (!modalTbody) return;
@@ -4962,6 +5821,66 @@ class BulkFormManager {
         if (modal) modal.classList.remove('show');
     }
 
+    // addGroupedBillRows() {
+    //     const modalInputs = document.querySelectorAll('#modalBillTbody .modal-bill-id-input');
+    //     const billIds = Array.from(modalInputs).map(input => input.value.trim()).filter(id => id);
+
+    //     if (billIds.length < 2) {
+    //         alert('Vui lòng nhập ít nhất 2 Bill ID để gộp thành một tải.');
+    //         return;
+    //     }
+
+    //     const invalidBill = Array.from(modalInputs).find(input => {
+    //         const row = input.closest('tr');
+    //         return row && row.querySelector('.status-invalid');
+    //     });
+        
+    //     if (invalidBill) {
+    //         alert('Tồn tại Bill ID không hợp lệ trong danh sách. Vui lòng kiểm tra lại.');
+    //         return;
+    //     }
+        
+    //     const tbody = document.querySelector('#billTable tbody');
+    //     if (!tbody) return;
+
+    //     this.groupCounter++;
+    //     const groupId = `group-${this.groupCounter}`;
+    //     const groupQuantity = 1;
+
+    //     billIds.forEach((billId, index) => {
+    //         this.rowCounter++;
+    //         const row = document.createElement('tr');
+    //         row.id = `row-${this.rowCounter}`;
+    //         row.classList.add('grouped-row');
+    //         row.dataset.groupId = groupId;
+            
+    //         let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" onblur="validateBillId(this)" readonly></td>`;
+            
+    //         if (index === 0) {
+    //             rowHtml += `
+    //                 <td rowspan="${billIds.length}" class="grouped-quantity-cell">
+    //                     <input type="number" class="form-control quantity-input" value="${groupQuantity}" min="1" required oninput="updateTotalSummary()">
+    //                     <small class="text-muted">${billIds.length} ID</small>
+    //                 </td>
+    //             `;
+    //         }
+            
+    //         rowHtml += `<td class="status-cell"><span class="status-valid">✅ Hợp lệ</span></td>`;
+            
+    //         if (index === 0) {
+    //             rowHtml += `<td rowspan="${billIds.length}" class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeGroupedRows('${groupId}')" title="Xóa nhóm">🗑️</button></td>`;
+    //         }
+            
+    //         row.innerHTML = rowHtml;
+    //         tbody.appendChild(row);
+    //     });
+
+    //     this.closeGroupedBillModal();
+    //     this.updateTotalSummary();
+    // }
+
+
+
     addGroupedBillRows() {
         const modalInputs = document.querySelectorAll('#modalBillTbody .modal-bill-id-input');
         const billIds = Array.from(modalInputs).map(input => input.value.trim()).filter(id => id);
@@ -4997,6 +5916,9 @@ class BulkFormManager {
             
             let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" onblur="validateBillId(this)" readonly></td>`;
             
+            // ✅ THÊM: Cột SL bao - mỗi row có input riêng
+            rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL bao" min="0"></td>`;
+            
             if (index === 0) {
                 rowHtml += `
                     <td rowspan="${billIds.length}" class="grouped-quantity-cell">
@@ -5019,6 +5941,8 @@ class BulkFormManager {
         this.closeGroupedBillModal();
         this.updateTotalSummary();
     }
+
+
 
     removeBillRow(rowId) {
         const row = document.getElementById(rowId);
@@ -5102,6 +6026,112 @@ class BulkFormManager {
         return { valid: true };
     }
 
+    generateGroupId(billIds) {
+        return billIds.join('_');
+    }
+
+    // async submitBulkForm() {
+    //     const resultContainer = document.getElementById('bulk-result-container');
+    //     const submitBtn = document.getElementById('submitBtn');
+    //     if (!resultContainer || !submitBtn) return;
+
+    //     resultContainer.innerHTML = '';
+        
+    //     if (this.hasInvalidIds()) {
+    //         resultContainer.innerHTML = '<div class="error">Vui lòng sửa các Bill ID không hợp lệ trước khi lưu.</div>';
+    //         return;
+    //     }
+
+    //     const requiredValidation = this.validateRequiredFields();
+    //     if (!requiredValidation.valid) {
+    //         resultContainer.innerHTML = `<div class="error">${requiredValidation.message}</div>`;
+    //         return;
+    //     }
+
+    //     const quantityValidation = this.validateQuantityRequirement();
+    //     if (!quantityValidation.valid) {
+    //         resultContainer.innerHTML = `<div class="error">${quantityValidation.message}</div>`;
+    //         return;
+    //     }
+        
+    //     const billData = [];
+    //     const groupQuantities = {};
+    //     const processedGroups = new Set();
+
+
+    //     // Lấy số lượng của từng nhóm
+    //     document.querySelectorAll('tr.grouped-row .quantity-input').forEach(input => {
+    //         const row = input.closest('tr');
+    //         const groupId = row.dataset.groupId;
+    //         groupQuantities[groupId] = parseInt(input.value, 10) || 0;
+    //     });
+
+
+    //     // Thu thập dữ liệu từ tất cả các dòng
+    //     document.querySelectorAll('#billTable tbody tr').forEach(row => {
+    //         const billId = row.querySelector('.bill-id-input')?.value.trim();
+    //         if (billId) {
+    //             const bagQuantity = parseInt(row.querySelector('.bag-quantity-input')?.value, 10) || 0;
+    //             let quantity = 0;
+    //             if (row.classList.contains('single-row')) {
+    //                 quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
+    //             } else if (row.classList.contains('grouped-row')) {
+    //                 quantity = groupQuantities[row.dataset.groupId] || 0;
+    //             }
+    //             billData.push({ 
+    //                 bill_id: billId, 
+    //                 bag_quantity: bagQuantity,
+    //                 quantity 
+    //             });
+    //         }
+    //     });
+
+
+
+    //     if (billData.length === 0) {
+    //         resultContainer.innerHTML = '<div class="error">Vui lòng nhập ít nhất một Bill ID.</div>';
+    //         return;
+    //     }
+        
+    //     submitBtn.classList.add('htmx-request');
+    //     resultContainer.innerHTML = '<div class="info">🔄 Đang xử lý, vui lòng chờ...</div>';
+        
+    //     // ✅ SỬA: Sử dụng class selector thay vì name attribute
+    //     const depotInputs = document.querySelectorAll('.depot-hidden-input');
+    //     const handoverPersonInput = document.querySelector('.employee-hidden-input');
+    //     const transportProviderInput = document.querySelector('.transport-hidden-input');
+        
+    //     const payload = {
+    //         from_depot: depotInputs[0]?.value || '',
+    //         to_depot: depotInputs[1]?.value || '',
+    //         handover_person: handoverPersonInput?.value || '',
+    //         transport_provider: transportProviderInput?.value || '',
+    //         bill_data: billData
+    //     };
+        
+    //     try {
+    //         const response = await fetch('/bulk-create-records', {
+    //             method: 'POST',
+    //             headers: {'Content-Type': 'application/json'},
+    //             body: JSON.stringify(payload)
+    //         });
+    //         const resultHTML = await response.text();
+    //         resultContainer.innerHTML = resultHTML;
+            
+    //         if (response.ok && resultHTML.includes('success')) {
+    //             // Xóa bảng và thêm lại một dòng mới
+    //             const tbody = document.querySelector('#billTable tbody');
+    //             if (tbody) tbody.innerHTML = '';
+    //             this.addSingleBillRow();
+    //         }
+    //     } catch (error) {
+    //         resultContainer.innerHTML = `<div class="error">Lỗi kết nối đến máy chủ: ${error.message}</div>`;
+    //     } finally {
+    //         submitBtn.classList.remove('htmx-request');
+    //     }
+    // }
+
+
     async submitBulkForm() {
         const resultContainer = document.getElementById('bulk-result-container');
         const submitBtn = document.getElementById('submitBtn');
@@ -5128,6 +6158,8 @@ class BulkFormManager {
         
         const billData = [];
         const groupQuantities = {};
+        const groupBillIds = {}; // ✅ THÊM: Track Bill IDs của từng group
+        const processedGroups = new Set();
 
         // Lấy số lượng của từng nhóm
         document.querySelectorAll('tr.grouped-row .quantity-input').forEach(input => {
@@ -5136,17 +6168,45 @@ class BulkFormManager {
             groupQuantities[groupId] = parseInt(input.value, 10) || 0;
         });
 
-        // Thu thập dữ liệu từ tất cả các dòng
+        // ✅ THÊM: Thu thập Bill IDs cho từng group
+        document.querySelectorAll('#billTable tbody tr.grouped-row').forEach(row => {
+            const billId = row.querySelector('.bill-id-input')?.value.trim();
+            if (billId) {
+                const groupId = row.dataset.groupId;
+                if (!groupBillIds[groupId]) {
+                    groupBillIds[groupId] = [];
+                }
+                groupBillIds[groupId].push(billId);
+            }
+        });
+
+        // ✅ SỬA: Thu thập dữ liệu từ tất cả các dòng với Group ID
         document.querySelectorAll('#billTable tbody tr').forEach(row => {
             const billId = row.querySelector('.bill-id-input')?.value.trim();
             if (billId) {
+                const bagQuantity = parseInt(row.querySelector('.bag-quantity-input')?.value, 10) || 0;
                 let quantity = 0;
+                let groupId = null; // ✅ THÊM: Group ID field
+
                 if (row.classList.contains('single-row')) {
                     quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
+                    // Single row không có Group ID
                 } else if (row.classList.contains('grouped-row')) {
-                    quantity = groupQuantities[row.dataset.groupId] || 0;
+                    const rowGroupId = row.dataset.groupId;
+                    quantity = groupQuantities[rowGroupId] || 0;
+                    
+                    // ✅ THÊM: Tạo Group ID từ Bill IDs bằng cách nối với _
+                    if (groupBillIds[rowGroupId] && groupBillIds[rowGroupId].length > 0) {
+                        groupId = groupBillIds[rowGroupId].join('_');
+                    }
                 }
-                billData.push({ bill_id: billId, quantity });
+
+                billData.push({ 
+                    bill_id: billId, 
+                    bag_quantity: bagQuantity,
+                    quantity,
+                    group_id: groupId // ✅ THÊM: Group ID
+                });
             }
         });
 
@@ -5192,6 +6252,8 @@ class BulkFormManager {
             submitBtn.classList.remove('htmx-request');
         }
     }
+
+    
 }
 
 export default BulkFormManager;
@@ -5578,7 +6640,7 @@ class DropdownManager {
         errorDiv.textContent = message;
         errorDiv.style.cssText = `
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
             background: #f44336;
             color: white;
@@ -5624,7 +6686,7 @@ export function showValidationError(message) {
     errorDiv.textContent = message;
     errorDiv.style.cssText = `
         position: fixed;
-        top: 20px;
+        bottom: 20px;
         right: 20px;
         background: #f44336;
         color: white;
@@ -5641,6 +6703,40 @@ export function showValidationError(message) {
     }, 3000);
 }
 
+export function showRefreshNotification(message, type = 'success', duration = 3000) {
+    const existing = document.querySelector('.refresh-notification');
+    if (existing) {
+        existing.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = `refresh-notification ${type}`;
+    
+    notification.innerHTML = `
+        <span style="margin-right: 8px;">${type === 'success' ? '✅' : '❌'}</span>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Force reflow
+    notification.offsetHeight;
+    
+    // Show animation
+    requestAnimationFrame(() => {
+        notification.classList.add('show');
+    });
+    
+    // Auto hide
+    setTimeout(() => {
+        notification.classList.add('hide');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 400);
+    }, duration);
+}
 ============================================================
 
 

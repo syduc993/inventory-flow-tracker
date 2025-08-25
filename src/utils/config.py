@@ -49,6 +49,7 @@ LARKBASE_FIELDS = [
     "Kho đi", 
     "ID kho đến",
     "Kho đến",
+    "Số lượng bao",
     "Số lượng bao/tải giao", 
     "ID người bàn giao",
     "Người bàn giao",

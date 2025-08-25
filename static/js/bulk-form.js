@@ -75,6 +75,23 @@ class BulkFormManager {
         }
     }
 
+    // addSingleBillRow() {
+    //     const tbody = document.querySelector('#billTable tbody');
+    //     if (!tbody) return;
+    //     this.rowCounter++;
+    //     const row = document.createElement('tr');
+    //     row.id = `row-${this.rowCounter}`;
+    //     row.classList.add('single-row');
+    //     row.innerHTML = `
+    //         <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
+    //         <td><input type="number" class="form-control quantity-input" placeholder="SL tải" min="1" required oninput="updateTotalSummary()"></td>
+    //         <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
+    //         <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
+    //     `;
+    //     tbody.appendChild(row);
+    //     this.updateTotalSummary();
+    // }
+    
     addSingleBillRow() {
         const tbody = document.querySelector('#billTable tbody');
         if (!tbody) return;
@@ -84,6 +101,7 @@ class BulkFormManager {
         row.classList.add('single-row');
         row.innerHTML = `
             <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
+            <td><input type="number" class="form-control bag-quantity-input" placeholder="SL bao" min="0"></td>
             <td><input type="number" class="form-control quantity-input" placeholder="SL tải" min="1" required oninput="updateTotalSummary()"></td>
             <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
             <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
@@ -91,7 +109,9 @@ class BulkFormManager {
         tbody.appendChild(row);
         this.updateTotalSummary();
     }
-    
+
+
+
     addModalBillRow() {
         const modalTbody = document.getElementById('modalBillTbody');
         if (!modalTbody) return;
@@ -180,6 +200,66 @@ class BulkFormManager {
         if (modal) modal.classList.remove('show');
     }
 
+    // addGroupedBillRows() {
+    //     const modalInputs = document.querySelectorAll('#modalBillTbody .modal-bill-id-input');
+    //     const billIds = Array.from(modalInputs).map(input => input.value.trim()).filter(id => id);
+
+    //     if (billIds.length < 2) {
+    //         alert('Vui lòng nhập ít nhất 2 Bill ID để gộp thành một tải.');
+    //         return;
+    //     }
+
+    //     const invalidBill = Array.from(modalInputs).find(input => {
+    //         const row = input.closest('tr');
+    //         return row && row.querySelector('.status-invalid');
+    //     });
+        
+    //     if (invalidBill) {
+    //         alert('Tồn tại Bill ID không hợp lệ trong danh sách. Vui lòng kiểm tra lại.');
+    //         return;
+    //     }
+        
+    //     const tbody = document.querySelector('#billTable tbody');
+    //     if (!tbody) return;
+
+    //     this.groupCounter++;
+    //     const groupId = `group-${this.groupCounter}`;
+    //     const groupQuantity = 1;
+
+    //     billIds.forEach((billId, index) => {
+    //         this.rowCounter++;
+    //         const row = document.createElement('tr');
+    //         row.id = `row-${this.rowCounter}`;
+    //         row.classList.add('grouped-row');
+    //         row.dataset.groupId = groupId;
+            
+    //         let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" onblur="validateBillId(this)" readonly></td>`;
+            
+    //         if (index === 0) {
+    //             rowHtml += `
+    //                 <td rowspan="${billIds.length}" class="grouped-quantity-cell">
+    //                     <input type="number" class="form-control quantity-input" value="${groupQuantity}" min="1" required oninput="updateTotalSummary()">
+    //                     <small class="text-muted">${billIds.length} ID</small>
+    //                 </td>
+    //             `;
+    //         }
+            
+    //         rowHtml += `<td class="status-cell"><span class="status-valid">✅ Hợp lệ</span></td>`;
+            
+    //         if (index === 0) {
+    //             rowHtml += `<td rowspan="${billIds.length}" class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeGroupedRows('${groupId}')" title="Xóa nhóm">🗑️</button></td>`;
+    //         }
+            
+    //         row.innerHTML = rowHtml;
+    //         tbody.appendChild(row);
+    //     });
+
+    //     this.closeGroupedBillModal();
+    //     this.updateTotalSummary();
+    // }
+
+
+
     addGroupedBillRows() {
         const modalInputs = document.querySelectorAll('#modalBillTbody .modal-bill-id-input');
         const billIds = Array.from(modalInputs).map(input => input.value.trim()).filter(id => id);
@@ -215,6 +295,9 @@ class BulkFormManager {
             
             let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" onblur="validateBillId(this)" readonly></td>`;
             
+            // ✅ THÊM: Cột SL bao - mỗi row có input riêng
+            rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL bao" min="0"></td>`;
+            
             if (index === 0) {
                 rowHtml += `
                     <td rowspan="${billIds.length}" class="grouped-quantity-cell">
@@ -237,6 +320,8 @@ class BulkFormManager {
         this.closeGroupedBillModal();
         this.updateTotalSummary();
     }
+
+
 
     removeBillRow(rowId) {
         const row = document.getElementById(rowId);
@@ -320,6 +405,112 @@ class BulkFormManager {
         return { valid: true };
     }
 
+    generateGroupId(billIds) {
+        return billIds.join('_');
+    }
+
+    // async submitBulkForm() {
+    //     const resultContainer = document.getElementById('bulk-result-container');
+    //     const submitBtn = document.getElementById('submitBtn');
+    //     if (!resultContainer || !submitBtn) return;
+
+    //     resultContainer.innerHTML = '';
+        
+    //     if (this.hasInvalidIds()) {
+    //         resultContainer.innerHTML = '<div class="error">Vui lòng sửa các Bill ID không hợp lệ trước khi lưu.</div>';
+    //         return;
+    //     }
+
+    //     const requiredValidation = this.validateRequiredFields();
+    //     if (!requiredValidation.valid) {
+    //         resultContainer.innerHTML = `<div class="error">${requiredValidation.message}</div>`;
+    //         return;
+    //     }
+
+    //     const quantityValidation = this.validateQuantityRequirement();
+    //     if (!quantityValidation.valid) {
+    //         resultContainer.innerHTML = `<div class="error">${quantityValidation.message}</div>`;
+    //         return;
+    //     }
+        
+    //     const billData = [];
+    //     const groupQuantities = {};
+    //     const processedGroups = new Set();
+
+
+    //     // Lấy số lượng của từng nhóm
+    //     document.querySelectorAll('tr.grouped-row .quantity-input').forEach(input => {
+    //         const row = input.closest('tr');
+    //         const groupId = row.dataset.groupId;
+    //         groupQuantities[groupId] = parseInt(input.value, 10) || 0;
+    //     });
+
+
+    //     // Thu thập dữ liệu từ tất cả các dòng
+    //     document.querySelectorAll('#billTable tbody tr').forEach(row => {
+    //         const billId = row.querySelector('.bill-id-input')?.value.trim();
+    //         if (billId) {
+    //             const bagQuantity = parseInt(row.querySelector('.bag-quantity-input')?.value, 10) || 0;
+    //             let quantity = 0;
+    //             if (row.classList.contains('single-row')) {
+    //                 quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
+    //             } else if (row.classList.contains('grouped-row')) {
+    //                 quantity = groupQuantities[row.dataset.groupId] || 0;
+    //             }
+    //             billData.push({ 
+    //                 bill_id: billId, 
+    //                 bag_quantity: bagQuantity,
+    //                 quantity 
+    //             });
+    //         }
+    //     });
+
+
+
+    //     if (billData.length === 0) {
+    //         resultContainer.innerHTML = '<div class="error">Vui lòng nhập ít nhất một Bill ID.</div>';
+    //         return;
+    //     }
+        
+    //     submitBtn.classList.add('htmx-request');
+    //     resultContainer.innerHTML = '<div class="info">🔄 Đang xử lý, vui lòng chờ...</div>';
+        
+    //     // ✅ SỬA: Sử dụng class selector thay vì name attribute
+    //     const depotInputs = document.querySelectorAll('.depot-hidden-input');
+    //     const handoverPersonInput = document.querySelector('.employee-hidden-input');
+    //     const transportProviderInput = document.querySelector('.transport-hidden-input');
+        
+    //     const payload = {
+    //         from_depot: depotInputs[0]?.value || '',
+    //         to_depot: depotInputs[1]?.value || '',
+    //         handover_person: handoverPersonInput?.value || '',
+    //         transport_provider: transportProviderInput?.value || '',
+    //         bill_data: billData
+    //     };
+        
+    //     try {
+    //         const response = await fetch('/bulk-create-records', {
+    //             method: 'POST',
+    //             headers: {'Content-Type': 'application/json'},
+    //             body: JSON.stringify(payload)
+    //         });
+    //         const resultHTML = await response.text();
+    //         resultContainer.innerHTML = resultHTML;
+            
+    //         if (response.ok && resultHTML.includes('success')) {
+    //             // Xóa bảng và thêm lại một dòng mới
+    //             const tbody = document.querySelector('#billTable tbody');
+    //             if (tbody) tbody.innerHTML = '';
+    //             this.addSingleBillRow();
+    //         }
+    //     } catch (error) {
+    //         resultContainer.innerHTML = `<div class="error">Lỗi kết nối đến máy chủ: ${error.message}</div>`;
+    //     } finally {
+    //         submitBtn.classList.remove('htmx-request');
+    //     }
+    // }
+
+
     async submitBulkForm() {
         const resultContainer = document.getElementById('bulk-result-container');
         const submitBtn = document.getElementById('submitBtn');
@@ -346,6 +537,8 @@ class BulkFormManager {
         
         const billData = [];
         const groupQuantities = {};
+        const groupBillIds = {}; // ✅ THÊM: Track Bill IDs của từng group
+        const processedGroups = new Set();
 
         // Lấy số lượng của từng nhóm
         document.querySelectorAll('tr.grouped-row .quantity-input').forEach(input => {
@@ -354,17 +547,45 @@ class BulkFormManager {
             groupQuantities[groupId] = parseInt(input.value, 10) || 0;
         });
 
-        // Thu thập dữ liệu từ tất cả các dòng
+        // ✅ THÊM: Thu thập Bill IDs cho từng group
+        document.querySelectorAll('#billTable tbody tr.grouped-row').forEach(row => {
+            const billId = row.querySelector('.bill-id-input')?.value.trim();
+            if (billId) {
+                const groupId = row.dataset.groupId;
+                if (!groupBillIds[groupId]) {
+                    groupBillIds[groupId] = [];
+                }
+                groupBillIds[groupId].push(billId);
+            }
+        });
+
+        // ✅ SỬA: Thu thập dữ liệu từ tất cả các dòng với Group ID
         document.querySelectorAll('#billTable tbody tr').forEach(row => {
             const billId = row.querySelector('.bill-id-input')?.value.trim();
             if (billId) {
+                const bagQuantity = parseInt(row.querySelector('.bag-quantity-input')?.value, 10) || 0;
                 let quantity = 0;
+                let groupId = null; // ✅ THÊM: Group ID field
+
                 if (row.classList.contains('single-row')) {
                     quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
+                    // Single row không có Group ID
                 } else if (row.classList.contains('grouped-row')) {
-                    quantity = groupQuantities[row.dataset.groupId] || 0;
+                    const rowGroupId = row.dataset.groupId;
+                    quantity = groupQuantities[rowGroupId] || 0;
+                    
+                    // ✅ THÊM: Tạo Group ID từ Bill IDs bằng cách nối với _
+                    if (groupBillIds[rowGroupId] && groupBillIds[rowGroupId].length > 0) {
+                        groupId = groupBillIds[rowGroupId].join('_');
+                    }
                 }
-                billData.push({ bill_id: billId, quantity });
+
+                billData.push({ 
+                    bill_id: billId, 
+                    bag_quantity: bagQuantity,
+                    quantity,
+                    group_id: groupId // ✅ THÊM: Group ID
+                });
             }
         });
 
@@ -410,6 +631,8 @@ class BulkFormManager {
             submitBtn.classList.remove('htmx-request');
         }
     }
+
+    
 }
 
 export default BulkFormManager;

@@ -67,7 +67,7 @@ def update_employee_json_file():
     try:
         with open(EMPLOYEE_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(active_employees, f, ensure_ascii=False, indent=4)
-        msg = f"Cập nhật thành công! Đã lưu {len(active_employees)} nhân viên vào file {EMPLOYEE_JSON_PATH}."
+        msg = f"Cập nhật thành công {len(active_employees)} nhân viên"
         logging.info(msg)
         return True, msg
     except IOError as e:

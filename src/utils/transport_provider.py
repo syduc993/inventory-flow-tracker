@@ -63,7 +63,7 @@ def update_transport_providers_json_file(app_token, table_id="tblDefault"):
         with open(TRANSPORT_PROVIDERS_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(providers, f, ensure_ascii=False, indent=4)
         
-        msg = f"Cập nhật thành công! Đã lưu {len(providers)} nhà cung cấp vào file {TRANSPORT_PROVIDERS_JSON_PATH}."
+        msg = f"Cập nhật thành công {len(providers)} nhà cung cấp"
         logging.info(msg)
         return True, msg
         

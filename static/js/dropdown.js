@@ -375,7 +375,7 @@ class DropdownManager {
         errorDiv.textContent = message;
         errorDiv.style.cssText = `
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
             background: #f44336;
             color: white;

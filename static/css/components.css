@@ -358,29 +358,91 @@ button.htmx-request {
 /* === Chiều rộng cột cho tất cả màn hình === */
 .bill-table th:nth-child(1), /* Cột ID */
 .bill-table td:nth-child(1) {
-    width: 60%;
+    width: 40%;
 }
 
-.bill-table th:nth-child(2), /* Cột SL tải */  
+
+.bill-table th:nth-child(2), /* Cột SL bao */  
 .bill-table td:nth-child(2) {
-    width: 8%; /* ✅ Giảm từ 5% lên 8% để đủ chứa số */
+    width: 15%;
+    text-align: center;
+}
+
+.bill-table th:nth-child(3), /* Cột SL tải */  
+.bill-table td:nth-child(3) {
+    width: 15%;
     text-align: center;
 }
 
 /* SỬA: Đảm bảo cột Trạng thái trên desktop căn giữa */
-.bill-table th:nth-child(3),
-.bill-table td:nth-child(3) {
+.bill-table th:nth-child(4),
+.bill-table td:nth-child(4) {
     width: 22%;
     text-align: center;
 }
 
-.bill-table th:nth-child(4), /* Cột Xóa */
-.bill-table td:nth-child(4) {
+.bill-table th:nth-child(5), /* Cột Xóa */
+.bill-table td:nth-child(5) {
     width: 10%;
     text-align: center;
 }
 
-/* === Mobile responsive (giữ nguyên phần này) === */
+
+
+/* SỬA: Refresh notification styles - đảm bảo hiển thị đúng */
+.refresh-notification {
+    position: fixed !important;
+    top: 80px !important;
+    right: 20px !important;
+    z-index: 99999 !important; /* Tăng z-index cao hơn */
+    max-width: 300px !important;
+    margin: 0 !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25) !important; /* Tăng shadow */
+    font-weight: 500 !important;
+    transform: translateX(350px); /* Bắt đầu ở ngoài màn hình */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    opacity: 0; /* Bắt đầu với opacity 0 */
+}
+
+.refresh-notification.show {
+    transform: translateX(0) !important;
+    opacity: 1 !important; /* Hiển thị khi có class show */
+}
+
+.refresh-notification.hide {
+    transform: translateX(350px) !important;
+    opacity: 0 !important;
+}
+
+/* Màu sắc cho notification */
+.refresh-notification.success {
+    background: linear-gradient(135deg, #4caf50, #45a049) !important;
+    color: white !important;
+    border: 1px solid #4caf50 !important;
+}
+
+.refresh-notification.error {
+    background: linear-gradient(135deg, #f44336, #d32f2f) !important;
+    color: white !important;
+    border: 1px solid #f44336 !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .refresh-notification {
+        top: 70px !important;
+        right: 10px !important;
+        left: 10px !important;
+        max-width: none !important;
+        text-align: center !important;
+    }
+}
+
+
+
+/* === Mobile responsive === */
 @media (max-width: 768px) {
     .bill-table {
         table-layout: fixed; 
@@ -390,19 +452,25 @@ button.htmx-request {
     /* === Phân chia lại chiều rộng các cột === */
     .bill-table th:nth-child(1),
     .bill-table td:nth-child(1) { width: 18%; }
-    
+
     .bill-table th:nth-child(2), 
     .bill-table td:nth-child(2) { 
-        width: 12%; /* ✅ Tăng từ 5% lên 12% cho mobile */
+        width: 12%;
+        text-align: center;
+    }
+
+    .bill-table th:nth-child(3), 
+    .bill-table td:nth-child(3) { 
+        width: 12%;
         text-align: center;
     }
     
     /* SỬA: Đảm bảo cột Trạng thái trên mobile căn giữa */
-    .bill-table th:nth-child(3),
-    .bill-table td:nth-child(3) { width: 18%; text-align: center; }
-    
     .bill-table th:nth-child(4),
-    .bill-table td:nth-child(4) { width: 9%; text-align: center; }
+    .bill-table td:nth-child(4) { width: 18%; text-align: center; }
+    
+    .bill-table th:nth-child(5),
+    .bill-table td:nth-child(5) { width: 9%; text-align: center; }
 
     /* Giảm padding và font-size chung cho bảng trên mobile */
     .bill-table th,

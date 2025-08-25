@@ -1,79 +1,114 @@
-# src/routes/refresh_routes.py - Data Refresh Routes
+# FILE: src/routes/refresh_routes.py (FINAL & CORRECT PARTIAL UPDATE VERSION)
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse
+# ✅ SỬA: Dùng lại Response và thêm templates để render HTML
+from fastapi.responses import Response 
+from src.core.dependencies import templates # Thêm templates
 import time
 import logging
+import json
 
 from src.services.employee_service import EmployeeService
 from src.services.transport_service import TransportProviderService
 from src.services.depot_service import DepotService
 from src.core.dependencies import get_current_user, get_employee_service, get_transport_service, get_depot_service
+from src.utils.config import TABLE_IDS
 
 router = APIRouter(prefix="/refresh", tags=["refresh"])
 logger = logging.getLogger(__name__)
 
-@router.post("/employees", response_class=HTMLResponse)
+# =================================================================================
+# === HÀM REFRESH NHÂN VIÊN (TRẢ VỀ PARTIAL HTML) =================================
+# =================================================================================
+@router.post("/employees")
 async def refresh_employees_endpoint(
     request: Request,
     employee_service: EmployeeService = Depends(get_employee_service)
 ):
-    """Endpoint để làm mới danh sách nhân viên"""
-    user = get_current_user(request)
-    logger.info(f"User {user.get('name')} refreshing employees")
-    
     try:
-        time.sleep(0.5)
-        
         success, message = employee_service.refresh_employees()
-        
-        if success:
-            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
-        else:
-            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
-            
+        event_data = {"message": message, "type": "success" if success else "error"}
     except Exception as e:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
+        event_data = {"message": f"Lỗi hệ thống: {str(e)}", "type": "error"}
 
-@router.post("/transport-providers", response_class=HTMLResponse)
+    headers = {"HX-Trigger": json.dumps({"show-refresh-notification": event_data})}
+    
+    # ✅ SỬA: Render lại component dropdown với dữ liệu mới và trả về HTML
+    new_employees = employee_service.get_employees()
+    context = {
+        "request": request, 
+        "employees": new_employees, 
+        "field_name": "handover_person", 
+        "placeholder": "Tìm nhân viên..."
+    }
+    # Dùng lại TemplateResponse để render và gửi header
+    return templates.TemplateResponse(
+        "components/dropdowns/employee.html",
+        context,
+        headers=headers
+    )
+
+# =================================================================================
+# === HÀM REFRESH ĐƠN VỊ VẬN CHUYỂN (TRẢ VỀ PARTIAL HTML) ==========================
+# =================================================================================
+@router.post("/transport-providers")
 async def refresh_transport_providers_endpoint(
     request: Request,
     transport_service: TransportProviderService = Depends(get_transport_service)
 ):
-    """Endpoint để làm mới danh sách đơn vị vận chuyển"""
-    user = get_current_user(request)
-    logger.info(f"User {user.get('name')} refreshing transport providers")
-    
     try:
         time.sleep(0.5)
-        
-        success, message = transport_service.refresh_transport_providers("tblyiELQIi6M1j1r")
-        
-        if success:
-            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
-        else:
-            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
-            
+        table_id = TABLE_IDS.get('TRANSPORT_PROVIDERS_TABLE_ID', 'tblyiELQIi6M1j1r')
+        success, message = transport_service.refresh_transport_providers(table_id)
+        event_data = {"message": message, "type": "success" if success else "error"}
     except Exception as e:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
+        event_data = {"message": f"Lỗi hệ thống: {str(e)}", "type": "error"}
+            
+    headers = {"HX-Trigger": json.dumps({"show-refresh-notification": event_data})}
+    
+    # ✅ SỬA: Render lại component dropdown với dữ liệu mới và trả về HTML
+    new_providers = transport_service.get_transport_providers()
+    context = {
+        "request": request,
+        "transport_providers": new_providers,
+        "field_name": "transport_provider",
+        "placeholder": "Tìm đơn vị vận chuyển..."
+    }
+    return templates.TemplateResponse(
+        "components/dropdowns/transport.html",
+        context,
+        headers=headers
+    )
 
-@router.post("/depots", response_class=HTMLResponse)
+# =================================================================================
+# === HÀM REFRESH KHO (TRẢ VỀ PARTIAL HTML) ========================================
+# =================================================================================
+@router.post("/depots")
 async def refresh_depots_endpoint(
     request: Request,
     depot_service: DepotService = Depends(get_depot_service)
 ):
-    """Endpoint để làm mới danh sách depot"""
-    user = get_current_user(request)
-    logger.info(f"User {user.get('name')} refreshing depots")
-    
     try:
         time.sleep(0.5)
-        
         success, message = depot_service.refresh_depots()
-        
-        if success:
-            return HTMLResponse(f"<div class='success'>✅ {message}</div>")
-        else:
-            return HTMLResponse(f"<div class='error'>❌ Lỗi: {message}</div>")
-            
+        event_data = {"message": message, "type": "success" if success else "error"}
     except Exception as e:
-        return HTMLResponse(f"<div class='error'>❌ Lỗi hệ thống: {str(e)}</div>")
+        event_data = {"message": f"Lỗi hệ thống: {str(e)}", "type": "error"}
+
+    headers = {"HX-Trigger": json.dumps({"show-refresh-notification": event_data})}
+
+    # ✅ SỬA: Render lại component dropdown với dữ liệu mới và trả về HTML
+    new_depots = depot_service.get_depots()
+    # Chú ý: cần truyền cả field_name và placeholder, ta có thể tạm hardcode
+    # hoặc tìm cách truyền từ frontend, nhưng hardcode là đơn giản nhất.
+    # Ta sẽ giả định field_name và placeholder dựa trên context.
+    context = {
+        "request": request,
+        "depots": new_depots,
+        "field_name": "depot", # Tên chung, không ảnh hưởng nhiều
+        "placeholder": "Chọn kho..."
+    }
+    return templates.TemplateResponse(
+        "components/dropdowns/depot.html",
+        context,
+        headers=headers
+    )

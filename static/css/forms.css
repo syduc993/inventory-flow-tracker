@@ -19,7 +19,7 @@
     font-size: 14px;
 }
 
-/* Sửa: đồng nhất height input và button trong search-form */
+/* Đồng nhất height input và button trong search-form */
 .form-control,
 .search-input,
 .search-form .btn {
@@ -27,7 +27,6 @@
     padding-top: 12px;
     padding-bottom: 12px;
     line-height: 20px;
-    /* giữ nguyên các thuộc tính cũ */
     box-sizing: border-box;
     font-size: 16px;
 }
@@ -49,9 +48,9 @@
     box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-/* ✅ SỬA: Buttons với responsive text handling */
+/* Buttons với responsive text handling */
 .btn {
-    width: 100% !important;
+    width: 100%; /* Bỏ !important để class khác ghi đè */
     box-sizing: border-box;
     padding: 12px 16px;
     border: none;
@@ -63,10 +62,10 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     min-width: unset;
-    white-space: normal; /* ✅ SỬA: Cho phép xuống dòng */
-    height: auto;
+    white-space: normal;
+    height: auto; 
     text-align: center;
-    line-height: 1.2; /* ✅ THÊM: Cải thiện line height */
+    line-height: 1.2;
 }
 
 /* Căn chỉnh cho mọi nút trong search-form */
@@ -145,7 +144,7 @@
     padding: 6px 12px !important;
     font-size: 12px;
     flex: 0 0 auto;
-    white-space: nowrap; /* ✅ Giữ nowrap cho button nhỏ */
+    white-space: nowrap;
 }
 
 /* Form actions */
@@ -157,7 +156,7 @@
     margin-bottom: 8px;
 }
 
-/* ✅ SỬA: Button group với responsive gap */
+/* Button group với responsive gap */
 .btn-group {
     display: flex;
     gap: 8px;
@@ -166,10 +165,9 @@
 
 .btn-group .btn {
     flex: 1;
-    min-width: 0; /* ✅ THÊM: Cho phép flex shrink */
+    min-width: 0;
 }
 
-/* ✅ THÊM: Responsive gap cho button group */
 @media (max-width: 480px) {
     .btn-group {
         gap: 4px;
@@ -180,72 +178,51 @@
 .input-with-refresh {
     display: flex;
     gap: 8px;
-    align-items: flex-start;
+    /* ✅ SỬA: Căn giữa theo chiều dọc để nút và input thẳng hàng */
+    align-items: center; 
 }
 
 .input-with-refresh > div {
     flex: 1;
 }
 
-.input-with-refresh .btn {
-    width: auto !important;
-    white-space: nowrap;
-    min-width: 120px;
+/* ======================================================================== */
+/* === ✅ FIX CUỐI CÙNG: Định nghĩa class mới cho nút refresh icon === */
+/* ======================================================================== */
+.btn-refresh-icon {
+    /* Ép nút thành hình vuông, kích thước bằng chiều cao ô input */
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important; 
+    
+    padding: 0 !important; /* Bỏ padding để kiểm soát kích thước tuyệt đối */
+    flex-shrink: 0; /* Ngăn nút bị co lại trong flex container */
+    font-size: 1.2rem; /* Tăng kích thước icon một chút */
 }
 
-/* ✅ THÊM: Responsive input with refresh */
+/* Responsive sizes cho nút icon */
+@media (max-width: 768px) {
+    .btn-refresh-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+    }
+}
+
 @media (max-width: 480px) {
     .input-with-refresh {
         gap: 4px;
     }
-    
-    .input-with-refresh .btn {
-        min-width: 80px;
-        font-size: 10px;
-        padding: 8px 6px;
-    }
-
-    .input-with-refresh .form-control {
-        padding: 8px 8px;
-        font-size: 14px; 
+    .btn-refresh-icon {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        font-size: 1rem;
     }
 }
-/* Refresh container */
-.refresh-container {
-    width: 100%;
-    margin-bottom: 16px;
-}
+/* ======================================================================== */
 
-.refresh-status-container {
-    font-size: 12px;
-    margin-top: 4px;
-    min-height: 18px;
-    text-align: center;
-    padding-right: 0;
-}
-
-.btn-refresh,
-.form-btn-refresh,
-.form-btn-refresh-transport {
-    width: 100% !important;
-}
-
-.btn-refresh .spinner,
-.form-btn-refresh .spinner,
-.form-btn-refresh-transport .spinner {
-    width: 14px;
-    height: 14px;
-    border-width: 2px;
-    border-top-color: #fff;
-}
-
-.btn-refresh:hover,
-.form-btn-refresh:hover,
-.form-btn-refresh-transport:hover {
-    background-color: rgba(25, 118, 210, 0.8);
-}
-
-/* HTMX indicators */
+/* Các quy tắc HTMX giữ nguyên */
 #htmx-indicator,
 .htmx-indicator.global {
     display: none;
@@ -264,4 +241,17 @@ button.htmx-request .htmx-indicator {
 .table-actions .btn {
     width: auto !important;
     flex: 0 0 auto;
+}
+
+/* Khối này vẫn hữu ích cho các nút có chữ khác */
+.btn.htmx-request,
+button.htmx-request {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn.htmx-request .btn-text,
+button.htmx-request .btn-text {
+    display: none;
 }

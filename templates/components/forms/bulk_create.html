@@ -1,5 +1,8 @@
-<div class="bulk-form-container">
-    <!-- ✅ SỬA LỖI 1: Cải thiện structure của common fields section -->
+<!-- ====================================================================== -->
+<!--  FILE: templates/components/forms/bulk_create.html (FINAL & CORRECT)   -->
+<!-- ====================================================================== -->
+
+<div class="bulk-form-container" hx-on:show-refresh-notification="handleRefresh(event)">
     <div class="common-fields-section elevation-1">
         <h4>1. Thông tin chung</h4>
         <div class="common-fields-grid">
@@ -11,11 +14,12 @@
                             {% include "components/dropdowns/depot.html" %}
                         {% endwith %}
                     </div>
-                    <button class="btn btn-primary" 
+                    <!-- ✅ SỬA: Thêm hx-target để chỉ cập nhật dropdown -->
+                    <button class="btn btn-primary btn-refresh-icon" 
                             hx-post="/refresh/depots" 
+                            hx-indicator="#from-depot-spinner"
                             hx-target="#from-depot-dropdown-container"
-                            hx-swap="outerHTML"
-                            hx-indicator="#from-depot-spinner">
+                            hx-swap="outerHTML">
                         <span class="btn-text">🔄</span>
                         <span id="from-depot-spinner" class="spinner htmx-indicator"></span>
                     </button>
@@ -30,11 +34,12 @@
                             {% include "components/dropdowns/depot.html" %}
                         {% endwith %}
                     </div>
-                    <button class="btn btn-primary" 
+                    <!-- ✅ SỬA: Thêm hx-target để chỉ cập nhật dropdown -->
+                    <button class="btn btn-primary btn-refresh-icon" 
                             hx-post="/refresh/depots" 
+                            hx-indicator="#to-depot-spinner"
                             hx-target="#to-depot-dropdown-container"
-                            hx-swap="outerHTML"
-                            hx-indicator="#to-depot-spinner">
+                            hx-swap="outerHTML">
                         <span class="btn-text">🔄</span>
                         <span id="to-depot-spinner" class="spinner htmx-indicator"></span>
                     </button>
@@ -49,11 +54,12 @@
                             {% include "components/dropdowns/employee.html" %}
                         {% endwith %}
                     </div>
-                    <button class="btn btn-primary" 
+                    <!-- ✅ SỬA: Thêm hx-target để chỉ cập nhật dropdown -->
+                    <button class="btn btn-primary btn-refresh-icon" 
                             hx-post="/refresh/employees" 
+                            hx-indicator="#employee-spinner"
                             hx-target="#employee-dropdown-container"
-                            hx-swap="outerHTML"
-                            hx-indicator="#employee-spinner">
+                            hx-swap="outerHTML">
                         <span class="btn-text">🔄</span>
                         <span id="employee-spinner" class="spinner htmx-indicator"></span>
                     </button>
@@ -68,11 +74,12 @@
                             {% include "components/dropdowns/transport.html" %}
                         {% endwith %}
                     </div>
-                    <button class="btn btn-primary" 
+                    <!-- ✅ SỬA: Thêm hx-target để chỉ cập nhật dropdown -->
+                    <button class="btn btn-primary btn-refresh-icon" 
                             hx-post="/refresh/transport-providers" 
+                            hx-indicator="#transport-spinner"
                             hx-target="#transport-dropdown-container"
-                            hx-swap="outerHTML"
-                            hx-indicator="#transport-spinner">
+                            hx-swap="outerHTML">
                         <span class="btn-text">🔄</span>
                         <span id="transport-spinner" class="spinner htmx-indicator"></span>
                     </button>
@@ -81,15 +88,15 @@
         </div>
     </div>
 
+    <!-- Phần còn lại của form không thay đổi -->
     <div class="bill-ids-section">
         <h4>2. Danh sách Bill ID</h4>
-
         <div class="table-container">
             <table class="bill-table" id="billTable">
                 <thead>
                     <tr>
-                        <!-- ✅ SỬA: Thay thế inline style bằng class -->
                         <th class="th-bill-id">Bill ID</th>
+                        <th class="th-bag-quantity">SL bao</th>
                         <th class="th-quantity">SL tải</th>
                         <th class="th-status">Trạng thái</th>
                         <th class="th-action">Xóa</th>
@@ -100,8 +107,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- ✅ THAY ĐỔI CHÍNH: Di chuyển table-actions xuống dưới bảng -->
         <div class="table-actions">
             <button type="button" class="btn btn-primary btn-small" onclick="addSingleBillRow()">
                 ➕ Thêm ID đơn lẻ
@@ -114,7 +119,6 @@
                 📦 Thêm ID gộp tải
             </button>
         </div>
-
         <div class="total-summary">
             <strong>Tổng cộng:</strong> <span id="totalBills">0</span> Bill ID, <span id="totalLoads">0</span> bao/tải.
         </div>
@@ -130,7 +134,7 @@
     <div id="bulk-result-container" style="margin-top: 20px;"></div>
 </div>
 
-<!-- ✅ SỬA: Modal có cột Trạng thái cho validation real-time, KHÔNG có cột STT -->
+<!-- Modal -->
 <div id="groupedBillModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -142,7 +146,6 @@
                 <table class="modal-bill-table" id="modalBillTable">
                     <thead>
                         <tr>
-                            <!-- ✅ SỬA: Thay thế inline style bằng class -->
                             <th class="th-bill-id">Bill ID</th>
                             <th class="th-status">Trạng thái</th>
                             <th class="th-action">Xóa</th>
@@ -164,10 +167,20 @@
     </div>
 </div>
 
-<!-- ✅ SỬA LỖI CHÍNH: Loại bỏ script conflict, chỉ giữ khởi tạo đơn giản -->
+<!-- Script -->
 <script>
+    function handleRefresh(event) {
+        if (event.detail && typeof showRefreshNotification === 'function') {
+            const message = event.detail.message;
+            const type = event.detail.type;
+            
+            // ✅ SỬA: Chỉ hiển thị popup. KHÔNG tải lại trang.
+            showRefreshNotification(message, type);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-        // Chỉ khởi tạo row đầu tiên, không override modal functions
+        // Khởi tạo dòng đầu tiên
         setTimeout(() => {
             if (typeof addSingleBillRow === 'function') {
                 const tbody = document.querySelector('#billTable tbody');
@@ -177,7 +190,7 @@
             }
         }, 100);
         
-        // Close modal khi click backdrop
+        // Logic đóng modal
         const modal = document.getElementById('groupedBillModal');
         if (modal) {
             modal.addEventListener('click', function(e) {
@@ -188,8 +201,6 @@
                 }
             });
         }
-        
-        // Close modal với Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const modal = document.getElementById('groupedBillModal');

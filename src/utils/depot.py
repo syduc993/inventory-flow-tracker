@@ -75,7 +75,7 @@ def update_depot_json_file():
         with open(DEPOT_JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(depots, f, ensure_ascii=False, indent=4)
         
-        msg = f"Cập nhật thành công! Đã lưu {len(depots)} depot vào file {DEPOT_JSON_PATH}."
+        msg = f"Cập nhật thành công {len(depots)} depot"
         logging.info(msg)
         return True, msg
         

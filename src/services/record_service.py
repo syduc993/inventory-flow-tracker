@@ -62,8 +62,50 @@ class RecordService:
         
         return larkbase_write_data(self.app_token, self.table_id, new_record)
 
-    def batch_create_records(self, records_data):
-        """Tạo nhiều records cùng lúc"""
+    # def batch_create_records(self, records_data):
+    #     """Tạo nhiều records cùng lúc"""
+    #     from src.utils.larkbase import larkbase_batch_write_data
+        
+    #     processed_records = []
+        
+    #     for record_data in records_data:
+    #         processed_record = {}
+            
+    #         # Xử lý như create_record bình thường
+    #         numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
+            
+    #         for key, value in record_data.items():
+    #             if key in numeric_fields and value:
+    #                 try:
+    #                     processed_record[key] = int(value) if value else 0
+    #                 except (ValueError, TypeError):
+    #                     processed_record[key] = 0
+    #             elif key == "Người bàn giao":
+    #                 if value:
+    #                     processed_record["ID người bàn giao"] = value
+    #                     # Lấy tên nhân viên
+    #                     from src.services.employee_service import EmployeeService
+    #                     employee_service = EmployeeService()
+    #                     employees = employee_service.get_employees()
+                        
+    #                     employee_name = ""
+    #                     for emp in employees:
+    #                         if emp.get('id') == value:
+    #                             employee_name = emp.get('name', '')
+    #                             break
+                        
+    #                     processed_record["Người bàn giao"] = employee_name or value
+    #                 continue
+    #             elif value and key not in ["Người bàn giao_hidden"]:
+    #                 processed_record[key] = value
+            
+    #         processed_record["Ngày bàn giao"] = int(time.time() * 1000)
+    #         processed_records.append(processed_record)
+        
+    #     return larkbase_batch_write_data(self.app_token, self.table_id, processed_records)
+
+    def batch_create_records(self, records_data, extra_group_id=None):
+        """Tạo nhiều records cùng lúc với Group ID"""
         from src.utils.larkbase import larkbase_batch_write_data
         
         processed_records = []
@@ -71,7 +113,7 @@ class RecordService:
         for record_data in records_data:
             processed_record = {}
             
-            # Xử lý như create_record bình thường
+            # Xử lý existing fields
             numeric_fields = ["Số lượng", "Số lượng bao/tải giao", "Số lượng bao tải nhận"]
             
             for key, value in record_data.items():
@@ -83,7 +125,7 @@ class RecordService:
                 elif key == "Người bàn giao":
                     if value:
                         processed_record["ID người bàn giao"] = value
-                        # Lấy tên nhân viên
+                        # Get employee name
                         from src.services.employee_service import EmployeeService
                         employee_service = EmployeeService()
                         employees = employee_service.get_employees()
@@ -96,7 +138,12 @@ class RecordService:
                         
                         processed_record["Người bàn giao"] = employee_name or value
                     continue
-                elif value and key not in ["Người bàn giao_hidden"]:
+                elif key == "group_id":
+                    # ✅ THÊM: Xử lý Group ID
+                    if value:
+                        processed_record["Group ID"] = value
+                    continue
+                elif value and key not in ["Người bàn giao_hidden", "group_id"]:
                     processed_record[key] = value
             
             processed_record["Ngày bàn giao"] = int(time.time() * 1000)
