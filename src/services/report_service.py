@@ -122,7 +122,8 @@ class ReportService:
         for fields in records:
             bags = 0
             try:
-                bags_field = fields.get('Số lượng bao', 0)
+                # SỬA LỖI 1: Lấy đúng dữ liệu cho "SL túi" từ cột "Số lượng túi"
+                bags_field = fields.get('Số lượng túi', 0)
                 if isinstance(bags_field, str):
                     bags = int(bags_field) if bags_field.isdigit() else 0
                 elif isinstance(bags_field, (int, float)):
@@ -132,7 +133,8 @@ class ReportService:
                 
             loads = 0
             try:
-                loads_field = fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0))
+                # SỬA LỖI 2: Lấy đúng dữ liệu cho "SL bao" từ cột "Số lượng bao"
+                loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
                 if isinstance(loads_field, str):
                     loads = int(loads_field) if loads_field.isdigit() else 0
                 elif isinstance(loads_field, (int, float)):
@@ -239,15 +241,17 @@ class ReportService:
             header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
             header_alignment = Alignment(horizontal="center", vertical="center")
             
-            headers = ["ID", "Số lượng bao", "Số lượng tải", "ID người bàn giao", "Người bàn giao"]
+            headers = ["ID", "Số lượng túi", "Số lượng bao", "ID người bàn giao", "Người bàn giao"]
             for col, header in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=col, value=header)
                 cell.font, cell.fill, cell.alignment = header_font, header_fill, header_alignment
             
             for row, fields in enumerate(route_records, 2):
                 ws.cell(row=row, column=1, value=fields.get('ID', ''))
-                ws.cell(row=row, column=2, value=fields.get('Số lượng bao', 0))
-                ws.cell(row=row, column=3, value=fields.get('Số lượng tải') or fields.get('Số lượng bao/tải giao', 0))
+                # SỬA LỖI 1: Lấy đúng cột "Số lượng túi" cho Excel
+                ws.cell(row=row, column=2, value=fields.get('Số lượng túi', 0))
+                # SỬA LỖI 2: Lấy đúng cột "Số lượng bao" cho Excel
+                ws.cell(row=row, column=3, value=fields.get('Số lượng bao') or fields.get('Số lượng tải') or fields.get('Số lượng bao/tải giao', 0))
                 ws.cell(row=row, column=4, value=fields.get('ID người bàn giao', ''))
                 ws.cell(row=row, column=5, value=fields.get('Người bàn giao', ''))
             

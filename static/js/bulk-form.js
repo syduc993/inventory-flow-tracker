@@ -31,18 +31,13 @@
 //         window.validateModalBillId = this.validateModalBillId.bind(this);
 //     }
 
-//     // ✅ SỬA: Sử dụng class selector thay vì name attribute
 //     setupCommonFieldsWatcher() {
-//         // Lấy giá trị ban đầu
 //         const depotInputs = document.querySelectorAll('.depot-hidden-input');
 //         const fromDepotInput = depotInputs[0];
 //         const toDepotInput = depotInputs[1];
 //         this.lastFromDepotValue = fromDepotInput ? fromDepotInput.value : '';
 //         this.lastToDepotValue = toDepotInput ? toDepotInput.value : '';
 
-//         // Do component dropdown không bắn ra sự kiện 'change' tiêu chuẩn,
-//         // chúng ta phải dùng polling để kiểm tra sự thay đổi giá trị.
-//         // Đây là cách đáng tin cậy để trigger re-validation khi kho được chọn.
 //         setInterval(() => this.checkForValueChanges(), 800);
 //     }
 
@@ -75,7 +70,6 @@
 //         }
 //     }
 
-    
 //     addSingleBillRow() {
 //         const tbody = document.querySelector('#billTable tbody');
 //         if (!tbody) return;
@@ -83,18 +77,19 @@
 //         const row = document.createElement('tr');
 //         row.id = `row-${this.rowCounter}`;
 //         row.classList.add('single-row');
+//         // ========================================================
+//         // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
+//         // ========================================================
 //         row.innerHTML = `
 //             <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
-//             <td><input type="number" class="form-control bag-quantity-input" placeholder="SL bao" min="0"></td>
-//             <td><input type="number" class="form-control quantity-input" placeholder="SL tải" min="1" required oninput="updateTotalSummary()"></td>
+//             <td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>
+//             <td><input type="number" class="form-control quantity-input" placeholder="SL bao" min="1" required oninput="updateTotalSummary()"></td>
 //             <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
 //             <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
 //         `;
 //         tbody.appendChild(row);
 //         this.updateTotalSummary();
 //     }
-
-
 
 //     addModalBillRow() {
 //         const modalTbody = document.getElementById('modalBillTbody');
@@ -129,7 +124,6 @@
 //             return;
 //         }
 
-//         // ✅ SỬA: Sử dụng class selector thay vì name attribute
 //         const depotInputs = document.querySelectorAll('.depot-hidden-input');
 //         const fromDepot = depotInputs[0]?.value || '';
 //         const toDepot = depotInputs[1]?.value || '';
@@ -219,8 +213,10 @@
             
 //             let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" onblur="validateBillId(this)" readonly></td>`;
             
-//             // ✅ THÊM: Cột SL bao - mỗi row có input riêng
-//             rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL bao" min="0"></td>`;
+//             // ========================================================
+//             // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
+//             // ========================================================
+//             rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>`;
             
 //             if (index === 0) {
 //                 rowHtml += `
@@ -245,8 +241,6 @@
 //         this.updateTotalSummary();
 //     }
 
-
-
 //     removeBillRow(rowId) {
 //         const row = document.getElementById(rowId);
 //         if (row) {
@@ -261,18 +255,24 @@
 //     }
 
 //     async validateBillId(input) {
-//         // Re-validation logic is similar to modal, just on the main table
 //         await this.validateModalBillId(input);
 //     }
 
 //     updateTotalSummary() {
 //         let totalBills = 0;
+//         let totalBags = 0;
 //         let totalLoads = 0;
         
 //         document.querySelectorAll('#billTable tbody tr').forEach(row => {
 //             if (row.querySelector('.bill-id-input')?.value.trim()) {
 //                 totalBills++;
 //             }
+
+//             const bagInput = row.querySelector('.bag-quantity-input');
+//             if (bagInput) {
+//                 totalBags += parseInt(bagInput.value, 10) || 0;
+//             }
+
 //             if (row.querySelector('.quantity-input')) {
 //                 const quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
 //                 totalLoads += quantity;
@@ -280,8 +280,11 @@
 //         });
         
 //         const totalBillsSpan = document.getElementById('totalBills');
+//         const totalBagsSpan = document.getElementById('totalBags');
 //         const totalLoadsSpan = document.getElementById('totalLoads');
+
 //         if(totalBillsSpan) totalBillsSpan.textContent = totalBills;
+//         if(totalBagsSpan) totalBagsSpan.textContent = totalBags;
 //         if(totalLoadsSpan) totalLoadsSpan.textContent = totalLoads;
 //     }
 
@@ -290,7 +293,6 @@
 //     }
 
 //     validateRequiredFields() {
-//         // ✅ SỬA: Sử dụng class selector thay vì name attribute
 //         const depotInputs = document.querySelectorAll('.depot-hidden-input');
 //         const fromDepot = depotInputs[0]?.value || '';
 //         const toDepot = depotInputs[1]?.value || '';
@@ -322,7 +324,10 @@
 //             if (billIdInput?.value.trim() && quantityInput) {
 //                  const quantity = parseInt(quantityInput.value, 10);
 //                  if (isNaN(quantity) || quantity <= 0) {
-//                      return { valid: false, message: `❌ Bill ID "${billIdInput.value}" phải có số lượng bao/tải lớn hơn 0.` };
+//                      // ========================================================
+//                      // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
+//                      // ========================================================
+//                      return { valid: false, message: `❌ Bill ID "${billIdInput.value}" phải có số lượng bao lớn hơn 0.` };
 //                  }
 //             }
 //         }
@@ -359,17 +364,15 @@
         
 //         const billData = [];
 //         const groupQuantities = {};
-//         const groupBillIds = {}; // ✅ THÊM: Track Bill IDs của từng group
+//         const groupBillIds = {}; 
 //         const processedGroups = new Set();
 
-//         // Lấy số lượng của từng nhóm
 //         document.querySelectorAll('tr.grouped-row .quantity-input').forEach(input => {
 //             const row = input.closest('tr');
 //             const groupId = row.dataset.groupId;
 //             groupQuantities[groupId] = parseInt(input.value, 10) || 0;
 //         });
 
-//         // ✅ THÊM: Thu thập Bill IDs cho từng group
 //         document.querySelectorAll('#billTable tbody tr.grouped-row').forEach(row => {
 //             const billId = row.querySelector('.bill-id-input')?.value.trim();
 //             if (billId) {
@@ -381,22 +384,19 @@
 //             }
 //         });
 
-//         // ✅ SỬA: Thu thập dữ liệu từ tất cả các dòng với Group ID
 //         document.querySelectorAll('#billTable tbody tr').forEach(row => {
 //             const billId = row.querySelector('.bill-id-input')?.value.trim();
 //             if (billId) {
 //                 const bagQuantity = parseInt(row.querySelector('.bag-quantity-input')?.value, 10) || 0;
 //                 let quantity = 0;
-//                 let groupId = null; // ✅ THÊM: Group ID field
+//                 let groupId = null;
 
 //                 if (row.classList.contains('single-row')) {
 //                     quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
-//                     // Single row không có Group ID
 //                 } else if (row.classList.contains('grouped-row')) {
 //                     const rowGroupId = row.dataset.groupId;
 //                     quantity = groupQuantities[rowGroupId] || 0;
                     
-//                     // ✅ THÊM: Tạo Group ID từ Bill IDs bằng cách nối với _
 //                     if (groupBillIds[rowGroupId] && groupBillIds[rowGroupId].length > 0) {
 //                         groupId = groupBillIds[rowGroupId].join('_');
 //                     }
@@ -406,7 +406,7 @@
 //                     bill_id: billId, 
 //                     bag_quantity: bagQuantity,
 //                     quantity,
-//                     group_id: groupId // ✅ THÊM: Group ID
+//                     group_id: groupId
 //                 });
 //             }
 //         });
@@ -419,7 +419,6 @@
 //         submitBtn.classList.add('htmx-request');
 //         resultContainer.innerHTML = '<div class="info">🔄 Đang xử lý, vui lòng chờ...</div>';
         
-//         // ✅ SỬA: Sử dụng class selector thay vì name attribute
 //         const depotInputs = document.querySelectorAll('.depot-hidden-input');
 //         const handoverPersonInput = document.querySelector('.employee-hidden-input');
 //         const transportProviderInput = document.querySelector('.transport-hidden-input');
@@ -442,7 +441,6 @@
 //             resultContainer.innerHTML = resultHTML;
             
 //             if (response.ok && resultHTML.includes('success')) {
-//                 // Xóa bảng và thêm lại một dòng mới
 //                 const tbody = document.querySelector('#billTable tbody');
 //                 if (tbody) tbody.innerHTML = '';
 //                 this.addSingleBillRow();
@@ -453,8 +451,6 @@
 //             submitBtn.classList.remove('htmx-request');
 //         }
 //     }
-
-    
 // }
 
 // export default BulkFormManager;
@@ -544,8 +540,8 @@ class BulkFormManager {
         // ========================================================
         row.innerHTML = `
             <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
-            <td><input type="number" class="form-control bag-quantity-input" placeholder="SL bao" min="0" oninput="updateTotalSummary()"></td>
-            <td><input type="number" class="form-control quantity-input" placeholder="SL tải" min="1" required oninput="updateTotalSummary()"></td>
+            <td><input type="number" class="form-control quantity-input" placeholder="SL bao" min="1" required oninput="updateTotalSummary()"></td>
+            <td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>
             <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
             <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
         `;
@@ -678,8 +674,6 @@ class BulkFormManager {
             // ========================================================
             // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
             // ========================================================
-            rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL bao" min="0" oninput="updateTotalSummary()"></td>`;
-            
             if (index === 0) {
                 rowHtml += `
                     <td rowspan="${billIds.length}" class="grouped-quantity-cell">
@@ -688,6 +682,8 @@ class BulkFormManager {
                     </td>
                 `;
             }
+
+            rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>`;
             
             rowHtml += `<td class="status-cell"><span class="status-valid">✅ Hợp lệ</span></td>`;
             
@@ -720,9 +716,6 @@ class BulkFormManager {
         await this.validateModalBillId(input);
     }
 
-    // ========================================================
-    // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
-    // ========================================================
     updateTotalSummary() {
         let totalBills = 0;
         let totalBags = 0;
@@ -789,7 +782,10 @@ class BulkFormManager {
             if (billIdInput?.value.trim() && quantityInput) {
                  const quantity = parseInt(quantityInput.value, 10);
                  if (isNaN(quantity) || quantity <= 0) {
-                     return { valid: false, message: `❌ Bill ID "${billIdInput.value}" phải có số lượng bao/tải lớn hơn 0.` };
+                     // ========================================================
+                     // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
+                     // ========================================================
+                     return { valid: false, message: `❌ Bill ID "${billIdInput.value}" phải có số lượng bao lớn hơn 0.` };
                  }
             }
         }

@@ -21,8 +21,8 @@ class RecordService:
         """Tạo record mới với tách riêng ID và tên từ dropdown"""
         new_record = {}
         
-        # Danh sách các trường cần chuyển đổi thành số
-        numeric_fields = ["Số lượng", "Số lượng tải", "Số lượng bao tải nhận"]
+        # ⭐ ĐÃ SỬA: Cập nhật danh sách các trường số cho đúng
+        numeric_fields = ["Số lượng", "Số lượng túi", "Số lượng bao", "Số lượng bao tải nhận"]
         
         for key, value in form_data.items():
             if key in numeric_fields and value:
@@ -71,8 +71,8 @@ class RecordService:
         for record_data in records_data:
             processed_record = {}
             
-            # Xử lý existing fields
-            numeric_fields = ["Số lượng", "Số lượng tải", "Số lượng bao tải nhận"]
+            # ⭐ ĐÃ SỬA: Cập nhật danh sách các trường số cho đúng
+            numeric_fields = ["Số lượng", "Số lượng túi", "Số lượng bao", "Số lượng bao tải nhận"]
             
             for key, value in record_data.items():
                 if key in numeric_fields and value:
