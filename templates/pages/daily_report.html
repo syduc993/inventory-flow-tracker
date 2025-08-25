@@ -94,15 +94,17 @@
                                     <tr>
                                         <th>Tên đơn vị</th>
                                         <th class="text-center">Số đơn</th>
-                                        <th class="text-center">Số bao/tải</th>
+                                        <th class="text-center">SL bao</th>
+                                        <th class="text-center">SL tải</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for transport in report_data.transport_summary %}
                                     <tr>
-                                        <td class="transport-name">{{ transport.name }}</td>
+                                        <td class="transport-name">{{ transport.transport_provider }}</td>
                                         <td class="text-center">{{ transport.count }}</td>
-                                        <td class="text-center">{{ transport.quantity }}</td>
+                                        <td class="text-center">{{ transport.bags if transport.bags > 0 else '-' }}</td>
+                                        <td class="text-center">{{ transport.loads if transport.loads > 0 else '-' }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -119,9 +121,10 @@
                                     <tr>
                                         <th>Tuyến đường</th>
                                         <th class="text-center">Số đơn</th>
-                                        <th class="text-center">Số bao/tải</th>
+                                        <th class="text-center">SL bao</th>
+                                        <th class="text-center">SL tải</th>
                                         <th>Đơn vị vận chuyển</th>
-                                        <th class="text-center">Xuất Excel</th> <!-- ✅ THÊM cột này -->
+                                        <th class="text-center">Xuất Excel</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -129,15 +132,14 @@
                                     <tr>
                                         <td class="route-name">{{ route.route }}</td>
                                         <td class="text-center">{{ route.count }}</td>
-                                        <td class="text-center">{{ route.quantity }}</td>
+                                        <td class="text-center">{{ route.bags if route.bags > 0 else '-' }}</td>
+                                        <td class="text-center">{{ route.loads if route.loads > 0 else '-' }}</td>
                                         <td>
-                                            <!-- ✅ SỬA: Hiển thị transport_provider thay vì loop transport_providers -->
                                             <div class="transport-list">
                                                 <span class="transport-tag">{{ route.transport_provider }}</span>
                                             </div>
                                         </td>
                                         <td class="text-center">
-                                            <!-- ✅ THÊM nút xuất cho từng tuyến -->
                                             {% set route_parts = route.route.split(' → ') %}
                                             {% if route_parts|length == 2 %}
                                             <a href="/reports/daily/export-route?from_depot={{ route_parts[0]|urlencode }}&to_depot={{ route_parts[1]|urlencode }}{% if date_str %}&date={{ date_str }}{% endif %}{% if current_filters.employee %}&employee={{ current_filters.employee }}{% endif %}" 

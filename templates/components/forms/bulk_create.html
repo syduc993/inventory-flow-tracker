@@ -1,7 +1,3 @@
-<!-- ====================================================================== -->
-<!--  FILE: templates/components/forms/bulk_create.html (FINAL & CORRECT)   -->
-<!-- ====================================================================== -->
-
 <div class="bulk-form-container" hx-on:show-refresh-notification="handleRefresh(event)">
     <div class="common-fields-section elevation-1">
         <h4>1. Thông tin chung</h4>
@@ -14,7 +10,6 @@
                             {% include "components/dropdowns/depot.html" %}
                         {% endwith %}
                     </div>
-                    <!-- ✅ SỬA: Thêm hx-target để chỉ cập nhật dropdown -->
                     <button class="btn btn-primary btn-refresh-icon" 
                             hx-post="/refresh/depots" 
                             hx-indicator="#from-depot-spinner"
@@ -34,7 +29,6 @@
                             {% include "components/dropdowns/depot.html" %}
                         {% endwith %}
                     </div>
-                    <!-- ✅ SỬA: Thêm hx-target để chỉ cập nhật dropdown -->
                     <button class="btn btn-primary btn-refresh-icon" 
                             hx-post="/refresh/depots" 
                             hx-indicator="#to-depot-spinner"
@@ -54,7 +48,6 @@
                             {% include "components/dropdowns/employee.html" %}
                         {% endwith %}
                     </div>
-                    <!-- ✅ SỬA: Thêm hx-target để chỉ cập nhật dropdown -->
                     <button class="btn btn-primary btn-refresh-icon" 
                             hx-post="/refresh/employees" 
                             hx-indicator="#employee-spinner"
@@ -74,7 +67,6 @@
                             {% include "components/dropdowns/transport.html" %}
                         {% endwith %}
                     </div>
-                    <!-- ✅ SỬA: Thêm hx-target để chỉ cập nhật dropdown -->
                     <button class="btn btn-primary btn-refresh-icon" 
                             hx-post="/refresh/transport-providers" 
                             hx-indicator="#transport-spinner"
@@ -120,7 +112,10 @@
             </button>
         </div>
         <div class="total-summary">
-            <strong>Tổng cộng:</strong> <span id="totalBills">0</span> Bill ID, <span id="totalLoads">0</span> bao/tải.
+            <strong>Tổng cộng:</strong> 
+            <span id="totalBills">0</span> Bill ID, 
+            <span id="totalBags">0</span> bao, 
+            <span id="totalLoads">0</span> tải.
         </div>
     </div>
 
@@ -174,7 +169,6 @@
             const message = event.detail.message;
             const type = event.detail.type;
             
-            // ✅ SỬA: Chỉ hiển thị popup. KHÔNG tải lại trang.
             showRefreshNotification(message, type);
         }
     }

@@ -367,7 +367,7 @@ async def bulk_create_records(
                 "ID kho đến": example_item.get("toDepotId", ""),
                 "Kho đến": example_item.get("toDepotName", ""),
                 "Số lượng": int(example_item.get("realQuantity") or 0),
-                "Số lượng bao/tải giao": int(quantity),
+                "Số lượng tải": int(quantity),
                 "Người bàn giao": handover_person,
                 "Đơn vị vận chuyển": transport_provider,
                 "Ngày bàn giao": int(time.time() * 1000)

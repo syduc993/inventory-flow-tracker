@@ -50,7 +50,7 @@ LARKBASE_FIELDS = [
     "ID kho đến",
     "Kho đến",
     "Số lượng bao",
-    "Số lượng bao/tải giao", 
+    "Số lượng tải", 
     "ID người bàn giao",
     "Người bàn giao",
     "Ngày bàn giao",
@@ -65,14 +65,16 @@ LARKBASE_FIELDS = [
 
 # Các trường người dùng có thể nhập liệu khi TẠO MỚI bản ghi.
 CREATABLE_FIELDS = [
-    "Số lượng bao/tải giao",
+    "Số lượng bao",
+    "Số lượng tải",
     "Người bàn giao",
     "Đơn vị vận chuyển"
 ]
 
 # Các trường người dùng có thể nhập liệu khi CẬP NHẬT bản ghi.
 UPDATABLE_FIELDS = [
-    "Số lượng bao/tải giao",
+    "Số lượng bao",
+    "Số lượng tải",
     "Người bàn giao",
     "Đơn vị vận chuyển"
 ]
