@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-26 17:04:14
+Thời gian tạo: 2025-08-26 17:55:07
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -89,11 +89,11 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 .gitignore (628 bytes)
 docker-compose.yml (365 bytes)
 Dockerfile (590 bytes)
-Get detail code.ipynb (23453 bytes)
+Get detail code.ipynb (69375 bytes)
 main.py (253 bytes)
 project_complete_info.txt (0 bytes)
 README.md (432 bytes)
-requirements.txt (193 bytes)
+requirements.txt (210 bytes)
 src\auth\__init__.py (0 bytes)
 src\auth\auth_middleware.py (8925 bytes)
 src\auth\lark_oauth.py (22567 bytes)
@@ -229,6 +229,7 @@ python-dotenv==1.0.0
 requests==2.31.0
 python-dateutil>=2.8.0
 pydantic==2.7.3
+openpyxl==3.1.2
 ============================================================
 
 ============================================================
