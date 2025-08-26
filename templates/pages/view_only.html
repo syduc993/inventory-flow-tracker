@@ -4,18 +4,25 @@
     
     <div class="detail-row">
         <span class="detail-label">Kho đi:</span>
-        <span class="detail-value">{{ record.fields['Kho đi'] }} ({{ record.fields['ID kho đi'] }})</span>
+        <span class="detail-value">{{ record.fields.get('Kho đi', 'N/A') }} ({{ record.fields.get('ID kho đi', 'N/A') }})</span>
     </div>
     
     <div class="detail-row">
         <span class="detail-label">Kho đến:</span>
-        <span class="detail-value">{{ record.fields['Kho đến'] }} ({{ record.fields['ID kho đến'] }})</span>
+        <span class="detail-value">{{ record.fields.get('Kho đến', 'N/A') }} ({{ record.fields.get('ID kho đến', 'N/A') }})</span>
     </div>
     
+    <!-- ⭐ SỬA ĐỔI: Tách "Số lượng" thành "Số lượng bao" và "Số lượng túi" -->
     <div class="detail-row">
-        <span class="detail-label">Số lượng:</span>
-        <span class="detail-value">{{ record.fields['Số lượng'] }} bao/tải</span>
+        <span class="detail-label">Số lượng bao:</span>
+        <span class="detail-value">{{ record.fields.get('Số lượng bao', 0) }}</span>
     </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Số lượng túi:</span>
+        <span class="detail-value">{{ record.fields.get('Số lượng túi', 0) }}</span>
+    </div>
+    <!-- Kết thúc sửa đổi -->
     
     {% if record.fields.get('Người bàn giao') %}
     <div class="detail-row">
