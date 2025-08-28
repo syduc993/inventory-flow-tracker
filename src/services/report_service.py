@@ -42,15 +42,23 @@ class ReportService:
                                 continue
                         except (ValueError, TypeError):
                             continue
-                
-                if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
+                if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
                     continue
-                
-                if from_depot_filter and fields.get('ID kho đi', '') != from_depot_filter:
+
+                if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
                     continue
+
+                if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
+                    continue    
+
+                #if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
+                #    continue
                 
-                if to_depot_filter and fields.get('ID kho đến', '') != to_depot_filter:
-                    continue
+                #if from_depot_filter and fields.get('ID kho đi', '') != from_depot_filter:
+                #    continue
+                
+                #if to_depot_filter and fields.get('ID kho đến', '') != to_depot_filter:
+                #    continue
                 
                 filtered_records.append(fields)
             
@@ -202,6 +210,7 @@ class ReportService:
         
         return grouped
 
+
     def _process_grouped_records(self, group_records, route_transport_stats, total_loads):
         """Xử lý nhóm records có cùng Group ID - chỉ tính 'Số lượng bao' 1 lần"""
         if not group_records:
@@ -210,8 +219,10 @@ class ReportService:
         # Lấy thông tin chung từ record đầu tiên
         first_record = group_records[0]
         
-        # Tính tổng bags từ tất cả records trong nhóm
+        # ✅ SỬA: Khởi tạo biến bags trước vòng lặp
         total_bags = 0
+        
+        # Tính tổng bags từ tất cả records trong nhóm
         for fields in group_records:
             try:
                 bags_field = fields.get('Số lượng túi', 0)
@@ -219,9 +230,12 @@ class ReportService:
                     bags = int(bags_field) if bags_field.isdigit() else 0
                 elif isinstance(bags_field, (int, float)):
                     bags = int(bags_field)
+                else:
+                    bags = 0  # ✅ THÊM: Default value nếu không phải str/int/float
                 total_bags += bags
             except (ValueError, TypeError):
-                pass
+                # ✅ THÊM: Nếu có lỗi, tiếp tục với giá trị 0
+                continue
         
         # Chỉ lấy "Số lượng bao" từ record đầu tiên (đại diện cho cả nhóm)
         loads = 0
@@ -231,8 +245,10 @@ class ReportService:
                 loads = int(loads_field) if loads_field.isdigit() else 0
             elif isinstance(loads_field, (int, float)):
                 loads = int(loads_field)
+            else:
+                loads = 0  # ✅ THÊM: Default value
         except (ValueError, TypeError):
-            pass
+            loads = 0  # ✅ THÊM: Default value nếu có lỗi
         
         # Tạo route key từ record đầu tiên
         transport_provider = (first_record.get('Đơn vị vận chuyển') or 'Không rõ').strip()
@@ -248,6 +264,57 @@ class ReportService:
         stats['loads'] += loads              # Chỉ tính loads 1 lần
         
         return loads
+
+
+
+
+
+    # def _process_grouped_records(self, group_records, route_transport_stats, total_loads):
+    #     """Xử lý nhóm records có cùng Group ID - chỉ tính 'Số lượng bao' 1 lần"""
+    #     if not group_records:
+    #         return 0
+        
+    #     # Lấy thông tin chung từ record đầu tiên
+    #     first_record = group_records[0]
+        
+    #     # Tính tổng bags từ tất cả records trong nhóm
+    #     total_bags = 0
+    #     for fields in group_records:
+    #         try:
+    #             bags_field = fields.get('Số lượng túi', 0)
+    #             if isinstance(bags_field, str):
+    #                 bags = int(bags_field) if bags_field.isdigit() else 0
+    #             elif isinstance(bags_field, (int, float)):
+    #                 bags = int(bags_field)
+    #             total_bags += bags
+    #         except (ValueError, TypeError):
+    #             pass
+        
+    #     # Chỉ lấy "Số lượng bao" từ record đầu tiên (đại diện cho cả nhóm)
+    #     loads = 0
+    #     try:
+    #         loads_field = first_record.get('Số lượng bao', first_record.get('Số lượng tải', first_record.get('Số lượng bao/tải giao', 0)))
+    #         if isinstance(loads_field, str):
+    #             loads = int(loads_field) if loads_field.isdigit() else 0
+    #         elif isinstance(loads_field, (int, float)):
+    #             loads = int(loads_field)
+    #     except (ValueError, TypeError):
+    #         pass
+        
+    #     # Tạo route key từ record đầu tiên
+    #     transport_provider = (first_record.get('Đơn vị vận chuyển') or 'Không rõ').strip()
+    #     from_depot = (first_record.get('Kho đi') or 'Không rõ').strip()
+    #     to_depot = (first_record.get('Kho đến') or 'Không rõ').strip()
+    #     route_key = f"{from_depot} → {to_depot}"
+    #     route_transport_key = f"{route_key}|{transport_provider}"
+        
+    #     # Cập nhật thống kê
+    #     stats = route_transport_stats[route_transport_key]
+    #     stats['count'] += len(group_records)  # Đếm tất cả records trong nhóm
+    #     stats['bags'] += total_bags          # Tổng bags của cả nhóm
+    #     stats['loads'] += loads              # Chỉ tính loads 1 lần
+        
+    #     return loads
 
     def _process_single_record(self, fields, route_transport_stats):
         """Xử lý record đơn lẻ không có Group ID"""

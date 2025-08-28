@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-28 10:37:13
+Thời gian tạo: 2025-08-28 11:49:14
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -111,7 +111,7 @@ src\services\__init__.py (0 bytes)
 src\services\depot_service.py (769 bytes)
 src\services\employee_service.py (399 bytes)
 src\services\record_service.py (7156 bytes)
-src\services\report_service.py (15663 bytes)
+src\services\report_service.py (24036 bytes)
 src\services\transport_service.py (609 bytes)
 src\utils\__init__.py (0 bytes)
 src\utils\api.py (2170 bytes)
@@ -2354,15 +2354,23 @@ class ReportService:
                                 continue
                         except (ValueError, TypeError):
                             continue
-                
-                if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
+                if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
                     continue
-                
-                if from_depot_filter and fields.get('ID kho đi', '') != from_depot_filter:
+
+                if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
                     continue
+
+                if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
+                    continue    
+
+                #if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
+                #    continue
                 
-                if to_depot_filter and fields.get('ID kho đến', '') != to_depot_filter:
-                    continue
+                #if from_depot_filter and fields.get('ID kho đi', '') != from_depot_filter:
+                #    continue
+                
+                #if to_depot_filter and fields.get('ID kho đến', '') != to_depot_filter:
+                #    continue
                 
                 filtered_records.append(fields)
             
@@ -2424,49 +2432,28 @@ class ReportService:
         }
 
     def _calculate_daily_statistics(self, records):
-        """Tính toán thống kê từ danh sách records"""
+        """Tính toán thống kê từ danh sách records với logic nhóm theo Group ID"""
         if not records:
             return self._empty_report_data()
+        
+        # === BƯỚC 1: NHÓM RECORDS THEO GROUP ID ===
+        grouped_records = self._group_records_by_group_id(records)
         
         route_transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0})
         total_loads = 0
         
-        for fields in records:
-            bags = 0
-            try:
-                # SỬA LỖI 1: Lấy đúng dữ liệu cho "SL túi" từ cột "Số lượng túi"
-                bags_field = fields.get('Số lượng túi', 0)
-                if isinstance(bags_field, str):
-                    bags = int(bags_field) if bags_field.isdigit() else 0
-                elif isinstance(bags_field, (int, float)):
-                    bags = int(bags_field)
-            except (ValueError, TypeError):
-                pass
-                
-            loads = 0
-            try:
-                # SỬA LỖI 2: Lấy đúng dữ liệu cho "SL bao" từ cột "Số lượng bao"
-                loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
-                if isinstance(loads_field, str):
-                    loads = int(loads_field) if loads_field.isdigit() else 0
-                elif isinstance(loads_field, (int, float)):
-                    loads = int(loads_field)
-                total_loads += loads
-            except (ValueError, TypeError):
-                pass
-            
-            transport_provider = (fields.get('Đơn vị vận chuyển') or 'Không rõ').strip()
-            from_depot = (fields.get('Kho đi') or 'Không rõ').strip()
-            to_depot = (fields.get('Kho đến') or 'Không rõ').strip()
-            route_key = f"{from_depot} → {to_depot}"
-            route_transport_key = f"{route_key}|{transport_provider}"
-            
-            stats = route_transport_stats[route_transport_key]
-            stats['count'] += 1
-            stats['bags'] += bags
-            stats['loads'] += loads
+        # === BƯỚC 2: XỬ LÝ TỪNG NHÓM RECORDS ===
+        for group_key, group_records in grouped_records.items():
+            if group_key.startswith('group_'):
+                # Records có Group ID - chỉ tính "Số lượng bao" 1 lần cho cả nhóm
+                self._process_grouped_records(group_records, route_transport_stats, total_loads)
+            else:
+                # Records không có Group ID - tính bình thường từng record
+                for fields in group_records:
+                    loads_added = self._process_single_record(fields, route_transport_stats)
+                    total_loads += loads_added
         
-        # --- Tính toán cho Bảng Tuyến đường ---
+        # === BƯỚC 3: TẠO SUMMARY CHO BẢNG TUYẾN ĐƯỜNG ===
         route_summary = []
         for route_transport_key, stats in route_transport_stats.items():
             route_part, transport_part = route_transport_key.split('|', 1)
@@ -2480,7 +2467,7 @@ class ReportService:
         
         route_summary.sort(key=lambda x: x['loads'], reverse=True)
         
-        # === BỔ SUNG: TÍNH TOÁN CHO BẢNG ĐƠN VỊ VẬN CHUYỂN ===
+        # === BƯỚC 4: TÍNH TOÁN CHO BẢNG ĐƠN VỊ VẬN CHUYỂN ===
         transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0, 'routes': set()})
         
         for item in route_summary:
@@ -2503,7 +2490,6 @@ class ReportService:
             })
             
         transport_summary.sort(key=lambda x: x['loads'], reverse=True)
-        # === KẾT THÚC PHẦN BỔ SUNG ===
         
         return {
             'total_records': len(records),
@@ -2511,8 +2497,205 @@ class ReportService:
             'routes': dict(route_transport_stats),
             'route_summary': route_summary,
             'transport_providers': dict(transport_stats),
-            'transport_summary': transport_summary # Trả về dữ liệu đã được tính toán
+            'transport_summary': transport_summary
         }
+
+    def _group_records_by_group_id(self, records):
+        """Nhóm records theo Group ID"""
+        grouped = {}
+        single_counter = 0
+        
+        for fields in records:
+            group_id = fields.get('Group ID')
+            
+            if group_id:
+                # Records có Group ID giống nhau sẽ được nhóm lại
+                group_key = f"group_{group_id}"
+                if group_key not in grouped:
+                    grouped[group_key] = []
+                grouped[group_key].append(fields)
+            else:
+                # Records không có Group ID tạo key riêng
+                single_counter += 1
+                single_key = f"single_{single_counter}"
+                grouped[single_key] = [fields]
+        
+        return grouped
+
+    def _process_grouped_records(self, group_records, route_transport_stats, total_loads):
+        """Xử lý nhóm records có cùng Group ID - chỉ tính 'Số lượng bao' 1 lần"""
+        if not group_records:
+            return 0
+        
+        # Lấy thông tin chung từ record đầu tiên
+        first_record = group_records[0]
+        
+        # Tính tổng bags từ tất cả records trong nhóm
+        total_bags = 0
+        for fields in group_records:
+            try:
+                bags_field = fields.get('Số lượng túi', 0)
+                if isinstance(bags_field, str):
+                    bags = int(bags_field) if bags_field.isdigit() else 0
+                elif isinstance(bags_field, (int, float)):
+                    bags = int(bags_field)
+                total_bags += bags
+            except (ValueError, TypeError):
+                pass
+        
+        # Chỉ lấy "Số lượng bao" từ record đầu tiên (đại diện cho cả nhóm)
+        loads = 0
+        try:
+            loads_field = first_record.get('Số lượng bao', first_record.get('Số lượng tải', first_record.get('Số lượng bao/tải giao', 0)))
+            if isinstance(loads_field, str):
+                loads = int(loads_field) if loads_field.isdigit() else 0
+            elif isinstance(loads_field, (int, float)):
+                loads = int(loads_field)
+        except (ValueError, TypeError):
+            pass
+        
+        # Tạo route key từ record đầu tiên
+        transport_provider = (first_record.get('Đơn vị vận chuyển') or 'Không rõ').strip()
+        from_depot = (first_record.get('Kho đi') or 'Không rõ').strip()
+        to_depot = (first_record.get('Kho đến') or 'Không rõ').strip()
+        route_key = f"{from_depot} → {to_depot}"
+        route_transport_key = f"{route_key}|{transport_provider}"
+        
+        # Cập nhật thống kê
+        stats = route_transport_stats[route_transport_key]
+        stats['count'] += len(group_records)  # Đếm tất cả records trong nhóm
+        stats['bags'] += total_bags          # Tổng bags của cả nhóm
+        stats['loads'] += loads              # Chỉ tính loads 1 lần
+        
+        return loads
+
+    def _process_single_record(self, fields, route_transport_stats):
+        """Xử lý record đơn lẻ không có Group ID"""
+        bags = 0
+        try:
+            bags_field = fields.get('Số lượng túi', 0)
+            if isinstance(bags_field, str):
+                bags = int(bags_field) if bags_field.isdigit() else 0
+            elif isinstance(bags_field, (int, float)):
+                bags = int(bags_field)
+        except (ValueError, TypeError):
+            pass
+            
+        loads = 0
+        try:
+            loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
+            if isinstance(loads_field, str):
+                loads = int(loads_field) if loads_field.isdigit() else 0
+            elif isinstance(loads_field, (int, float)):
+                loads = int(loads_field)
+        except (ValueError, TypeError):
+            pass
+        
+        transport_provider = (fields.get('Đơn vị vận chuyển') or 'Không rõ').strip()
+        from_depot = (fields.get('Kho đi') or 'Không rõ').strip()
+        to_depot = (fields.get('Kho đến') or 'Không rõ').strip()
+        route_key = f"{from_depot} → {to_depot}"
+        route_transport_key = f"{route_key}|{transport_provider}"
+        
+        stats = route_transport_stats[route_transport_key]
+        stats['count'] += 1
+        stats['bags'] += bags
+        stats['loads'] += loads
+        
+        return loads
+
+
+
+    # def _calculate_daily_statistics(self, records):
+    #     """Tính toán thống kê từ danh sách records"""
+    #     if not records:
+    #         return self._empty_report_data()
+        
+    #     route_transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0})
+    #     total_loads = 0
+        
+    #     for fields in records:
+    #         bags = 0
+    #         try:
+    #             # SỬA LỖI 1: Lấy đúng dữ liệu cho "SL túi" từ cột "Số lượng túi"
+    #             bags_field = fields.get('Số lượng túi', 0)
+    #             if isinstance(bags_field, str):
+    #                 bags = int(bags_field) if bags_field.isdigit() else 0
+    #             elif isinstance(bags_field, (int, float)):
+    #                 bags = int(bags_field)
+    #         except (ValueError, TypeError):
+    #             pass
+                
+    #         loads = 0
+    #         try:
+    #             # SỬA LỖI 2: Lấy đúng dữ liệu cho "SL bao" từ cột "Số lượng bao"
+    #             loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
+    #             if isinstance(loads_field, str):
+    #                 loads = int(loads_field) if loads_field.isdigit() else 0
+    #             elif isinstance(loads_field, (int, float)):
+    #                 loads = int(loads_field)
+    #             total_loads += loads
+    #         except (ValueError, TypeError):
+    #             pass
+            
+    #         transport_provider = (fields.get('Đơn vị vận chuyển') or 'Không rõ').strip()
+    #         from_depot = (fields.get('Kho đi') or 'Không rõ').strip()
+    #         to_depot = (fields.get('Kho đến') or 'Không rõ').strip()
+    #         route_key = f"{from_depot} → {to_depot}"
+    #         route_transport_key = f"{route_key}|{transport_provider}"
+            
+    #         stats = route_transport_stats[route_transport_key]
+    #         stats['count'] += 1
+    #         stats['bags'] += bags
+    #         stats['loads'] += loads
+        
+    #     # --- Tính toán cho Bảng Tuyến đường ---
+    #     route_summary = []
+    #     for route_transport_key, stats in route_transport_stats.items():
+    #         route_part, transport_part = route_transport_key.split('|', 1)
+    #         route_summary.append({
+    #             'route': route_part,
+    #             'transport_provider': transport_part,
+    #             'count': stats['count'],
+    #             'bags': stats['bags'],
+    #             'loads': stats['loads']
+    #         })
+        
+    #     route_summary.sort(key=lambda x: x['loads'], reverse=True)
+        
+    #     # === BỔ SUNG: TÍNH TOÁN CHO BẢNG ĐƠN VỊ VẬN CHUYỂN ===
+    #     transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0, 'routes': set()})
+        
+    #     for item in route_summary:
+    #         provider = item['transport_provider']
+    #         stats = transport_stats[provider]
+            
+    #         stats['count'] += item['count']
+    #         stats['bags'] += item['bags']
+    #         stats['loads'] += item['loads']
+    #         stats['routes'].add(item['route'])
+
+    #     transport_summary = []
+    #     for provider, stats in transport_stats.items():
+    #         transport_summary.append({
+    #             'transport_provider': provider,
+    #             'count': stats['count'],
+    #             'bags': stats['bags'],
+    #             'loads': stats['loads'],
+    #             'route_count': len(stats['routes']) # Đếm số tuyến đường duy nhất
+    #         })
+            
+    #     transport_summary.sort(key=lambda x: x['loads'], reverse=True)
+    #     # === KẾT THÚC PHẦN BỔ SUNG ===
+        
+    #     return {
+    #         'total_records': len(records),
+    #         'total_quantity': total_loads,
+    #         'routes': dict(route_transport_stats),
+    #         'route_summary': route_summary,
+    #         'transport_providers': dict(transport_stats),
+    #         'transport_summary': transport_summary # Trả về dữ liệu đã được tính toán
+    #     }
 
     def export_route_records_to_excel(self, from_depot, to_depot, user_id=None, date_str=None, employee_filter=None):
         """Xuất records của một tuyến đường cụ thể ra Excel"""
