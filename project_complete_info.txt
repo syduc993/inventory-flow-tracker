@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-08-26 17:55:07
+Thời gian tạo: 2025-08-28 10:37:13
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -89,7 +89,7 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 .gitignore (628 bytes)
 docker-compose.yml (365 bytes)
 Dockerfile (590 bytes)
-Get detail code.ipynb (69375 bytes)
+Get detail code.ipynb (9199 bytes)
 main.py (253 bytes)
 project_complete_info.txt (0 bytes)
 README.md (432 bytes)
@@ -102,7 +102,7 @@ src\core\__init__.py (0 bytes)
 src\core\app.py (2075 bytes)
 src\core\dependencies.py (2258 bytes)
 src\routes\__init__.py (0 bytes)
-src\routes\api_routes.py (12214 bytes)
+src\routes\api_routes.py (12769 bytes)
 src\routes\auth_routes.py (4183 bytes)
 src\routes\record_routes.py (5325 bytes)
 src\routes\refresh_routes.py (5111 bytes)
@@ -111,7 +111,7 @@ src\services\__init__.py (0 bytes)
 src\services\depot_service.py (769 bytes)
 src\services\employee_service.py (399 bytes)
 src\services\record_service.py (7156 bytes)
-src\services\report_service.py (12629 bytes)
+src\services\report_service.py (15663 bytes)
 src\services\transport_service.py (609 bytes)
 src\utils\__init__.py (0 bytes)
 src\utils\api.py (2170 bytes)
@@ -1295,6 +1295,7 @@ async def read_root(
         "depots": depot_service.get_depots()
     })
 
+
 @router.post("/validate-bill-id")
 async def validate_bill_id(
     request: Request, 
@@ -1319,20 +1320,30 @@ async def validate_bill_id(
                 "message": "ID không hợp lệ"
             })
         
-        example_item = imex_items[0]
         
-        # Validate status phải thuộc [3,4,5,6]
-        status_str = example_item.get("status", "")
+        # Lấy tất cả status từ các dòng sản phẩm
         try:
-            status = int(status_str) if status_str else None
-        except ValueError:
-            status = None
-        
-        if status not in [3, 4, 5, 6]:
+            all_statuses = {int(item.get("status", 0)) for item in imex_items}
+        except (ValueError, TypeError):
             return JSONResponse({
                 "valid": False,
-                "message": "Status không hợp lệ"
+                "message": "Lỗi dữ liệu status từ API"
             })
+
+        # Kiểm tra xem có BẤT KỲ status nào hợp lệ không
+        valid_statuses = {3, 4, 5, 6}
+        is_valid_bill = any(status in valid_statuses for status in all_statuses)
+
+        if not is_valid_bill:
+            # Chỉ báo lỗi nếu TẤT CẢ các dòng đều không hợp lệ
+            return JSONResponse({
+                "valid": False,
+                "message": "ID chưa được duyệt"
+            })
+        
+
+        # Vẫn dùng example_item để kiểm tra thông tin chung như kho
+        example_item = imex_items[0]
         
         # Validate kho đi/kho đến với thông tin chung
         if example_item.get("fromDepotId", "") != from_depot:
@@ -1359,6 +1370,8 @@ async def validate_bill_id(
             "valid": False,
             "message": "Lỗi kiểm tra"
         })
+
+
 
 @router.post("/bulk-create-records", response_class=HTMLResponse)
 async def bulk_create_records(
@@ -1426,21 +1439,28 @@ async def bulk_create_records(
                 if len(error_samples) < 3:  # Chỉ lưu 3 mẫu lỗi đầu tiên
                     error_samples.append(f"{bill_id}: ID không hợp lệ")
                 continue
-
-            example_item = imex_items[0]
-
-            # Kiểm tra status
-            status_str = example_item.get("status", "")
+            
             try:
-                status = int(status_str) if status_str else None
-            except ValueError:
-                status = None
+                all_statuses = {int(item.get("status", 0)) for item in imex_items}
+            except (ValueError, TypeError):
+                error_count += 1
+                if len(error_samples) < 3:
+                    error_samples.append(f"{bill_id}: Lỗi dữ liệu status")
+                continue
 
-            if status not in [3, 4, 5, 6]:
+            valid_statuses = {3, 4, 5, 6}
+            is_valid_bill = any(status in valid_statuses for status in all_statuses)
+
+            if not is_valid_bill:
                 error_count += 1
                 if len(error_samples) < 3:
                     error_samples.append(f"{bill_id}: ID chưa được duyệt")
                 continue
+            
+            
+            # Vẫn dùng example_item để kiểm tra thông tin chung
+            example_item = imex_items[0]
+
             if example_item.get("fromDepotId", "") != from_depot:
                 error_count += 1
                 if len(error_samples) < 3:
@@ -1452,10 +1472,7 @@ async def bulk_create_records(
                     error_samples.append(f"{bill_id}: Không đúng kho đến")
                 continue
 
-            # =================================================================
-            # === ⭐⭐ ĐÂY LÀ THAY ĐỔI QUAN TRỌNG NHẤT ⭐⭐ ===
-            # =================================================================
-            # ✅ SỬA: Chuẩn bị record data cho batch creation với tên cột đã đồng bộ
+            # Chuẩn bị record data cho batch creation với tên cột đã đồng bộ
             record_data = {
                 "ID": bill_id,
                 "ID kho đi": example_item.get("fromDepotId", ""),
@@ -1526,6 +1543,8 @@ async def bulk_create_records(
     except Exception as e:
         logger.error(f"Error in bulk create: {e}")
         return HTMLResponse(f'<div class="error">❌ Lỗi hệ thống: {str(e)}</div>')
+
+
 
 @router.get("/health")
 async def health_check():
@@ -2524,7 +2543,10 @@ class ReportService:
                 if fields.get('Kho đi', '').strip() == from_depot and fields.get('Kho đến', '').strip() == to_depot:
                     route_records.append(fields)
             
-            if not route_records: return None, 0
+            if not route_records:
+                return None, 0
+            
+            grouped_records = self._group_records_for_export(route_records)
             
             wb = Workbook()
             ws = wb.active
@@ -2538,16 +2560,47 @@ class ReportService:
             for col, header in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=col, value=header)
                 cell.font, cell.fill, cell.alignment = header_font, header_fill, header_alignment
+            current_row = 2
             
-            for row, fields in enumerate(route_records, 2):
-                ws.cell(row=row, column=1, value=fields.get('ID', ''))
-                # SỬA LỖI 1: Lấy đúng cột "Số lượng túi" cho Excel
-                ws.cell(row=row, column=2, value=fields.get('Số lượng túi', 0))
-                # SỬA LỖI 2: Lấy đúng cột "Số lượng bao" cho Excel
-                ws.cell(row=row, column=3, value=fields.get('Số lượng bao') or fields.get('Số lượng tải') or fields.get('Số lượng bao/tải giao', 0))
-                ws.cell(row=row, column=4, value=fields.get('ID người bàn giao', ''))
-                ws.cell(row=row, column=5, value=fields.get('Người bàn giao', ''))
+            for group_key, group_records in grouped_records.items():
+                if len(group_records) > 1:
+                    # ✅ MERGE: Nhóm có nhiều records - merge cột "Số lượng bao"
+                    first_record = group_records[0]
+                    
+                    # Ghi row đầu tiên
+                    ws.cell(row=current_row, column=1, value=first_record.get('ID', ''))
+                    ws.cell(row=current_row, column=2, value=first_record.get('Số lượng túi', 0))
+                    ws.cell(row=current_row, column=3, value=first_record.get('Số lượng bao', 0))
+                    ws.cell(row=current_row, column=4, value=first_record.get('ID người bàn giao', ''))
+                    ws.cell(row=current_row, column=5, value=first_record.get('Người bàn giao', ''))
+                    
+                    # Merge cột "Số lượng bao" vertically cho group
+                    if len(group_records) > 1:
+                        ws.merge_cells(
+                            start_row=current_row, start_column=3,
+                            end_row=current_row + len(group_records) - 1, end_column=3
+                        )
+                    
+                    # Ghi các rows còn lại
+                    for i, record in enumerate(group_records[1:], 1):
+                        ws.cell(row=current_row + i, column=1, value=record.get('ID', ''))
+                        ws.cell(row=current_row + i, column=2, value=record.get('Số lượng túi', 0))
+                        # Column 3 đã merge, không ghi gì
+                        ws.cell(row=current_row + i, column=4, value=record.get('ID người bàn giao', ''))
+                        ws.cell(row=current_row + i, column=5, value=record.get('Người bàn giao', ''))
+                    
+                    current_row += len(group_records)
+                else:
+                    # Single record - không merge
+                    record = group_records[0]
+                    ws.cell(row=current_row, column=1, value=record.get('ID', ''))
+                    ws.cell(row=current_row, column=2, value=record.get('Số lượng túi', 0))
+                    ws.cell(row=current_row, column=3, value=record.get('Số lượng bao', 0))
+                    ws.cell(row=current_row, column=4, value=record.get('ID người bàn giao', ''))
+                    ws.cell(row=current_row, column=5, value=record.get('Người bàn giao', ''))
+                    current_row += 1
             
+            # Auto adjust columns (giữ nguyên existing code)
             for column in ws.columns:
                 max_length = 0
                 column_letter = column[0].column_letter
@@ -2555,7 +2608,8 @@ class ReportService:
                     try:
                         if len(str(cell.value)) > max_length:
                             max_length = len(str(cell.value))
-                    except: pass
+                    except: 
+                        pass
                 adjusted_width = min(max_length + 2, 50)
                 ws.column_dimensions[column_letter].width = adjusted_width
             
@@ -2567,6 +2621,37 @@ class ReportService:
         except Exception as e:
             logger.error(f"Error creating route Excel export: {e}")
             return None, 0
+
+
+    def _group_records_for_export(self, records):
+        """
+        Nhóm các records theo Group ID để merge cells trong Excel
+        
+        Args:
+            records (list): Danh sách các field records
+            
+        Returns:
+            dict: {group_key: [list_of_records], ...}
+        """
+        grouped = {}
+        single_counter = 0
+        
+        for record in records:
+            group_id = record.get('Group ID')
+            
+            if group_id:
+                # Records có Group ID giống nhau sẽ được group lại
+                if group_id not in grouped:
+                    grouped[group_id] = []
+                grouped[group_id].append(record)
+            else:
+                # Records không có Group ID sẽ tạo key riêng
+                single_counter += 1
+                single_key = f"single_{single_counter}"
+                grouped[single_key] = [record]
+        
+        return grouped
+
 ============================================================
 
 ============================================================

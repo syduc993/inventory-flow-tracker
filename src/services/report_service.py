@@ -112,49 +112,28 @@ class ReportService:
         }
 
     def _calculate_daily_statistics(self, records):
-        """Tính toán thống kê từ danh sách records"""
+        """Tính toán thống kê từ danh sách records với logic nhóm theo Group ID"""
         if not records:
             return self._empty_report_data()
+        
+        # === BƯỚC 1: NHÓM RECORDS THEO GROUP ID ===
+        grouped_records = self._group_records_by_group_id(records)
         
         route_transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0})
         total_loads = 0
         
-        for fields in records:
-            bags = 0
-            try:
-                # SỬA LỖI 1: Lấy đúng dữ liệu cho "SL túi" từ cột "Số lượng túi"
-                bags_field = fields.get('Số lượng túi', 0)
-                if isinstance(bags_field, str):
-                    bags = int(bags_field) if bags_field.isdigit() else 0
-                elif isinstance(bags_field, (int, float)):
-                    bags = int(bags_field)
-            except (ValueError, TypeError):
-                pass
-                
-            loads = 0
-            try:
-                # SỬA LỖI 2: Lấy đúng dữ liệu cho "SL bao" từ cột "Số lượng bao"
-                loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
-                if isinstance(loads_field, str):
-                    loads = int(loads_field) if loads_field.isdigit() else 0
-                elif isinstance(loads_field, (int, float)):
-                    loads = int(loads_field)
-                total_loads += loads
-            except (ValueError, TypeError):
-                pass
-            
-            transport_provider = (fields.get('Đơn vị vận chuyển') or 'Không rõ').strip()
-            from_depot = (fields.get('Kho đi') or 'Không rõ').strip()
-            to_depot = (fields.get('Kho đến') or 'Không rõ').strip()
-            route_key = f"{from_depot} → {to_depot}"
-            route_transport_key = f"{route_key}|{transport_provider}"
-            
-            stats = route_transport_stats[route_transport_key]
-            stats['count'] += 1
-            stats['bags'] += bags
-            stats['loads'] += loads
+        # === BƯỚC 2: XỬ LÝ TỪNG NHÓM RECORDS ===
+        for group_key, group_records in grouped_records.items():
+            if group_key.startswith('group_'):
+                # Records có Group ID - chỉ tính "Số lượng bao" 1 lần cho cả nhóm
+                self._process_grouped_records(group_records, route_transport_stats, total_loads)
+            else:
+                # Records không có Group ID - tính bình thường từng record
+                for fields in group_records:
+                    loads_added = self._process_single_record(fields, route_transport_stats)
+                    total_loads += loads_added
         
-        # --- Tính toán cho Bảng Tuyến đường ---
+        # === BƯỚC 3: TẠO SUMMARY CHO BẢNG TUYẾN ĐƯỜNG ===
         route_summary = []
         for route_transport_key, stats in route_transport_stats.items():
             route_part, transport_part = route_transport_key.split('|', 1)
@@ -168,7 +147,7 @@ class ReportService:
         
         route_summary.sort(key=lambda x: x['loads'], reverse=True)
         
-        # === BỔ SUNG: TÍNH TOÁN CHO BẢNG ĐƠN VỊ VẬN CHUYỂN ===
+        # === BƯỚC 4: TÍNH TOÁN CHO BẢNG ĐƠN VỊ VẬN CHUYỂN ===
         transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0, 'routes': set()})
         
         for item in route_summary:
@@ -191,7 +170,6 @@ class ReportService:
             })
             
         transport_summary.sort(key=lambda x: x['loads'], reverse=True)
-        # === KẾT THÚC PHẦN BỔ SUNG ===
         
         return {
             'total_records': len(records),
@@ -199,8 +177,205 @@ class ReportService:
             'routes': dict(route_transport_stats),
             'route_summary': route_summary,
             'transport_providers': dict(transport_stats),
-            'transport_summary': transport_summary # Trả về dữ liệu đã được tính toán
+            'transport_summary': transport_summary
         }
+
+    def _group_records_by_group_id(self, records):
+        """Nhóm records theo Group ID"""
+        grouped = {}
+        single_counter = 0
+        
+        for fields in records:
+            group_id = fields.get('Group ID')
+            
+            if group_id:
+                # Records có Group ID giống nhau sẽ được nhóm lại
+                group_key = f"group_{group_id}"
+                if group_key not in grouped:
+                    grouped[group_key] = []
+                grouped[group_key].append(fields)
+            else:
+                # Records không có Group ID tạo key riêng
+                single_counter += 1
+                single_key = f"single_{single_counter}"
+                grouped[single_key] = [fields]
+        
+        return grouped
+
+    def _process_grouped_records(self, group_records, route_transport_stats, total_loads):
+        """Xử lý nhóm records có cùng Group ID - chỉ tính 'Số lượng bao' 1 lần"""
+        if not group_records:
+            return 0
+        
+        # Lấy thông tin chung từ record đầu tiên
+        first_record = group_records[0]
+        
+        # Tính tổng bags từ tất cả records trong nhóm
+        total_bags = 0
+        for fields in group_records:
+            try:
+                bags_field = fields.get('Số lượng túi', 0)
+                if isinstance(bags_field, str):
+                    bags = int(bags_field) if bags_field.isdigit() else 0
+                elif isinstance(bags_field, (int, float)):
+                    bags = int(bags_field)
+                total_bags += bags
+            except (ValueError, TypeError):
+                pass
+        
+        # Chỉ lấy "Số lượng bao" từ record đầu tiên (đại diện cho cả nhóm)
+        loads = 0
+        try:
+            loads_field = first_record.get('Số lượng bao', first_record.get('Số lượng tải', first_record.get('Số lượng bao/tải giao', 0)))
+            if isinstance(loads_field, str):
+                loads = int(loads_field) if loads_field.isdigit() else 0
+            elif isinstance(loads_field, (int, float)):
+                loads = int(loads_field)
+        except (ValueError, TypeError):
+            pass
+        
+        # Tạo route key từ record đầu tiên
+        transport_provider = (first_record.get('Đơn vị vận chuyển') or 'Không rõ').strip()
+        from_depot = (first_record.get('Kho đi') or 'Không rõ').strip()
+        to_depot = (first_record.get('Kho đến') or 'Không rõ').strip()
+        route_key = f"{from_depot} → {to_depot}"
+        route_transport_key = f"{route_key}|{transport_provider}"
+        
+        # Cập nhật thống kê
+        stats = route_transport_stats[route_transport_key]
+        stats['count'] += len(group_records)  # Đếm tất cả records trong nhóm
+        stats['bags'] += total_bags          # Tổng bags của cả nhóm
+        stats['loads'] += loads              # Chỉ tính loads 1 lần
+        
+        return loads
+
+    def _process_single_record(self, fields, route_transport_stats):
+        """Xử lý record đơn lẻ không có Group ID"""
+        bags = 0
+        try:
+            bags_field = fields.get('Số lượng túi', 0)
+            if isinstance(bags_field, str):
+                bags = int(bags_field) if bags_field.isdigit() else 0
+            elif isinstance(bags_field, (int, float)):
+                bags = int(bags_field)
+        except (ValueError, TypeError):
+            pass
+            
+        loads = 0
+        try:
+            loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
+            if isinstance(loads_field, str):
+                loads = int(loads_field) if loads_field.isdigit() else 0
+            elif isinstance(loads_field, (int, float)):
+                loads = int(loads_field)
+        except (ValueError, TypeError):
+            pass
+        
+        transport_provider = (fields.get('Đơn vị vận chuyển') or 'Không rõ').strip()
+        from_depot = (fields.get('Kho đi') or 'Không rõ').strip()
+        to_depot = (fields.get('Kho đến') or 'Không rõ').strip()
+        route_key = f"{from_depot} → {to_depot}"
+        route_transport_key = f"{route_key}|{transport_provider}"
+        
+        stats = route_transport_stats[route_transport_key]
+        stats['count'] += 1
+        stats['bags'] += bags
+        stats['loads'] += loads
+        
+        return loads
+
+
+
+    # def _calculate_daily_statistics(self, records):
+    #     """Tính toán thống kê từ danh sách records"""
+    #     if not records:
+    #         return self._empty_report_data()
+        
+    #     route_transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0})
+    #     total_loads = 0
+        
+    #     for fields in records:
+    #         bags = 0
+    #         try:
+    #             # SỬA LỖI 1: Lấy đúng dữ liệu cho "SL túi" từ cột "Số lượng túi"
+    #             bags_field = fields.get('Số lượng túi', 0)
+    #             if isinstance(bags_field, str):
+    #                 bags = int(bags_field) if bags_field.isdigit() else 0
+    #             elif isinstance(bags_field, (int, float)):
+    #                 bags = int(bags_field)
+    #         except (ValueError, TypeError):
+    #             pass
+                
+    #         loads = 0
+    #         try:
+    #             # SỬA LỖI 2: Lấy đúng dữ liệu cho "SL bao" từ cột "Số lượng bao"
+    #             loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
+    #             if isinstance(loads_field, str):
+    #                 loads = int(loads_field) if loads_field.isdigit() else 0
+    #             elif isinstance(loads_field, (int, float)):
+    #                 loads = int(loads_field)
+    #             total_loads += loads
+    #         except (ValueError, TypeError):
+    #             pass
+            
+    #         transport_provider = (fields.get('Đơn vị vận chuyển') or 'Không rõ').strip()
+    #         from_depot = (fields.get('Kho đi') or 'Không rõ').strip()
+    #         to_depot = (fields.get('Kho đến') or 'Không rõ').strip()
+    #         route_key = f"{from_depot} → {to_depot}"
+    #         route_transport_key = f"{route_key}|{transport_provider}"
+            
+    #         stats = route_transport_stats[route_transport_key]
+    #         stats['count'] += 1
+    #         stats['bags'] += bags
+    #         stats['loads'] += loads
+        
+    #     # --- Tính toán cho Bảng Tuyến đường ---
+    #     route_summary = []
+    #     for route_transport_key, stats in route_transport_stats.items():
+    #         route_part, transport_part = route_transport_key.split('|', 1)
+    #         route_summary.append({
+    #             'route': route_part,
+    #             'transport_provider': transport_part,
+    #             'count': stats['count'],
+    #             'bags': stats['bags'],
+    #             'loads': stats['loads']
+    #         })
+        
+    #     route_summary.sort(key=lambda x: x['loads'], reverse=True)
+        
+    #     # === BỔ SUNG: TÍNH TOÁN CHO BẢNG ĐƠN VỊ VẬN CHUYỂN ===
+    #     transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0, 'routes': set()})
+        
+    #     for item in route_summary:
+    #         provider = item['transport_provider']
+    #         stats = transport_stats[provider]
+            
+    #         stats['count'] += item['count']
+    #         stats['bags'] += item['bags']
+    #         stats['loads'] += item['loads']
+    #         stats['routes'].add(item['route'])
+
+    #     transport_summary = []
+    #     for provider, stats in transport_stats.items():
+    #         transport_summary.append({
+    #             'transport_provider': provider,
+    #             'count': stats['count'],
+    #             'bags': stats['bags'],
+    #             'loads': stats['loads'],
+    #             'route_count': len(stats['routes']) # Đếm số tuyến đường duy nhất
+    #         })
+            
+    #     transport_summary.sort(key=lambda x: x['loads'], reverse=True)
+    #     # === KẾT THÚC PHẦN BỔ SUNG ===
+        
+    #     return {
+    #         'total_records': len(records),
+    #         'total_quantity': total_loads,
+    #         'routes': dict(route_transport_stats),
+    #         'route_summary': route_summary,
+    #         'transport_providers': dict(transport_stats),
+    #         'transport_summary': transport_summary # Trả về dữ liệu đã được tính toán
+    #     }
 
     def export_route_records_to_excel(self, from_depot, to_depot, user_id=None, date_str=None, employee_filter=None):
         """Xuất records của một tuyến đường cụ thể ra Excel"""
@@ -231,7 +406,10 @@ class ReportService:
                 if fields.get('Kho đi', '').strip() == from_depot and fields.get('Kho đến', '').strip() == to_depot:
                     route_records.append(fields)
             
-            if not route_records: return None, 0
+            if not route_records:
+                return None, 0
+            
+            grouped_records = self._group_records_for_export(route_records)
             
             wb = Workbook()
             ws = wb.active
@@ -245,16 +423,47 @@ class ReportService:
             for col, header in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=col, value=header)
                 cell.font, cell.fill, cell.alignment = header_font, header_fill, header_alignment
+            current_row = 2
             
-            for row, fields in enumerate(route_records, 2):
-                ws.cell(row=row, column=1, value=fields.get('ID', ''))
-                # SỬA LỖI 1: Lấy đúng cột "Số lượng túi" cho Excel
-                ws.cell(row=row, column=2, value=fields.get('Số lượng túi', 0))
-                # SỬA LỖI 2: Lấy đúng cột "Số lượng bao" cho Excel
-                ws.cell(row=row, column=3, value=fields.get('Số lượng bao') or fields.get('Số lượng tải') or fields.get('Số lượng bao/tải giao', 0))
-                ws.cell(row=row, column=4, value=fields.get('ID người bàn giao', ''))
-                ws.cell(row=row, column=5, value=fields.get('Người bàn giao', ''))
+            for group_key, group_records in grouped_records.items():
+                if len(group_records) > 1:
+                    # ✅ MERGE: Nhóm có nhiều records - merge cột "Số lượng bao"
+                    first_record = group_records[0]
+                    
+                    # Ghi row đầu tiên
+                    ws.cell(row=current_row, column=1, value=first_record.get('ID', ''))
+                    ws.cell(row=current_row, column=2, value=first_record.get('Số lượng túi', 0))
+                    ws.cell(row=current_row, column=3, value=first_record.get('Số lượng bao', 0))
+                    ws.cell(row=current_row, column=4, value=first_record.get('ID người bàn giao', ''))
+                    ws.cell(row=current_row, column=5, value=first_record.get('Người bàn giao', ''))
+                    
+                    # Merge cột "Số lượng bao" vertically cho group
+                    if len(group_records) > 1:
+                        ws.merge_cells(
+                            start_row=current_row, start_column=3,
+                            end_row=current_row + len(group_records) - 1, end_column=3
+                        )
+                    
+                    # Ghi các rows còn lại
+                    for i, record in enumerate(group_records[1:], 1):
+                        ws.cell(row=current_row + i, column=1, value=record.get('ID', ''))
+                        ws.cell(row=current_row + i, column=2, value=record.get('Số lượng túi', 0))
+                        # Column 3 đã merge, không ghi gì
+                        ws.cell(row=current_row + i, column=4, value=record.get('ID người bàn giao', ''))
+                        ws.cell(row=current_row + i, column=5, value=record.get('Người bàn giao', ''))
+                    
+                    current_row += len(group_records)
+                else:
+                    # Single record - không merge
+                    record = group_records[0]
+                    ws.cell(row=current_row, column=1, value=record.get('ID', ''))
+                    ws.cell(row=current_row, column=2, value=record.get('Số lượng túi', 0))
+                    ws.cell(row=current_row, column=3, value=record.get('Số lượng bao', 0))
+                    ws.cell(row=current_row, column=4, value=record.get('ID người bàn giao', ''))
+                    ws.cell(row=current_row, column=5, value=record.get('Người bàn giao', ''))
+                    current_row += 1
             
+            # Auto adjust columns (giữ nguyên existing code)
             for column in ws.columns:
                 max_length = 0
                 column_letter = column[0].column_letter
@@ -262,7 +471,8 @@ class ReportService:
                     try:
                         if len(str(cell.value)) > max_length:
                             max_length = len(str(cell.value))
-                    except: pass
+                    except: 
+                        pass
                 adjusted_width = min(max_length + 2, 50)
                 ws.column_dimensions[column_letter].width = adjusted_width
             
@@ -274,3 +484,33 @@ class ReportService:
         except Exception as e:
             logger.error(f"Error creating route Excel export: {e}")
             return None, 0
+
+
+    def _group_records_for_export(self, records):
+        """
+        Nhóm các records theo Group ID để merge cells trong Excel
+        
+        Args:
+            records (list): Danh sách các field records
+            
+        Returns:
+            dict: {group_key: [list_of_records], ...}
+        """
+        grouped = {}
+        single_counter = 0
+        
+        for record in records:
+            group_id = record.get('Group ID')
+            
+            if group_id:
+                # Records có Group ID giống nhau sẽ được group lại
+                if group_id not in grouped:
+                    grouped[group_id] = []
+                grouped[group_id].append(record)
+            else:
+                # Records không có Group ID sẽ tạo key riêng
+                single_counter += 1
+                single_key = f"single_{single_counter}"
+                grouped[single_key] = [record]
+        
+        return grouped
