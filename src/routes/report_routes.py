@@ -41,27 +41,40 @@ def create_safe_filename(from_depot, to_depot, date_str):
 @router.get("/daily", response_class=HTMLResponse)
 async def daily_report_page(
     request: Request,
-    date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+    start_date: str = Query(None, description="Ngày bắt đầu (YYYY-MM-DD)"),
+    end_date: str = Query(None, description="Ngày kết thúc (YYYY-MM-DD)"),
     employee: str = Query(None, description="ID nhân viên"),
     from_depot: str = Query(None, description="ID kho đi"),
     to_depot: str = Query(None, description="ID kho đến"),
     report_service: ReportService = Depends(get_report_service)
 ):
-    """Trang báo cáo hàng ngày với bộ lọc"""
+    """Trang báo cáo với bộ lọc khoảng ngày"""
     user = get_current_user(request)
     
-    # Nếu không có date parameter, sử dụng ngày hôm nay
-    if not date:
-        date = datetime.now().strftime('%Y-%m-%d')
+    # Nếu không có start_date, sử dụng ngày hôm nay
+    if not start_date:
+        today = datetime.now()
+        start_date = today.strftime('%Y-%m-%d')
+        end_date = start_date  # Mặc định cùng ngày
+    
+    # Nếu chỉ có start_date mà không có end_date
+    if start_date and not end_date:
+        end_date = start_date
     
     try:
         # Validate date format
-        report_date = datetime.strptime(date, '%Y-%m-%d')
+        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
         
-        # Lấy dữ liệu báo cáo với filters
+        # Đảm bảo start_date <= end_date
+        if start_date_obj > end_date_obj:
+            start_date_obj, end_date_obj = end_date_obj, start_date_obj
+            start_date, end_date = end_date, start_date
+        
+        # Lấy dữ liệu báo cáo với khoảng ngày
         report_data = report_service.get_daily_report(
-            user_id=None,  # Không filter theo user nữa
-            date_str=date,
+            start_date_str=start_date,
+            end_date_str=end_date,
             employee_filter=employee,
             from_depot_filter=from_depot,
             to_depot_filter=to_depot
@@ -75,8 +88,10 @@ async def daily_report_page(
         context = {
             "request": request,
             "user": user,
-            "report_date": report_date,
-            "date_str": date,
+            "start_date": start_date_obj,
+            "end_date": end_date_obj,
+            "start_date_str": start_date,
+            "end_date_str": end_date,
             "report_data": report_data,
             "today": datetime.now().strftime('%Y-%m-%d'),
             "all_employees": all_employees,
@@ -91,7 +106,7 @@ async def daily_report_page(
         return templates.TemplateResponse("pages/daily_report.html", context)
         
     except ValueError:
-        logger.error(f"Invalid date format: {date}")
+        logger.error(f"Invalid date format: start={start_date}, end={end_date}")
         context = {
             "request": request,
             "user": user,
@@ -104,7 +119,7 @@ async def daily_report_page(
         return templates.TemplateResponse("pages/daily_report.html", context)
         
     except Exception as e:
-        logger.error(f"Error generating daily report: {e}")
+        logger.error(f"Error generating date range report: {e}")
         context = {
             "request": request,
             "user": user,
@@ -116,32 +131,38 @@ async def daily_report_page(
         }
         return templates.TemplateResponse("pages/daily_report.html", context)
 
+
+
+
+
 @router.get("/daily/export-route")
 async def export_route_report(
     request: Request,
     from_depot: str = Query(..., description="Tên kho đi"),
     to_depot: str = Query(..., description="Tên kho đến"),
-    date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+    start_date: str = Query(None, description="Ngày bắt đầu (YYYY-MM-DD)"),
+    end_date: str = Query(None, description="Ngày kết thúc (YYYY-MM-DD)"),
     employee: str = Query(None, description="ID nhân viên"),
     report_service: ReportService = Depends(get_report_service)
 ):
-    """Xuất báo cáo theo tuyến đường cụ thể ra Excel"""
+    """Xuất báo cáo theo tuyến đường trong khoảng ngày ra Excel"""
     user = get_current_user(request)
     
     try:
         excel_buffer, record_count = report_service.export_route_records_to_excel(
             from_depot=from_depot,
             to_depot=to_depot,
-            user_id=None,
-            date_str=date,
+            start_date_str=start_date,
+            end_date_str=end_date,
             employee_filter=employee
         )
         
         if not excel_buffer:
             raise HTTPException(status_code=404, detail="Không có dữ liệu cho tuyến đường này")
         
-        # Sử dụng helper function để tạo tên file an toàn
-        filename = create_safe_filename(from_depot, to_depot, date)
+        # Tạo tên file với khoảng ngày
+        date_range = f"{start_date}_to_{end_date}" if start_date and end_date else "tat_ca"
+        filename = create_safe_filename(from_depot, to_depot, date_range)
         
         return StreamingResponse(
             io.BytesIO(excel_buffer.read()),
@@ -152,3 +173,121 @@ async def export_route_report(
     except Exception as e:
         logger.error(f"Error exporting route report: {e}")
         raise HTTPException(status_code=500, detail=f"Lỗi xuất báo cáo tuyến: {str(e)}")
+
+
+
+
+# @router.get("/daily", response_class=HTMLResponse)
+# async def daily_report_page(
+#     request: Request,
+#     date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+#     employee: str = Query(None, description="ID nhân viên"),
+#     from_depot: str = Query(None, description="ID kho đi"),
+#     to_depot: str = Query(None, description="ID kho đến"),
+#     report_service: ReportService = Depends(get_report_service)
+# ):
+#     """Trang báo cáo hàng ngày với bộ lọc"""
+#     user = get_current_user(request)
+    
+#     # Nếu không có date parameter, sử dụng ngày hôm nay
+#     if not date:
+#         date = datetime.now().strftime('%Y-%m-%d')
+    
+#     try:
+#         # Validate date format
+#         report_date = datetime.strptime(date, '%Y-%m-%d')
+        
+#         # Lấy dữ liệu báo cáo với filters
+#         report_data = report_service.get_daily_report(
+#             user_id=None,  # Không filter theo user nữa
+#             date_str=date,
+#             employee_filter=employee,
+#             from_depot_filter=from_depot,
+#             to_depot_filter=to_depot
+#         )
+        
+#         # Lấy danh sách để làm filter options
+#         all_employees = report_service.get_all_employees()
+#         all_depots = report_service.get_all_depots()
+        
+#         # Tạo context cho template
+#         context = {
+#             "request": request,
+#             "user": user,
+#             "report_date": report_date,
+#             "date_str": date,
+#             "report_data": report_data,
+#             "today": datetime.now().strftime('%Y-%m-%d'),
+#             "all_employees": all_employees,
+#             "all_depots": all_depots,
+#             "current_filters": {
+#                 "employee": employee,
+#                 "from_depot": from_depot,
+#                 "to_depot": to_depot
+#             }
+#         }
+        
+#         return templates.TemplateResponse("pages/daily_report.html", context)
+        
+#     except ValueError:
+#         logger.error(f"Invalid date format: {date}")
+#         context = {
+#             "request": request,
+#             "user": user,
+#             "error": "Định dạng ngày không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD",
+#             "today": datetime.now().strftime('%Y-%m-%d'),
+#             "all_employees": [],
+#             "all_depots": [],
+#             "current_filters": {}
+#         }
+#         return templates.TemplateResponse("pages/daily_report.html", context)
+        
+#     except Exception as e:
+#         logger.error(f"Error generating daily report: {e}")
+#         context = {
+#             "request": request,
+#             "user": user,
+#             "error": f"Lỗi khi tạo báo cáo: {str(e)}",
+#             "today": datetime.now().strftime('%Y-%m-%d'),
+#             "all_employees": [],
+#             "all_depots": [],
+#             "current_filters": {}
+#         }
+#         return templates.TemplateResponse("pages/daily_report.html", context)
+
+# @router.get("/daily/export-route")
+# async def export_route_report(
+#     request: Request,
+#     from_depot: str = Query(..., description="Tên kho đi"),
+#     to_depot: str = Query(..., description="Tên kho đến"),
+#     date: str = Query(None, description="Ngày báo cáo (YYYY-MM-DD)"),
+#     employee: str = Query(None, description="ID nhân viên"),
+#     report_service: ReportService = Depends(get_report_service)
+# ):
+#     """Xuất báo cáo theo tuyến đường cụ thể ra Excel"""
+#     user = get_current_user(request)
+    
+#     try:
+#         excel_buffer, record_count = report_service.export_route_records_to_excel(
+#             from_depot=from_depot,
+#             to_depot=to_depot,
+#             user_id=None,
+#             date_str=date,
+#             employee_filter=employee
+#         )
+        
+#         if not excel_buffer:
+#             raise HTTPException(status_code=404, detail="Không có dữ liệu cho tuyến đường này")
+        
+#         # Sử dụng helper function để tạo tên file an toàn
+#         filename = create_safe_filename(from_depot, to_depot, date)
+        
+#         return StreamingResponse(
+#             io.BytesIO(excel_buffer.read()),
+#             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#             headers={"Content-Disposition": f"attachment; filename={filename}"}
+#         )
+        
+#     except Exception as e:
+#         logger.error(f"Error exporting route report: {e}")
+#         raise HTTPException(status_code=500, detail=f"Lỗi xuất báo cáo tuyến: {str(e)}")

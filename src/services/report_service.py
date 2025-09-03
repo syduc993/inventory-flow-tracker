@@ -16,14 +16,25 @@ class ReportService:
         self.table_id = table_id
 
 
-    def get_daily_report(self, user_id=None, date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None):
+    def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None):
         """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí"""
         try:
-            if date_str:
-                report_date = datetime.strptime(date_str, '%Y-%m-%d')
+            if start_date_str and end_date_str:
+                # Tính toán với khoảng thời gian từ start_date đến end_date
+                start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                
+                # Timestamp bắt đầu từ 00:00:00 của ngày bắt đầu
+                start_timestamp = int(start_report_date.timestamp() * 1000)
+                # Timestamp kết thúc đến 00:00:00 của ngày tiếp theo sau end_date
+                end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
+            elif start_date_str:
+                # Nếu chỉ có start_date, dùng như ngày đơn lẻ
+                report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
                 start_timestamp = int(report_date.timestamp() * 1000)
                 end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
             else:
+                # Không có filter ngày - lấy tất cả
                 start_timestamp = 0
                 end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
             
@@ -33,7 +44,8 @@ class ReportService:
             for record in all_records:
                 fields = record.get('fields', {})
                 
-                if date_str:
+                # Lọc theo khoảng ngày nếu có start_date_str hoặc end_date_str
+                if start_date_str or end_date_str:
                     handover_date = fields.get('Ngày bàn giao')
                     if handover_date:
                         try:
@@ -42,24 +54,20 @@ class ReportService:
                                 continue
                         except (ValueError, TypeError):
                             continue
+                
+                # Lọc theo nhân viên bàn giao
                 if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
                     continue
 
+                # Lọc theo kho đi
                 if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
                     continue
 
+                # Lọc theo kho đến
                 if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
-                    continue    
-
-                #if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
-                #    continue
+                    continue
                 
-                #if from_depot_filter and fields.get('ID kho đi', '') != from_depot_filter:
-                #    continue
-                
-                #if to_depot_filter and fields.get('ID kho đến', '') != to_depot_filter:
-                #    continue
-                
+                # Record đã pass tất cả filters, thêm vào kết quả
                 filtered_records.append(fields)
             
             logger.info(f"Found {len(filtered_records)} records after filtering")
@@ -69,6 +77,8 @@ class ReportService:
         except Exception as e:
             logger.error(f"Error getting daily report: {e}")
             return self._empty_report_data()
+
+
 
 
     def get_all_employees(self):
@@ -444,18 +454,32 @@ class ReportService:
     #         'transport_summary': transport_summary # Trả về dữ liệu đã được tính toán
     #     }
 
-    def export_route_records_to_excel(self, from_depot, to_depot, user_id=None, date_str=None, employee_filter=None):
-        """Xuất records của một tuyến đường cụ thể ra Excel"""
+
+
+    def export_route_records_to_excel(self, from_depot, to_depot, start_date_str=None, end_date_str=None, employee_filter=None):
+        """Xuất records của một tuyến đường cụ thể ra Excel với hỗ trợ date range"""
         try:
             from openpyxl import Workbook
             from openpyxl.styles import Font, PatternFill, Alignment
             import io
             
-            if date_str:
-                report_date = datetime.strptime(date_str, '%Y-%m-%d')
+            # ✅ SỬA: Xử lý date range thay vì single date
+            if start_date_str and end_date_str:
+                # Tính toán với khoảng thời gian từ start_date đến end_date
+                start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                
+                # Timestamp bắt đầu từ 00:00:00 của ngày bắt đầu
+                start_timestamp = int(start_report_date.timestamp() * 1000)
+                # Timestamp kết thúc đến 00:00:00 của ngày tiếp theo sau end_date
+                end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
+            elif start_date_str:
+                # Nếu chỉ có start_date, dùng như ngày đơn lẻ
+                report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
                 start_timestamp = int(report_date.timestamp() * 1000)
                 end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
             else:
+                # Không có filter ngày - lấy tất cả
                 start_timestamp = 0
                 end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
             
@@ -464,12 +488,23 @@ class ReportService:
             route_records = []
             for record in all_records:
                 fields = record.get('fields', {})
-                if date_str:
+                
+                # ✅ SỬA: Filter theo date range nếu có start_date_str hoặc end_date_str
+                if start_date_str or end_date_str:
                     handover_date = fields.get('Ngày bàn giao')
-                    if handover_date and not (start_timestamp <= int(handover_date) < end_timestamp):
-                        continue
+                    if handover_date:
+                        try:
+                            handover_timestamp = int(handover_date)
+                            if not (start_timestamp <= handover_timestamp < end_timestamp):
+                                continue
+                        except (ValueError, TypeError):
+                            continue
+                
+                # Filter theo employee
                 if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
                     continue
+                    
+                # Filter theo route
                 if fields.get('Kho đi', '').strip() == from_depot and fields.get('Kho đến', '').strip() == to_depot:
                     route_records.append(fields)
             
@@ -480,13 +515,21 @@ class ReportService:
             
             wb = Workbook()
             ws = wb.active
-            ws.title = f"{from_depot} → {to_depot}"
+            
+            # ✅ SỬA: Cập nhật title để reflect date range
+            if start_date_str and end_date_str and start_date_str != end_date_str:
+                ws.title = f"{from_depot} → {to_depot} ({start_date_str} to {end_date_str})"[:31]  # Excel limit 31 chars
+            elif start_date_str:
+                ws.title = f"{from_depot} → {to_depot} ({start_date_str})"[:31]
+            else:
+                ws.title = f"{from_depot} → {to_depot}"[:31]
             
             header_font = Font(bold=True, color="FFFFFF")
             header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
             header_alignment = Alignment(horizontal="center", vertical="center")
             
-            headers = ["ID", "Số lượng túi", "Số lượng bao", "ID người bàn giao", "Người bàn giao"]
+            # ✅ THÊM: Cột "Số lượng sản phẩm yêu cầu" vào headers
+            headers = ["ID", "Số lượng túi", "Số lượng bao", "Số lượng sản phẩm yêu cầu", "ID người bàn giao", "Người bàn giao"]
             for col, header in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=col, value=header)
                 cell.font, cell.fill, cell.alignment = header_font, header_fill, header_alignment
@@ -501,8 +544,10 @@ class ReportService:
                     ws.cell(row=current_row, column=1, value=first_record.get('ID', ''))
                     ws.cell(row=current_row, column=2, value=first_record.get('Số lượng túi', 0))
                     ws.cell(row=current_row, column=3, value=first_record.get('Số lượng bao', 0))
-                    ws.cell(row=current_row, column=4, value=first_record.get('ID người bàn giao', ''))
-                    ws.cell(row=current_row, column=5, value=first_record.get('Người bàn giao', ''))
+                    # ✅ THÊM: Cột "Số lượng sản phẩm yêu cầu"
+                    ws.cell(row=current_row, column=4, value=first_record.get('Số lượng sản phẩm yêu cầu', 0))
+                    ws.cell(row=current_row, column=5, value=first_record.get('ID người bàn giao', ''))
+                    ws.cell(row=current_row, column=6, value=first_record.get('Người bàn giao', ''))
                     
                     # Merge cột "Số lượng bao" vertically cho group
                     if len(group_records) > 1:
@@ -516,8 +561,10 @@ class ReportService:
                         ws.cell(row=current_row + i, column=1, value=record.get('ID', ''))
                         ws.cell(row=current_row + i, column=2, value=record.get('Số lượng túi', 0))
                         # Column 3 đã merge, không ghi gì
-                        ws.cell(row=current_row + i, column=4, value=record.get('ID người bàn giao', ''))
-                        ws.cell(row=current_row + i, column=5, value=record.get('Người bàn giao', ''))
+                        # ✅ THÊM: Cột "Số lượng sản phẩm yêu cầu" cho các rows còn lại
+                        ws.cell(row=current_row + i, column=4, value=record.get('Số lượng sản phẩm yêu cầu', 0))
+                        ws.cell(row=current_row + i, column=5, value=record.get('ID người bàn giao', ''))
+                        ws.cell(row=current_row + i, column=6, value=record.get('Người bàn giao', ''))
                     
                     current_row += len(group_records)
                 else:
@@ -526,11 +573,13 @@ class ReportService:
                     ws.cell(row=current_row, column=1, value=record.get('ID', ''))
                     ws.cell(row=current_row, column=2, value=record.get('Số lượng túi', 0))
                     ws.cell(row=current_row, column=3, value=record.get('Số lượng bao', 0))
-                    ws.cell(row=current_row, column=4, value=record.get('ID người bàn giao', ''))
-                    ws.cell(row=current_row, column=5, value=record.get('Người bàn giao', ''))
+                    # ✅ THÊM: Cột "Số lượng sản phẩm yêu cầu" cho single record
+                    ws.cell(row=current_row, column=4, value=record.get('Số lượng sản phẩm yêu cầu', 0))
+                    ws.cell(row=current_row, column=5, value=record.get('ID người bàn giao', ''))
+                    ws.cell(row=current_row, column=6, value=record.get('Người bàn giao', ''))
                     current_row += 1
             
-            # Auto adjust columns (giữ nguyên existing code)
+            # Auto adjust columns
             for column in ws.columns:
                 max_length = 0
                 column_letter = column[0].column_letter
@@ -551,6 +600,149 @@ class ReportService:
         except Exception as e:
             logger.error(f"Error creating route Excel export: {e}")
             return None, 0
+
+
+
+    # def export_route_records_to_excel(self, from_depot, to_depot, start_date_str=None, end_date_str=None, employee_filter=None):
+    #     """Xuất records của một tuyến đường cụ thể ra Excel với hỗ trợ date range"""
+    #     try:
+    #         from openpyxl import Workbook
+    #         from openpyxl.styles import Font, PatternFill, Alignment
+    #         import io
+            
+    #         # ✅ SỬA: Xử lý date range thay vì single date
+    #         if start_date_str and end_date_str:
+    #             # Tính toán với khoảng thời gian từ start_date đến end_date
+    #             start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    #             end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                
+    #             # Timestamp bắt đầu từ 00:00:00 của ngày bắt đầu
+    #             start_timestamp = int(start_report_date.timestamp() * 1000)
+    #             # Timestamp kết thúc đến 00:00:00 của ngày tiếp theo sau end_date
+    #             end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
+    #         elif start_date_str:
+    #             # Nếu chỉ có start_date, dùng như ngày đơn lẻ
+    #             report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    #             start_timestamp = int(report_date.timestamp() * 1000)
+    #             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
+    #         else:
+    #             # Không có filter ngày - lấy tất cả
+    #             start_timestamp = 0
+    #             end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
+            
+    #         all_records = larkbase_get_all(self.app_token, self.table_id)
+            
+    #         route_records = []
+    #         for record in all_records:
+    #             fields = record.get('fields', {})
+                
+    #             # ✅ SỬA: Filter theo date range nếu có start_date_str hoặc end_date_str
+    #             if start_date_str or end_date_str:
+    #                 handover_date = fields.get('Ngày bàn giao')
+    #                 if handover_date:
+    #                     try:
+    #                         handover_timestamp = int(handover_date)
+    #                         if not (start_timestamp <= handover_timestamp < end_timestamp):
+    #                             continue
+    #                     except (ValueError, TypeError):
+    #                         continue
+                
+    #             # Filter theo employee
+    #             if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
+    #                 continue
+                    
+    #             # Filter theo route
+    #             if fields.get('Kho đi', '').strip() == from_depot and fields.get('Kho đến', '').strip() == to_depot:
+    #                 route_records.append(fields)
+            
+    #         if not route_records:
+    #             return None, 0
+            
+    #         grouped_records = self._group_records_for_export(route_records)
+            
+    #         wb = Workbook()
+    #         ws = wb.active
+            
+    #         # ✅ SỬA: Cập nhật title để reflect date range
+    #         if start_date_str and end_date_str and start_date_str != end_date_str:
+    #             ws.title = f"{from_depot} → {to_depot} ({start_date_str} to {end_date_str})"[:31]  # Excel limit 31 chars
+    #         elif start_date_str:
+    #             ws.title = f"{from_depot} → {to_depot} ({start_date_str})"[:31]
+    #         else:
+    #             ws.title = f"{from_depot} → {to_depot}"[:31]
+            
+    #         header_font = Font(bold=True, color="FFFFFF")
+    #         header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
+    #         header_alignment = Alignment(horizontal="center", vertical="center")
+            
+    #         headers = ["ID", "Số lượng túi", "Số lượng bao", "ID người bàn giao", "Người bàn giao"]
+    #         for col, header in enumerate(headers, 1):
+    #             cell = ws.cell(row=1, column=col, value=header)
+    #             cell.font, cell.fill, cell.alignment = header_font, header_fill, header_alignment
+    #         current_row = 2
+            
+    #         for group_key, group_records in grouped_records.items():
+    #             if len(group_records) > 1:
+    #                 # ✅ MERGE: Nhóm có nhiều records - merge cột "Số lượng bao"
+    #                 first_record = group_records[0]
+                    
+    #                 # Ghi row đầu tiên
+    #                 ws.cell(row=current_row, column=1, value=first_record.get('ID', ''))
+    #                 ws.cell(row=current_row, column=2, value=first_record.get('Số lượng túi', 0))
+    #                 ws.cell(row=current_row, column=3, value=first_record.get('Số lượng bao', 0))
+    #                 ws.cell(row=current_row, column=4, value=first_record.get('ID người bàn giao', ''))
+    #                 ws.cell(row=current_row, column=5, value=first_record.get('Người bàn giao', ''))
+                    
+    #                 # Merge cột "Số lượng bao" vertically cho group
+    #                 if len(group_records) > 1:
+    #                     ws.merge_cells(
+    #                         start_row=current_row, start_column=3,
+    #                         end_row=current_row + len(group_records) - 1, end_column=3
+    #                     )
+                    
+    #                 # Ghi các rows còn lại
+    #                 for i, record in enumerate(group_records[1:], 1):
+    #                     ws.cell(row=current_row + i, column=1, value=record.get('ID', ''))
+    #                     ws.cell(row=current_row + i, column=2, value=record.get('Số lượng túi', 0))
+    #                     # Column 3 đã merge, không ghi gì
+    #                     ws.cell(row=current_row + i, column=4, value=record.get('ID người bàn giao', ''))
+    #                     ws.cell(row=current_row + i, column=5, value=record.get('Người bàn giao', ''))
+                    
+    #                 current_row += len(group_records)
+    #             else:
+    #                 # Single record - không merge
+    #                 record = group_records[0]
+    #                 ws.cell(row=current_row, column=1, value=record.get('ID', ''))
+    #                 ws.cell(row=current_row, column=2, value=record.get('Số lượng túi', 0))
+    #                 ws.cell(row=current_row, column=3, value=record.get('Số lượng bao', 0))
+    #                 ws.cell(row=current_row, column=4, value=record.get('ID người bàn giao', ''))
+    #                 ws.cell(row=current_row, column=5, value=record.get('Người bàn giao', ''))
+    #                 current_row += 1
+            
+    #         # Auto adjust columns
+    #         for column in ws.columns:
+    #             max_length = 0
+    #             column_letter = column[0].column_letter
+    #             for cell in column:
+    #                 try:
+    #                     if len(str(cell.value)) > max_length:
+    #                         max_length = len(str(cell.value))
+    #                 except: 
+    #                     pass
+    #             adjusted_width = min(max_length + 2, 50)
+    #             ws.column_dimensions[column_letter].width = adjusted_width
+            
+    #         excel_buffer = io.BytesIO()
+    #         wb.save(excel_buffer)
+    #         excel_buffer.seek(0)
+    #         return excel_buffer, len(route_records)
+            
+    #     except Exception as e:
+    #         logger.error(f"Error creating route Excel export: {e}")
+    #         return None, 0
+
+
+
 
 
     def _group_records_for_export(self, records):

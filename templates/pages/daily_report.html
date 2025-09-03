@@ -17,8 +17,13 @@
             <!-- Date and Filters -->
             <form method="get" class="mobile-filters">
                 <div class="filter-group">
-                    <label class="filter-label">📅 Ngày:</label>
-                    <input type="date" name="date" value="{{ date_str }}" class="filter-select" required>
+                    <label class="filter-label">📅 Từ ngày:</label>
+                    <input type="date" name="start_date" value="{{ start_date_str }}" class="filter-select" required>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">📅 Đến ngày:</label>
+                    <input type="date" name="end_date" value="{{ end_date_str }}" class="filter-select" required>
                 </div>
                 
                 <div class="filter-group">
@@ -59,7 +64,7 @@
                 
                 <div class="filter-actions">
                     <button type="submit" class="btn-filter">🔍 Lọc</button>
-                    <a href="{{ url_for('daily_report_page') }}?date={{ date_str }}" class="btn-clear">🗑️ Xóa</a>
+                    <a href="{{ url_for('daily_report_page') }}?start_date={{ start_date_str }}&end_date={{ end_date_str }}" class="btn-clear">🗑️ Xóa</a>
                 </div>
             </form>
             
@@ -82,7 +87,7 @@
                     <div class="empty-state">
                         <span class="emoji">📭</span>
                         <h3>Chưa có hoạt động</h3>
-                        <p>Không có dữ liệu cho các bộ lọc đã chọn trong ngày {{ report_date.strftime('%d/%m/%Y') }}</p>
+                        <p>Không có dữ liệu cho các bộ lọc đã chọn từ {{ start_date.strftime('%d/%m/%Y') }} đến {{ end_date.strftime('%d/%m/%Y') }}</p>
                     </div>
                 {% else %}
                     <!-- Transport Providers Section -->
@@ -142,7 +147,7 @@
                                         <td class="text-center">
                                             {% set route_parts = route.route.split(' → ') %}
                                             {% if route_parts|length == 2 %}
-                                            <a href="/reports/daily/export-route?from_depot={{ route_parts[0]|urlencode }}&to_depot={{ route_parts[1]|urlencode }}{% if date_str %}&date={{ date_str }}{% endif %}{% if current_filters.employee %}&employee={{ current_filters.employee }}{% endif %}" 
+                                            <a href="/reports/daily/export-route?from_depot={{ route_parts[0]|urlencode }}&to_depot={{ route_parts[1]|urlencode }}{% if start_date_str %}&start_date={{ start_date_str }}{% endif %}{% if end_date_str %}&end_date={{ end_date_str }}{% endif %}{% if current_filters.employee %}&employee={{ current_filters.employee }}{% endif %}" 
                                                class="btn btn-success btn-export-route"
                                                title="Xuất Excel tuyến {{ route.route }}">
                                                 📊

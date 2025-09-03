@@ -2,6 +2,9 @@
     <div class="common-fields-section elevation-1">
         <h4>1. Thông tin chung</h4>
         <div class="common-fields-grid">
+            
+            <!-- ▼▼▼ PHẦN TỬ "TỪ KHO" ĐÃ ĐƯỢC ẨN BẰNG CÁCH COMMENT OUT ▼▼▼ -->
+            {#
             <div class="form-group">
                 <label class="form-label">Từ kho</label>
                 <div class="input-with-refresh">
@@ -20,6 +23,8 @@
                     </button>
                 </div>
             </div>
+            #}
+            <!-- ▲▲▲ KẾT THÚC PHẦN ĐÃ ẨN ▲▲▲ -->
             
             <div class="form-group">
                 <label class="form-label">Đến kho</label>
@@ -80,6 +85,7 @@
         </div>
     </div>
 
+
     <!-- Phần còn lại của form không thay đổi -->
     <div class="bill-ids-section">
         <h4>2. Danh sách Bill ID</h4>
@@ -116,9 +122,9 @@
             <span id="totalBills">0</span> Bill ID, 
             <span id="totalLoads">0</span> bao,
             <span id="totalBags">0</span> túi.
-
         </div>
     </div>
+
 
     <div class="form-actions">
         <button id="submitBtn" type="button" class="btn btn-primary" onclick="submitBulkForm()">
@@ -129,6 +135,7 @@
     
     <div id="bulk-result-container" style="margin-top: 20px;"></div>
 </div>
+
 
 <!-- Modal -->
 <div id="groupedBillModal" class="modal">
@@ -163,6 +170,7 @@
     </div>
 </div>
 
+
 <!-- Script -->
 <script>
     function handleRefresh(event) {
@@ -173,6 +181,7 @@
             showRefreshNotification(message, type);
         }
     }
+
 
     document.addEventListener('DOMContentLoaded', () => {
         // Khởi tạo dòng đầu tiên

@@ -82,8 +82,8 @@
 //         // ========================================================
 //         row.innerHTML = `
 //             <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
-//             <td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>
 //             <td><input type="number" class="form-control quantity-input" placeholder="SL bao" min="1" required oninput="updateTotalSummary()"></td>
+//             <td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>
 //             <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
 //             <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
 //         `;
@@ -216,8 +216,6 @@
 //             // ========================================================
 //             // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
 //             // ========================================================
-//             rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>`;
-            
 //             if (index === 0) {
 //                 rowHtml += `
 //                     <td rowspan="${billIds.length}" class="grouped-quantity-cell">
@@ -226,6 +224,8 @@
 //                     </td>
 //                 `;
 //             }
+
+//             rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>`;
             
 //             rowHtml += `<td class="status-cell"><span class="status-valid">✅ Hợp lệ</span></td>`;
             
@@ -456,16 +456,20 @@
 // export default BulkFormManager;
 
 
+
 // static/js/bulk-form.js
 import { showValidationError } from './validators.js';
+
 
 class BulkFormManager {
     constructor() {
         this.rowCounter = 0;
         this.groupCounter = 0;
-        this.lastFromDepotValue = '';
+        // ❌ BỎ: Không cần theo dõi "Kho đi" nữa
+        // this.lastFromDepotValue = ''; 
         this.lastToDepotValue = '';
         this.revalidateTimeout = null;
+
 
         this.bindGlobalMethods();
         this.setupCommonFieldsWatcher();
@@ -483,41 +487,53 @@ class BulkFormManager {
         window.submitBulkForm = this.submitBulkForm.bind(this);
         window.updateTotalSummary = this.updateTotalSummary.bind(this);
 
+
         // Các phương thức của Modal
         window.addModalBillRow = this.addModalBillRow.bind(this);
         window.removeModalBillRow = this.removeModalBillRow.bind(this);
         window.validateModalBillId = this.validateModalBillId.bind(this);
     }
 
+
     setupCommonFieldsWatcher() {
         const depotInputs = document.querySelectorAll('.depot-hidden-input');
-        const fromDepotInput = depotInputs[0];
-        const toDepotInput = depotInputs[1];
-        this.lastFromDepotValue = fromDepotInput ? fromDepotInput.value : '';
+        // ✅ SỬA: Chỉ lấy "Kho đến" (input thứ hai)
+        const toDepotInput = depotInputs[0];
+        // ❌ BỎ: Không cần "Kho đi"
+        // this.lastFromDepotValue = fromDepotInput ? fromDepotInput.value : ''; 
         this.lastToDepotValue = toDepotInput ? toDepotInput.value : '';
+
 
         setInterval(() => this.checkForValueChanges(), 800);
     }
 
+
     checkForValueChanges() {
         const depotInputs = document.querySelectorAll('.depot-hidden-input');
-        const fromDepotInput = depotInputs[0];
-        const toDepotInput = depotInputs[1];
+        // ✅ SỬA: Chỉ lấy "Kho đến"
+        const toDepotInput = depotInputs[0];
 
-        if (fromDepotInput && fromDepotInput.value !== this.lastFromDepotValue) {
-            this.lastFromDepotValue = fromDepotInput.value;
-            this.debounceRevalidate();
-        }
+
+        // ❌ BỎ: Toàn bộ khối if cho "Kho đi"
+        // if (fromDepotInput && fromDepotInput.value !== this.lastFromDepotValue) {
+        //     this.lastFromDepotValue = fromDepotInput.value;
+        //     this.debounceRevalidate();
+        // }
+
+
+        // ✅ SỬA: Giữ lại logic cho "Kho đến"
         if (toDepotInput && toDepotInput.value !== this.lastToDepotValue) {
             this.lastToDepotValue = toDepotInput.value;
             this.debounceRevalidate();
         }
     }
 
+
     debounceRevalidate() {
         clearTimeout(this.revalidateTimeout);
         this.revalidateTimeout = setTimeout(() => this.revalidateAllBillIds(), 500);
     }
+
 
     async revalidateAllBillIds() {
         const billIdInputs = document.querySelectorAll('.bill-id-input');
@@ -528,6 +544,7 @@ class BulkFormManager {
         }
     }
 
+
     addSingleBillRow() {
         const tbody = document.querySelector('#billTable tbody');
         if (!tbody) return;
@@ -535,9 +552,6 @@ class BulkFormManager {
         const row = document.createElement('tr');
         row.id = `row-${this.rowCounter}`;
         row.classList.add('single-row');
-        // ========================================================
-        // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
-        // ========================================================
         row.innerHTML = `
             <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
             <td><input type="number" class="form-control quantity-input" placeholder="SL bao" min="1" required oninput="updateTotalSummary()"></td>
@@ -548,6 +562,7 @@ class BulkFormManager {
         tbody.appendChild(row);
         this.updateTotalSummary();
     }
+
 
     addModalBillRow() {
         const modalTbody = document.getElementById('modalBillTbody');
@@ -565,12 +580,14 @@ class BulkFormManager {
         }
     }
 
+
     removeModalBillRow(button) {
         const row = button.closest('tr');
         if (row) {
             row.remove();
         }
     }
+
 
     async validateModalBillId(input) {
         const billId = input.value.trim();
@@ -582,12 +599,13 @@ class BulkFormManager {
             return;
         }
 
-        const depotInputs = document.querySelectorAll('.depot-hidden-input');
-        const fromDepot = depotInputs[0]?.value || '';
-        const toDepot = depotInputs[1]?.value || '';
+        // ✅ Đơn giản hóa: Chỉ lấy depot input theo 1 cách duy nhất
+        const toDepot = document.querySelector('.depot-hidden-input')?.value || '';
         
-        if (!fromDepot || !toDepot) {
-            statusCell.innerHTML = '<span class="status-invalid" title="Vui lòng chọn Kho đi và Kho đến ở form chính trước.">❌ Chọn kho trước</span>';
+        console.log('🔍 Found toDepot:', toDepot); // Debug log
+        
+        if (!toDepot) {
+            statusCell.innerHTML = '<span class="status-invalid" title="Vui lòng chọn Kho đến ở form chính trước.">❌ Chọn kho đến</span>';
             return;
         }
 
@@ -597,7 +615,7 @@ class BulkFormManager {
             const response = await fetch('/validate-bill-id', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `bill_id=${billId}&from_depot=${fromDepot}&to_depot=${toDepot}`
+                body: `bill_id=${billId}&to_depot=${toDepot}`
             });
             const result = await response.json();
             
@@ -611,17 +629,63 @@ class BulkFormManager {
         }
     }
 
+    // async validateModalBillId(input) {
+    //     const billId = input.value.trim();
+    //     const row = input.closest('tr');
+    //     const statusCell = row.querySelector('.status-cell');
+        
+    //     if (!billId) {
+    //         statusCell.innerHTML = '<span class="status-pending">⏳ Chưa kiểm tra</span>';
+    //         return;
+    //     }
+
+
+    //     const depotInputs = document.querySelectorAll('.depot-hidden-input');
+    //     // ✅ SỬA: Chỉ lấy "Kho đến" (input thứ hai)
+    //     const toDepot = depotInputs[1]?.value || '';
+        
+    //     // ✅ SỬA: Chỉ kiểm tra "Kho đến"
+    //     if (!toDepot) {
+    //         statusCell.innerHTML = '<span class="status-invalid" title="Vui lòng chọn Kho đến ở form chính trước.">❌ Chọn kho đến</span>';
+    //         return;
+    //     }
+
+
+    //     statusCell.innerHTML = '<span class="status-checking">🔄 Đang KT...</span>';
+        
+    //     try {
+    //         const response = await fetch('/validate-bill-id', {
+    //             method: 'POST',
+    //             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    //             // ✅ SỬA: Xóa from_depot khỏi body request
+    //             body: `bill_id=${billId}&to_depot=${toDepot}`
+    //         });
+    //         const result = await response.json();
+            
+    //         if (result.valid) {
+    //             statusCell.innerHTML = '<span class="status-valid">✅ Hợp lệ</span>';
+    //         } else {
+    //             statusCell.innerHTML = `<span class="status-invalid" title="${result.message}">❌ ${result.message}</span>`;
+    //         }
+    //     } catch (error) {
+    //         statusCell.innerHTML = '<span class="status-error" title="Lỗi kết nối máy chủ.">⚠️ Lỗi</span>';
+    //     }
+    // }
+
+
     showGroupedBillModal() {
         const modal = document.getElementById('groupedBillModal');
         const modalTbody = document.getElementById('modalBillTbody');
         
         if (!modal) return;
 
+
         if (modalTbody) {
             modalTbody.innerHTML = ''; 
             this.addModalBillRow();
             this.addModalBillRow();
         }
+
 
         modal.classList.add('show');
         
@@ -631,19 +695,23 @@ class BulkFormManager {
         }, 100);
     }
 
+
     closeGroupedBillModal() {
         const modal = document.getElementById('groupedBillModal');
         if (modal) modal.classList.remove('show');
     }
 
+
     addGroupedBillRows() {
         const modalInputs = document.querySelectorAll('#modalBillTbody .modal-bill-id-input');
         const billIds = Array.from(modalInputs).map(input => input.value.trim()).filter(id => id);
+
 
         if (billIds.length < 2) {
             alert('Vui lòng nhập ít nhất 2 Bill ID để gộp thành một tải.');
             return;
         }
+
 
         const invalidBill = Array.from(modalInputs).find(input => {
             const row = input.closest('tr');
@@ -658,9 +726,11 @@ class BulkFormManager {
         const tbody = document.querySelector('#billTable tbody');
         if (!tbody) return;
 
+
         this.groupCounter++;
         const groupId = `group-${this.groupCounter}`;
         const groupQuantity = 1;
+
 
         billIds.forEach((billId, index) => {
             this.rowCounter++;
@@ -671,9 +741,6 @@ class BulkFormManager {
             
             let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" onblur="validateBillId(this)" readonly></td>`;
             
-            // ========================================================
-            // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
-            // ========================================================
             if (index === 0) {
                 rowHtml += `
                     <td rowspan="${billIds.length}" class="grouped-quantity-cell">
@@ -682,6 +749,7 @@ class BulkFormManager {
                     </td>
                 `;
             }
+
 
             rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>`;
             
@@ -695,9 +763,11 @@ class BulkFormManager {
             tbody.appendChild(row);
         });
 
+
         this.closeGroupedBillModal();
         this.updateTotalSummary();
     }
+
 
     removeBillRow(rowId) {
         const row = document.getElementById(rowId);
@@ -707,14 +777,17 @@ class BulkFormManager {
         }
     }
 
+
     removeGroupedRows(groupId) {
         document.querySelectorAll(`tr[data-group-id="${groupId}"]`).forEach(row => row.remove());
         this.updateTotalSummary();
     }
 
+
     async validateBillId(input) {
         await this.validateModalBillId(input);
     }
+
 
     updateTotalSummary() {
         let totalBills = 0;
@@ -726,10 +799,12 @@ class BulkFormManager {
                 totalBills++;
             }
 
+
             const bagInput = row.querySelector('.bag-quantity-input');
             if (bagInput) {
                 totalBags += parseInt(bagInput.value, 10) || 0;
             }
+
 
             if (row.querySelector('.quantity-input')) {
                 const quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
@@ -741,26 +816,30 @@ class BulkFormManager {
         const totalBagsSpan = document.getElementById('totalBags');
         const totalLoadsSpan = document.getElementById('totalLoads');
 
+
         if(totalBillsSpan) totalBillsSpan.textContent = totalBills;
         if(totalBagsSpan) totalBagsSpan.textContent = totalBags;
         if(totalLoadsSpan) totalLoadsSpan.textContent = totalLoads;
     }
 
+
     hasInvalidIds() {
         return document.querySelectorAll('#billTable .status-invalid').length > 0;
     }
 
+
     validateRequiredFields() {
         const depotInputs = document.querySelectorAll('.depot-hidden-input');
-        const fromDepot = depotInputs[0]?.value || '';
-        const toDepot = depotInputs[1]?.value || '';
+        // ✅ SỬA: Chỉ lấy "Kho đến"
+        const toDepot = depotInputs[0]?.value || '';
         
         const handoverPersonInput = document.querySelector('.employee-hidden-input');
         const transportProviderInput = document.querySelector('.transport-hidden-input');
         
-        if (!fromDepot) {
-            return { valid: false, message: `❌ Vui lòng chọn Kho đi.` };
-        }
+        // ❌ BỎ: Kiểm tra "Kho đi"
+        // if (!fromDepot) {
+        //     return { valid: false, message: `❌ Vui lòng chọn Kho đi.` };
+        // }
         if (!toDepot) {
             return { valid: false, message: `❌ Vui lòng chọn Kho đến.` };
         }
@@ -774,6 +853,7 @@ class BulkFormManager {
         return { valid: true };
     }
 
+
     validateQuantityRequirement() {
         for (const row of document.querySelectorAll('#billTable tbody tr')) {
             const billIdInput = row.querySelector('.bill-id-input');
@@ -782,9 +862,6 @@ class BulkFormManager {
             if (billIdInput?.value.trim() && quantityInput) {
                  const quantity = parseInt(quantityInput.value, 10);
                  if (isNaN(quantity) || quantity <= 0) {
-                     // ========================================================
-                     // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
-                     // ========================================================
                      return { valid: false, message: `❌ Bill ID "${billIdInput.value}" phải có số lượng bao lớn hơn 0.` };
                  }
             }
@@ -792,14 +869,17 @@ class BulkFormManager {
         return { valid: true };
     }
 
+
     generateGroupId(billIds) {
         return billIds.join('_');
     }
+
 
     async submitBulkForm() {
         const resultContainer = document.getElementById('bulk-result-container');
         const submitBtn = document.getElementById('submitBtn');
         if (!resultContainer || !submitBtn) return;
+
 
         resultContainer.innerHTML = '';
         
@@ -808,11 +888,13 @@ class BulkFormManager {
             return;
         }
 
+
         const requiredValidation = this.validateRequiredFields();
         if (!requiredValidation.valid) {
             resultContainer.innerHTML = `<div class="error">${requiredValidation.message}</div>`;
             return;
         }
+
 
         const quantityValidation = this.validateQuantityRequirement();
         if (!quantityValidation.valid) {
@@ -825,11 +907,13 @@ class BulkFormManager {
         const groupBillIds = {}; 
         const processedGroups = new Set();
 
+
         document.querySelectorAll('tr.grouped-row .quantity-input').forEach(input => {
             const row = input.closest('tr');
             const groupId = row.dataset.groupId;
             groupQuantities[groupId] = parseInt(input.value, 10) || 0;
         });
+
 
         document.querySelectorAll('#billTable tbody tr.grouped-row').forEach(row => {
             const billId = row.querySelector('.bill-id-input')?.value.trim();
@@ -842,12 +926,14 @@ class BulkFormManager {
             }
         });
 
+
         document.querySelectorAll('#billTable tbody tr').forEach(row => {
             const billId = row.querySelector('.bill-id-input')?.value.trim();
             if (billId) {
                 const bagQuantity = parseInt(row.querySelector('.bag-quantity-input')?.value, 10) || 0;
                 let quantity = 0;
                 let groupId = null;
+
 
                 if (row.classList.contains('single-row')) {
                     quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
@@ -860,6 +946,7 @@ class BulkFormManager {
                     }
                 }
 
+
                 billData.push({ 
                     bill_id: billId, 
                     bag_quantity: bagQuantity,
@@ -868,6 +955,7 @@ class BulkFormManager {
                 });
             }
         });
+
 
         if (billData.length === 0) {
             resultContainer.innerHTML = '<div class="error">Vui lòng nhập ít nhất một Bill ID.</div>';
@@ -882,8 +970,9 @@ class BulkFormManager {
         const transportProviderInput = document.querySelector('.transport-hidden-input');
         
         const payload = {
-            from_depot: depotInputs[0]?.value || '',
-            to_depot: depotInputs[1]?.value || '',
+            // ❌ BỎ: Không gửi from_depot nữa
+            // from_depot: depotInputs[0]?.value || '', 
+            to_depot: depotInputs[0]?.value || '',
             handover_person: handoverPersonInput?.value || '',
             transport_provider: transportProviderInput?.value || '',
             bill_data: billData
@@ -910,5 +999,6 @@ class BulkFormManager {
         }
     }
 }
+
 
 export default BulkFormManager;
