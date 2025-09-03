@@ -36,8 +36,8 @@ def format_timestamp_ms_to_dt_string(ts_ms):
         utc_time = datetime.datetime.fromtimestamp(timestamp_sec)
         
         # ⭐ SỬA ĐỔI: Cộng thêm 7 giờ để chuyển sang múi giờ Việt Nam (GMT+7)
-        gmt7_time = utc_time + timedelta(hours=7)
-        
+        #gmt7_time = utc_time + timedelta(hours=7)
+        gmt7_time = utc_time  # Nguyên nhân là do dưới larkbase đã lưu Ngày bàn giao theo GMT + 7
         # Định dạng lại chuỗi ngày giờ theo format mong muốn
         return gmt7_time.strftime('%Y-%m-%d %H:%M:%S')
     except (ValueError, TypeError):

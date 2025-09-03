@@ -14,8 +14,20 @@
         <div class="page-content">
             <h1 class="title">📊 Báo cáo hàng ngày</h1>
             
-            <!-- Date and Filters -->
-            <form method="get" class="mobile-filters">
+            <!-- ✅ THÊM: Hiển thị khoảng thời gian báo cáo -->
+            {% if start_date_str and end_date_str %}
+            <div class="report-period">
+                <h3 style="text-align: center; color: #1976d2; margin-bottom: 20px;">
+                    📅 Từ {{ start_date.strftime('%d/%m/%Y') }} đến {{ end_date.strftime('%d/%m/%Y') }}
+                    {% if start_date_str == end_date_str %}
+                    (Ngày {{ start_date.strftime('%d/%m/%Y') }})
+                    {% endif %}
+                </h3>
+            </div>
+            {% endif %}
+            
+            <!-- Date and Filters with Search Dropdowns -->
+            <form method="get" class="mobile-filters" id="reportFilterForm">
                 <div class="filter-group">
                     <label class="filter-label">📅 Từ ngày:</label>
                     <input type="date" name="start_date" value="{{ start_date_str }}" class="filter-select" required>
@@ -28,38 +40,93 @@
                 
                 <div class="filter-group">
                     <label class="filter-label">👤 Nhân viên:</label>
-                    <select name="employee" class="filter-select">
-                        <option value="">Tất cả nhân viên</option>
-                        {% for emp in all_employees %}
-                        <option value="{{ emp.id }}" {% if current_filters.employee == emp.id %}selected{% endif %}>
-                            {{ emp.name }} ({{ emp.id }})
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <div class="employee-dropdown-component">
+                        <div class="employee-search">
+                            <input type="text" 
+                                   class="employee-search-input filter-select" 
+                                   placeholder="Tất cả nhân viên"
+                                   autocomplete="off">
+                            <input type="hidden" 
+                                   class="employee-hidden-input" 
+                                   name="employee"
+                                   value="{{ current_filters.employee or '' }}">
+                            <div class="employee-dropdown">
+                                <div class="employee-dropdown-info">
+                                    <small>Tìm kiếm nhân viên</small>
+                                </div>
+                                {% for emp in all_employees %}
+                                <div class="employee-option" 
+                                     data-value="{{ emp.id }}" 
+                                     data-name="{{ emp.name }}"
+                                     data-department="">
+                                    {{ emp.name }} ({{ emp.id }})
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="filter-group">
                     <label class="filter-label">📤 Kho xuất:</label>
-                    <select name="from_depot" class="filter-select">
-                        <option value="">Tất cả kho xuất</option>
-                        {% for depot in all_depots %}
-                        <option value="{{ depot.id }}" {% if current_filters.from_depot == depot.id %}selected{% endif %}>
-                            {{ depot.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <div class="depot-dropdown-component">
+                        <div class="depot-search">
+                            <input type="text" 
+                                   class="depot-search-input filter-select" 
+                                   placeholder="Tất cả kho xuất"
+                                   autocomplete="off">
+                            <input type="hidden" 
+                                   class="depot-hidden-input" 
+                                   name="from_depot"
+                                   value="{{ current_filters.from_depot or '' }}">
+                            <div class="depot-dropdown">
+                                <div class="depot-dropdown-info">
+                                    <small>Tìm kiếm kho xuất</small>
+                                </div>
+                                {% for depot in all_depots %}
+                                <div class="depot-option" 
+                                     data-value="{{ depot.id }}" 
+                                     data-name="{{ depot.name }}"
+                                     data-code="{{ depot.id }}"
+                                     data-address="">
+                                    {{ depot.name }}
+                                    <small>ID: {{ depot.id }}</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="filter-group">
                     <label class="filter-label">📥 Kho đến:</label>
-                    <select name="to_depot" class="filter-select">
-                        <option value="">Tất cả kho đến</option>
-                        {% for depot in all_depots %}
-                        <option value="{{ depot.id }}" {% if current_filters.to_depot == depot.id %}selected{% endif %}>
-                            {{ depot.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <div class="depot-dropdown-component">
+                        <div class="depot-search">
+                            <input type="text" 
+                                   class="depot-search-input filter-select" 
+                                   placeholder="Tất cả kho đến"
+                                   autocomplete="off">
+                            <input type="hidden" 
+                                   class="depot-hidden-input" 
+                                   name="to_depot"
+                                   value="{{ current_filters.to_depot or '' }}">
+                            <div class="depot-dropdown">
+                                <div class="depot-dropdown-info">
+                                    <small>Tìm kiếm kho đến</small>
+                                </div>
+                                {% for depot in all_depots %}
+                                <div class="depot-option" 
+                                     data-value="{{ depot.id }}" 
+                                     data-name="{{ depot.name }}"
+                                     data-code="{{ depot.id }}"
+                                     data-address="">
+                                    {{ depot.name }}
+                                    <small>ID: {{ depot.id }}</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="filter-actions">
@@ -74,12 +141,20 @@
                 <!-- Quick Stats -->
                 <div class="report-stats">
                     <div class="stat-item">
+                        <span class="stat-number">{{ report_data.total_records }}</span>
+                        <span>Tổng bản ghi</span>
+                    </div>
+                    <div class="stat-item">
                         <span class="stat-number">{{ report_data.transport_summary|length }}</span>
                         <span>Đơn vị vận chuyển</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-number">{{ report_data.route_summary|length }}</span>
                         <span>Tuyến đường</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ report_data.total_quantity or 0 }}</span>
+                        <span>Tổng SL bao</span>
                     </div>
                 </div>
                 
@@ -92,38 +167,74 @@
                 {% else %}
                     <!-- Transport Providers Section -->
                     <div class="report-section">
-                        <h2>🚛 Đơn vị vận chuyển</h2>
+                        <h2>🚛 Đơn vị vận chuyển 
+                            {% if start_date_str == end_date_str %}
+                            ({{ start_date.strftime('%d/%m/%Y') }})
+                            {% elif start_date_str and end_date_str %}
+                            ({{ start_date.strftime('%d/%m') }} - {{ end_date.strftime('%d/%m/%Y') }})
+                            {% endif %}
+                        </h2>
                         <div class="table-container">
                             <table class="report-table">
                                 <thead>
                                     <tr>
+                                        <th>Ngày</th>
                                         <th>Tên đơn vị</th>
                                         <th class="text-center">Số ID</th>
                                         <th class="text-center">SL túi</th>
                                         <th class="text-center">SL bao</th>
+                                        <th class="text-center">Số tuyến</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for transport in report_data.transport_summary %}
                                     <tr>
+                                        <td>
+                                            {% if transport.date and transport.date != 'Unknown' %}
+                                                {{ transport.date }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
                                         <td class="transport-name">{{ transport.transport_provider }}</td>
                                         <td class="text-center">{{ transport.count }}</td>
                                         <td class="text-center">{{ transport.bags if transport.bags > 0 else '-' }}</td>
                                         <td class="text-center">{{ transport.loads if transport.loads > 0 else '-' }}</td>
+                                        <td class="text-center">{{ transport.route_count if transport.route_count > 0 else '-' }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
+                                <tfoot>
+                                    <tr style="font-weight: bold; background-color: #f0f8ff;">
+                                        <td>Tổng cộng</td>
+                                        <td></td>
+                                        <td class="text-center">{{ report_data.total_records }}</td>
+                                        <td class="text-center">
+                                            {% set total_bags = report_data.transport_summary | sum(attribute='bags') %}
+                                            {{ total_bags if total_bags > 0 else '-' }}
+                                        </td>
+                                        <td class="text-center">{{ report_data.total_quantity or 0 }}</td>
+                                        <td class="text-center">{{ report_data.route_summary|length }}</td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
                     
                     <!-- Routes Section -->
                     <div class="report-section">
-                        <h2>📍 Tuyến đường</h2>
+                        <h2>📍 Tuyến đường 
+                            {% if start_date_str == end_date_str %}
+                            ({{ start_date.strftime('%d/%m/%Y') }})
+                            {% elif start_date_str and end_date_str %}
+                            ({{ start_date.strftime('%d/%m') }} - {{ end_date.strftime('%d/%m/%Y') }})
+                            {% endif %}
+                        </h2>
                         <div class="table-container">
                             <table class="report-table">
                                 <thead>
                                     <tr>
+                                        <th>Ngày</th>
                                         <th>Tuyến đường</th>
                                         <th class="text-center">Số ID</th>
                                         <th class="text-center">SL túi</th>
@@ -135,6 +246,13 @@
                                 <tbody>
                                     {% for route in report_data.route_summary %}
                                     <tr>
+                                        <td>
+                                            {% if route.date and route.date != 'Unknown' %}
+                                                {{ route.date }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
                                         <td class="route-name">{{ route.route }}</td>
                                         <td class="text-center">{{ route.count }}</td>
                                         <td class="text-center">{{ route.bags if route.bags > 0 else '-' }}</td>
@@ -147,9 +265,10 @@
                                         <td class="text-center">
                                             {% set route_parts = route.route.split(' → ') %}
                                             {% if route_parts|length == 2 %}
-                                            <a href="/reports/daily/export-route?from_depot={{ route_parts[0]|urlencode }}&to_depot={{ route_parts[1]|urlencode }}{% if start_date_str %}&start_date={{ start_date_str }}{% endif %}{% if end_date_str %}&end_date={{ end_date_str }}{% endif %}{% if current_filters.employee %}&employee={{ current_filters.employee }}{% endif %}" 
+                                            <!-- ✅ SỬA: Sử dụng ngày cụ thể của dòng đó thay vì filter chung -->
+                                            <a href="/reports/daily/export-route?from_depot={{ route_parts[0]|urlencode }}&to_depot={{ route_parts[1]|urlencode }}{% if route.date and route.date != 'Unknown' %}&start_date={{ route.date }}&end_date={{ route.date }}{% endif %}{% if current_filters.employee %}&employee={{ current_filters.employee }}{% endif %}" 
                                                class="btn btn-success btn-export-route"
-                                               title="Xuất Excel tuyến {{ route.route }}">
+                                               title="Xuất Excel tuyến {{ route.route }}{% if route.date and route.date != 'Unknown' %} - Ngày {{ route.date }}{% endif %}">
                                                 📊
                                             </a>
                                             {% endif %}
@@ -157,6 +276,20 @@
                                     </tr>
                                     {% endfor %}
                                 </tbody>
+                                <tfoot>
+                                    <tr style="font-weight: bold; background-color: #f0f8ff;">
+                                        <td>Tổng cộng</td>
+                                        <td></td>
+                                        <td class="text-center">{{ report_data.total_records }}</td>
+                                        <td class="text-center">
+                                            {% set total_bags = report_data.route_summary | sum(attribute='bags') %}
+                                            {{ total_bags if total_bags > 0 else '-' }}
+                                        </td>
+                                        <td class="text-center">{{ report_data.total_quantity or 0 }}</td>
+                                        <td class="text-center">{{ report_data.route_summary|length }} tuyến</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -166,5 +299,51 @@
     </div>
     
     {% include "components/common/scripts.html" %}
+    
+    <script>
+        // Initialize dropdown components after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set selected values for dropdowns if they exist
+            const employeeHidden = document.querySelector('input[name="employee"]');
+            const fromDepotHidden = document.querySelector('input[name="from_depot"]');  
+            const toDepotHidden = document.querySelector('input[name="to_depot"]');
+            
+            // Set employee dropdown value
+            if (employeeHidden && employeeHidden.value) {
+                const employeeOption = document.querySelector(`[data-value="${employeeHidden.value}"]`);
+                if (employeeOption) {
+                    const employeeInput = employeeHidden.parentElement.querySelector('.employee-search-input');
+                    if (employeeInput) {
+                        employeeInput.value = employeeOption.textContent.trim();
+                        employeeOption.classList.add('selected');
+                    }
+                }
+            }
+            
+            // Set from depot dropdown value
+            if (fromDepotHidden && fromDepotHidden.value) {
+                const fromDepotOption = document.querySelector(`input[name="from_depot"]`).parentElement.querySelector(`[data-value="${fromDepotHidden.value}"]`);
+                if (fromDepotOption) {
+                    const fromDepotInput = fromDepotHidden.parentElement.querySelector('.depot-search-input');
+                    if (fromDepotInput) {
+                        fromDepotInput.value = fromDepotOption.dataset.name;
+                        fromDepotOption.classList.add('selected');
+                    }
+                }
+            }
+            
+            // Set to depot dropdown value
+            if (toDepotHidden && toDepotHidden.value) {
+                const toDepotOption = document.querySelector(`input[name="to_depot"]`).parentElement.querySelector(`[data-value="${toDepotHidden.value}"]`);
+                if (toDepotOption) {
+                    const toDepotInput = toDepotHidden.parentElement.querySelector('.depot-search-input');
+                    if (toDepotInput) {
+                        toDepotInput.value = toDepotOption.dataset.name;
+                        toDepotOption.classList.add('selected');
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

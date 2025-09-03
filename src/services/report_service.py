@@ -17,24 +17,18 @@ class ReportService:
 
 
     def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None):
-        """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí"""
+        """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí và nhóm theo ngày"""
         try:
             if start_date_str and end_date_str:
-                # Tính toán với khoảng thời gian từ start_date đến end_date
                 start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
                 end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-                
-                # Timestamp bắt đầu từ 00:00:00 của ngày bắt đầu
                 start_timestamp = int(start_report_date.timestamp() * 1000)
-                # Timestamp kết thúc đến 00:00:00 của ngày tiếp theo sau end_date
                 end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
             elif start_date_str:
-                # Nếu chỉ có start_date, dùng như ngày đơn lẻ
                 report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
                 start_timestamp = int(report_date.timestamp() * 1000)
                 end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
             else:
-                # Không có filter ngày - lấy tất cả
                 start_timestamp = 0
                 end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
             
@@ -44,7 +38,7 @@ class ReportService:
             for record in all_records:
                 fields = record.get('fields', {})
                 
-                # Lọc theo khoảng ngày nếu có start_date_str hoặc end_date_str
+                # Lọc theo khoảng ngày
                 if start_date_str or end_date_str:
                     handover_date = fields.get('Ngày bàn giao')
                     if handover_date:
@@ -55,28 +49,215 @@ class ReportService:
                         except (ValueError, TypeError):
                             continue
                 
-                # Lọc theo nhân viên bàn giao
+                # Các filter khác (employee, depot) giữ nguyên như cũ
                 if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
                     continue
-
-                # Lọc theo kho đi
                 if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
                     continue
-
-                # Lọc theo kho đến
                 if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
                     continue
                 
-                # Record đã pass tất cả filters, thêm vào kết quả
                 filtered_records.append(fields)
             
             logger.info(f"Found {len(filtered_records)} records after filtering")
             
-            return self._calculate_daily_statistics(filtered_records)
+            # ✅ SỬA: Gọi hàm mới để tính toán nhóm theo ngày
+            return self._calculate_daily_statistics_grouped_by_date(filtered_records)
             
         except Exception as e:
             logger.error(f"Error getting daily report: {e}")
             return self._empty_report_data()
+
+    def _calculate_daily_statistics_grouped_by_date(self, records):
+        """Tính toán thống kê từ danh sách records với nhóm theo ngày bàn giao"""
+        if not records:
+            return self._empty_report_data()
+        
+        # ✅ THÊM: Nhóm records theo ngày bàn giao
+        daily_groups = defaultdict(list)
+        
+        for fields in records:
+            # Chuyển đổi timestamp thành ngày (YYYY-MM-DD)
+            handover_date = fields.get('Ngày bàn giao')
+            date_str = 'Unknown'
+            
+            if handover_date:
+                try:
+                    # Chuyển từ mili giây sang giây, sau đó tạo datetime object
+                    timestamp_sec = int(handover_date) / 1000
+                    dt_obj = datetime.fromtimestamp(timestamp_sec)
+                    # Chuyển về múi giờ GMT+7 (như trong record_routes.py)
+                    #dt_obj_gmt7 = dt_obj + timedelta(hours=7)
+                    dt_obj_gmt7 = dt_obj # Nguyên nhân là do dưới larkbase đã lưu Ngày bàn giao theo GMT + 7
+                    date_str = dt_obj_gmt7.strftime('%Y-%m-%d')
+                except (ValueError, TypeError):
+                    date_str = 'Unknown'
+            
+            daily_groups[date_str].append(fields)
+        
+        # ✅ THÊM: Tính toán thống kê cho từng ngày
+        daily_statistics = {}
+        route_summary_by_date = defaultdict(list)
+        transport_summary_by_date = defaultdict(list)
+        
+        for date_str, date_records in daily_groups.items():
+            # Sử dụng logic cũ để tính toán cho từng ngày
+            grouped_records = self._group_records_by_group_id(date_records)
+            
+            route_transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0})
+            total_loads = 0
+            
+            for group_key, group_records in grouped_records.items():
+                if group_key.startswith('group_'):
+                    loads_added = self._process_grouped_records(group_records, route_transport_stats, total_loads)
+                    total_loads += loads_added
+                else:
+                    for fields in group_records:
+                        loads_added = self._process_single_record(fields, route_transport_stats)
+                        total_loads += loads_added
+            
+            # Tạo route summary cho ngày này
+            daily_route_summary = []
+            for route_transport_key, stats in route_transport_stats.items():
+                route_part, transport_part = route_transport_key.split('|', 1)
+                daily_route_summary.append({
+                    'date': date_str,  # ✅ THÊM: Cột ngày
+                    'route': route_part,
+                    'transport_provider': transport_part,
+                    'count': stats['count'],
+                    'bags': stats['bags'],
+                    'loads': stats['loads']
+                })
+            
+            daily_route_summary.sort(key=lambda x: x['loads'], reverse=True)
+            route_summary_by_date[date_str] = daily_route_summary
+            
+            # Tính toán transport summary cho ngày này
+            transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0, 'routes': set()})
+            
+            for item in daily_route_summary:
+                provider = item['transport_provider']
+                stats = transport_stats[provider]
+                
+                stats['count'] += item['count']
+                stats['bags'] += item['bags']
+                stats['loads'] += item['loads']
+                stats['routes'].add(item['route'])
+            
+            daily_transport_summary = []
+            for provider, stats in transport_stats.items():
+                daily_transport_summary.append({
+                    'date': date_str,  # ✅ THÊM: Cột ngày
+                    'transport_provider': provider,
+                    'count': stats['count'],
+                    'bags': stats['bags'],
+                    'loads': stats['loads'],
+                    'route_count': len(stats['routes'])
+                })
+                
+            daily_transport_summary.sort(key=lambda x: x['loads'], reverse=True)
+            transport_summary_by_date[date_str] = daily_transport_summary
+            
+            # Lưu thống kê tổng cho ngày
+            daily_statistics[date_str] = {
+                'total_records': len(date_records),
+                'total_quantity': total_loads,
+                'route_summary': daily_route_summary,
+                'transport_summary': daily_transport_summary
+            }
+        
+        # ✅ THÊM: Tạo tổng hợp toàn bộ các ngày để hiển thị
+        all_route_summary = []
+        all_transport_summary = []
+        
+        for date_str in sorted(daily_statistics.keys()):
+            all_route_summary.extend(route_summary_by_date[date_str])
+            all_transport_summary.extend(transport_summary_by_date[date_str])
+        
+        # Tính tổng toàn bộ
+        total_records = sum(stats['total_records'] for stats in daily_statistics.values())
+        total_quantity = sum(stats['total_quantity'] for stats in daily_statistics.values())
+        
+        return {
+            'total_records': total_records,
+            'total_quantity': total_quantity,
+            'route_summary': all_route_summary,  # ✅ SỬA: Có cột date
+            'transport_summary': all_transport_summary,  # ✅ SỬA: Có cột date
+            'daily_statistics': daily_statistics,  # ✅ THÊM: Thống kê theo từng ngày
+            'date_list': sorted([d for d in daily_statistics.keys() if d != 'Unknown'])  # ✅ THÊM: Danh sách ngày
+        }
+
+
+
+
+
+
+
+
+
+
+
+    # def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None):
+    #     """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí"""
+    #     try:
+    #         if start_date_str and end_date_str:
+    #             # Tính toán với khoảng thời gian từ start_date đến end_date
+    #             start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    #             end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+                
+    #             # Timestamp bắt đầu từ 00:00:00 của ngày bắt đầu
+    #             start_timestamp = int(start_report_date.timestamp() * 1000)
+    #             # Timestamp kết thúc đến 00:00:00 của ngày tiếp theo sau end_date
+    #             end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
+    #         elif start_date_str:
+    #             # Nếu chỉ có start_date, dùng như ngày đơn lẻ
+    #             report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    #             start_timestamp = int(report_date.timestamp() * 1000)
+    #             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
+    #         else:
+    #             # Không có filter ngày - lấy tất cả
+    #             start_timestamp = 0
+    #             end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
+            
+    #         all_records = larkbase_get_all(self.app_token, self.table_id)
+            
+    #         filtered_records = []
+    #         for record in all_records:
+    #             fields = record.get('fields', {})
+                
+    #             # Lọc theo khoảng ngày nếu có start_date_str hoặc end_date_str
+    #             if start_date_str or end_date_str:
+    #                 handover_date = fields.get('Ngày bàn giao')
+    #                 if handover_date:
+    #                     try:
+    #                         handover_timestamp = int(handover_date)
+    #                         if not (start_timestamp <= handover_timestamp < end_timestamp):
+    #                             continue
+    #                     except (ValueError, TypeError):
+    #                         continue
+                
+    #             # Lọc theo nhân viên bàn giao
+    #             if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
+    #                 continue
+
+    #             # Lọc theo kho đi
+    #             if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
+    #                 continue
+
+    #             # Lọc theo kho đến
+    #             if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
+    #                 continue
+                
+    #             # Record đã pass tất cả filters, thêm vào kết quả
+    #             filtered_records.append(fields)
+            
+    #         logger.info(f"Found {len(filtered_records)} records after filtering")
+            
+    #         return self._calculate_daily_statistics(filtered_records)
+            
+    #     except Exception as e:
+    #         logger.error(f"Error getting daily report: {e}")
+    #         return self._empty_report_data()
 
 
 
