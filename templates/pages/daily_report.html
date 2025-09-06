@@ -129,6 +129,35 @@
                     </div>
                 </div>
                 
+                <!-- ✅ THÊM: Bộ lọc đơn vị vận chuyển -->
+                <div class="filter-group">
+                    <label class="filter-label">🚛 Đơn vị vận chuyển:</label>
+                    <div class="transport-dropdown-component">
+                        <div class="transport-search">
+                            <input type="text" 
+                                   class="transport-search-input filter-select" 
+                                   placeholder="Tất cả đơn vị vận chuyển"
+                                   autocomplete="off">
+                            <input type="hidden" 
+                                   class="transport-hidden-input" 
+                                   name="transport_provider"
+                                   value="{{ current_filters.transport_provider or '' }}">
+                            <div class="transport-dropdown">
+                                <div class="transport-dropdown-info">
+                                    <small>Tìm kiếm đơn vị vận chuyển</small>
+                                </div>
+                                {% for transport in all_transport_providers %}
+                                <div class="transport-option" 
+                                     data-value="{{ transport.id }}" 
+                                     data-name="{{ transport.name }}">
+                                    {{ transport.name }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="filter-actions">
                     <button type="submit" class="btn-filter">🔍 Lọc</button>
                     <a href="{{ url_for('daily_report_page') }}?start_date={{ start_date_str }}&end_date={{ end_date_str }}" class="btn-clear">🗑️ Xóa</a>
@@ -265,8 +294,8 @@
                                         <td class="text-center">
                                             {% set route_parts = route.route.split(' → ') %}
                                             {% if route_parts|length == 2 %}
-                                            <!-- ✅ SỬA: Sử dụng ngày cụ thể của dòng đó thay vì filter chung -->
-                                            <a href="/reports/daily/export-route?from_depot={{ route_parts[0]|urlencode }}&to_depot={{ route_parts[1]|urlencode }}{% if route.date and route.date != 'Unknown' %}&start_date={{ route.date }}&end_date={{ route.date }}{% endif %}{% if current_filters.employee %}&employee={{ current_filters.employee }}{% endif %}" 
+                                            <!-- ✅ SỬA: Thêm transport_provider filter vào export link -->
+                                            <a href="/reports/daily/export-route?from_depot={{ route_parts[0]|urlencode }}&to_depot={{ route_parts[1]|urlencode }}{% if route.date and route.date != 'Unknown' %}&start_date={{ route.date }}&end_date={{ route.date }}{% endif %}{% if current_filters.employee %}&employee={{ current_filters.employee }}{% endif %}{% if current_filters.transport_provider %}&transport_provider={{ current_filters.transport_provider }}{% endif %}" 
                                                class="btn btn-success btn-export-route"
                                                title="Xuất Excel tuyến {{ route.route }}{% if route.date and route.date != 'Unknown' %} - Ngày {{ route.date }}{% endif %}">
                                                 📊
@@ -307,6 +336,7 @@
             const employeeHidden = document.querySelector('input[name="employee"]');
             const fromDepotHidden = document.querySelector('input[name="from_depot"]');  
             const toDepotHidden = document.querySelector('input[name="to_depot"]');
+            const transportHidden = document.querySelector('input[name="transport_provider"]'); // ✅ THÊM
             
             // Set employee dropdown value
             if (employeeHidden && employeeHidden.value) {
@@ -340,6 +370,18 @@
                     if (toDepotInput) {
                         toDepotInput.value = toDepotOption.dataset.name;
                         toDepotOption.classList.add('selected');
+                    }
+                }
+            }
+            
+            // ✅ THÊM: Set transport provider dropdown value
+            if (transportHidden && transportHidden.value) {
+                const transportOption = document.querySelector(`input[name="transport_provider"]`).parentElement.querySelector(`[data-value="${transportHidden.value}"]`);
+                if (transportOption) {
+                    const transportInput = transportHidden.parentElement.querySelector('.transport-search-input');
+                    if (transportInput) {
+                        transportInput.value = transportOption.dataset.name;
+                        transportOption.classList.add('selected');
                     }
                 }
             }

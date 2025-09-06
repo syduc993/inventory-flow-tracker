@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-09-03 14:33:49
+Thời gian tạo: 2025-09-06 11:14:38
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -141,7 +141,7 @@ templates\components\forms\bulk_create.html (9560 bytes)
 templates\components\forms\create.html (1201 bytes)
 templates\components\forms\search.html (895 bytes)
 templates\components\forms\update.html (0 bytes)
-templates\pages\daily_report.html (14612 bytes)
+templates\pages\daily_report.html (20225 bytes)
 templates\pages\index.html (2404 bytes)
 templates\pages\view_only.html (2249 bytes)
 
