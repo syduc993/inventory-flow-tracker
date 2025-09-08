@@ -17,25 +17,41 @@ class ReportService:
 
 
 
-    def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None, transport_provider_filter=None):  # ✅ THÊM transport_provider_filter
+
+
+    def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None, transport_provider_filter=None):
         """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí và nhóm theo ngày"""
+        logger.info(f"🔍 Starting daily report generation with filters: employee={employee_filter}, from_depot={from_depot_filter}, to_depot={to_depot_filter}, transport={transport_provider_filter}")
+        
         try:
+            # Tính toán timestamp range
             if start_date_str and end_date_str:
                 start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
                 end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
                 start_timestamp = int(start_report_date.timestamp() * 1000)
                 end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
+                logger.info(f"📅 Date range filter: {start_date_str} to {end_date_str} (timestamps: {start_timestamp} - {end_timestamp})")
             elif start_date_str:
                 report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
                 start_timestamp = int(report_date.timestamp() * 1000)
                 end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
+                logger.info(f"📅 Single date filter: {start_date_str} (timestamps: {start_timestamp} - {end_timestamp})")
             else:
                 start_timestamp = 0
                 end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
+                logger.info(f"📅 No date filter - using full range (timestamps: {start_timestamp} - {end_timestamp})")
             
+            logger.info(f"📊 Getting all records from data source...")
             all_records = larkbase_get_all(self.app_token, self.table_id)
+            logger.info(f"📈 Retrieved {len(all_records)} total records from database")
             
             filtered_records = []
+            date_filtered_count = 0
+            employee_filtered_count = 0
+            from_depot_filtered_count = 0
+            to_depot_filtered_count = 0
+            transport_filtered_count = 0
+            
             for record in all_records:
                 fields = record.get('fields', {})
                 
@@ -46,33 +62,114 @@ class ReportService:
                         try:
                             handover_timestamp = int(handover_date)
                             if not (start_timestamp <= handover_timestamp < end_timestamp):
+                                date_filtered_count += 1
                                 continue
                         except (ValueError, TypeError):
+                            date_filtered_count += 1
                             continue
                 
                 # Các filter khác
                 if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
+                    employee_filtered_count += 1
                     continue
                 if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
+                    from_depot_filtered_count += 1
                     continue
                 if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
+                    to_depot_filtered_count += 1
                     continue
                 
-                # ✅ THÊM: Filter theo đơn vị vận chuyển
+                # Filter theo đơn vị vận chuyển
                 if transport_provider_filter and transport_provider_filter.strip():
-                    transport_provider_record = fields.get('Đơn vị vận chuyển', '').strip()
+                    transport_provider_record = (fields.get('Đơn vị vận chuyển') or '').strip()
                     if transport_provider_record != transport_provider_filter:
+                        transport_filtered_count += 1
                         continue
                 
                 filtered_records.append(fields)
             
-            logger.info(f"Found {len(filtered_records)} records after filtering")
+            # Log thống kê filter
+            logger.info(f"🎯 Filter statistics:")
+            logger.info(f"   - Date filtered out: {date_filtered_count} records")
+            logger.info(f"   - Employee filtered out: {employee_filtered_count} records")
+            logger.info(f"   - From depot filtered out: {from_depot_filtered_count} records")
+            logger.info(f"   - To depot filtered out: {to_depot_filtered_count} records")
+            logger.info(f"   - Transport provider filtered out: {transport_filtered_count} records")
+            logger.info(f"✅ Final result: {len(filtered_records)} records match all filters")
             
-            return self._calculate_daily_statistics_grouped_by_date(filtered_records)
+            if len(filtered_records) == 0:
+                logger.warning("⚠️ No records found matching the specified filters")
+            
+            logger.info(f"🔢 Processing filtered records for daily statistics calculation...")
+            result = self._calculate_daily_statistics_grouped_by_date(filtered_records)
+            logger.info(f"✅ Daily report generation completed successfully")
+            
+            return result
             
         except Exception as e:
-            logger.error(f"Error getting daily report: {e}")
+            logger.error(f"❌ Error getting daily report: {e}")
+            logger.error(f"   - Parameters: start_date={start_date_str}, end_date={end_date_str}")
+            logger.error(f"   - Filters: employee={employee_filter}, from_depot={from_depot_filter}, to_depot={to_depot_filter}, transport={transport_provider_filter}")
             return self._empty_report_data()
+
+
+
+    # def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None, transport_provider_filter=None):  # ✅ THÊM transport_provider_filter
+    #     """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí và nhóm theo ngày"""
+    #     try:
+    #         if start_date_str and end_date_str:
+    #             start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    #             end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    #             start_timestamp = int(start_report_date.timestamp() * 1000)
+    #             end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
+    #         elif start_date_str:
+    #             report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    #             start_timestamp = int(report_date.timestamp() * 1000)
+    #             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
+    #         else:
+    #             start_timestamp = 0
+    #             end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
+            
+    #         all_records = larkbase_get_all(self.app_token, self.table_id)
+            
+    #         filtered_records = []
+    #         for record in all_records:
+    #             fields = record.get('fields', {})
+                
+    #             # Lọc theo khoảng ngày
+    #             if start_date_str or end_date_str:
+    #                 handover_date = fields.get('Ngày bàn giao')
+    #                 if handover_date:
+    #                     try:
+    #                         handover_timestamp = int(handover_date)
+    #                         if not (start_timestamp <= handover_timestamp < end_timestamp):
+    #                             continue
+    #                     except (ValueError, TypeError):
+    #                         continue
+                
+    #             # Các filter khác
+    #             if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
+    #                 continue
+    #             if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
+    #                 continue
+    #             if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
+    #                 continue
+                
+    #             # ✅ THÊM: Filter theo đơn vị vận chuyển
+    #             if transport_provider_filter and transport_provider_filter.strip():
+    #                 transport_provider_record = fields.get('Đơn vị vận chuyển', '').strip()
+    #                 if transport_provider_record != transport_provider_filter:
+    #                     continue
+                
+    #             filtered_records.append(fields)
+            
+    #         logger.info(f"Found {len(filtered_records)} records after filtering")
+            
+    #         return self._calculate_daily_statistics_grouped_by_date(filtered_records)
+            
+    #     except Exception as e:
+    #         logger.error(f"Error getting daily report: {e}")
+    #         return self._empty_report_data()
 
 
     def get_all_transport_providers(self):
