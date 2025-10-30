@@ -210,7 +210,8 @@ class DropdownManager {
             }
         });
     }
-    
+
+
     initDepotDropdown(component) {
         const searchInput = component.querySelector('.depot-search-input');
         const hiddenInput = component.querySelector('.depot-hidden-input');
@@ -222,7 +223,6 @@ class DropdownManager {
         
         dropdown.style.display = 'none';
         
-        // ✅ SỬA: Show existing value khi focus lại  
         if (hiddenInput.value) {
             const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
             if (selectedOption) {
@@ -244,7 +244,6 @@ class DropdownManager {
             this.filterDepots(query, options, infoDiv);
         });
 
-        // ✅ SỬA: Ngăn người dùng nhập tự do
         searchInput.addEventListener('blur', () => {
             setTimeout(() => {
                 if (searchInput.value.trim() && !hiddenInput.value) {
@@ -255,7 +254,6 @@ class DropdownManager {
             }, 200);
         });
 
-        // ✅ SỬA: Show giá trị đã chọn khi focus lại
         searchInput.addEventListener('focus', () => {
             if (hiddenInput.value) {
                 dropdown.style.display = 'block';
@@ -274,6 +272,7 @@ class DropdownManager {
             if (option) {
                 const depotId = option.dataset.value;
                 const depotName = option.dataset.name;
+                const previousValue = hiddenInput.value;
 
                 searchInput.value = depotName;
                 hiddenInput.value = depotId;
@@ -281,10 +280,23 @@ class DropdownManager {
 
                 options.forEach(opt => opt.classList.remove('selected'));
                 option.classList.add('selected');
+
+                // --- THAY ĐỔI QUAN TRỌNG ---
+                // Chỉ phát sự kiện nếu giá trị thực sự thay đổi.
+                if (previousValue !== depotId) {
+                    console.log(`Depot changed to: ${depotId}. Firing depotChanged event.`);
+                    const depotChangedEvent = new CustomEvent('depotChanged', {
+                        detail: {
+                            depotId: depotId,
+                            depotName: depotName
+                        }
+                    });
+                    document.body.dispatchEvent(depotChangedEvent);
+                }
+                // --- KẾT THÚC THAY ĐỔI ---
             }
         });
 
-        // ✅ SỬA: Ngăn người dùng typing sau khi đã chọn
         searchInput.addEventListener('keydown', (e) => {
             if (hiddenInput.value && e.key !== 'Tab' && e.key !== 'Enter') {
                 if (e.key === 'Backspace' || e.key === 'Delete' || e.key.length === 1) {
@@ -294,6 +306,7 @@ class DropdownManager {
             }
         });
     }
+
     
     filterEmployees(query, options, infoDiv) {
         let visibleCount = 0;

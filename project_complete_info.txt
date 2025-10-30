@@ -1,7 +1,7 @@
 ================================================================================
 THÔNG TIN DỰ ÁN HOÀN CHỈNH
 ================================================================================
-Thời gian tạo: 2025-09-08 13:41:02
+Thời gian tạo: 2025-10-30 19:48:33
 Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ================================================================================
 
@@ -81,7 +81,8 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 ├── 📄 main.py
 ├── 📄 project_complete_info.txt
 ├── 📄 README.md
-└── 📄 requirements.txt
+├── 📄 requirements.txt
+└── 📄 test_larkbase_data.py
 
 
 📄 DANH SÁCH TẤT CẢ FILE
@@ -89,18 +90,18 @@ Thư mục gốc: d:\Atino\extension\inventory-flow-tracker
 .gitignore (628 bytes)
 docker-compose.yml (365 bytes)
 Dockerfile (590 bytes)
-Get detail code.ipynb (9334 bytes)
+Get detail code.ipynb (23175 bytes)
 main.py (253 bytes)
 project_complete_info.txt (0 bytes)
 README.md (432 bytes)
-requirements.txt (210 bytes)
+requirements.txt (228 bytes)
 src\auth\__init__.py (0 bytes)
 src\auth\auth_middleware.py (8925 bytes)
 src\auth\lark_oauth.py (22567 bytes)
 src\auth\session_manager.py (3876 bytes)
 src\core\__init__.py (0 bytes)
 src\core\app.py (2075 bytes)
-src\core\dependencies.py (2258 bytes)
+src\core\dependencies.py (2388 bytes)
 src\routes\__init__.py (0 bytes)
 src\routes\api_routes.py (24462 bytes)
 src\routes\auth_routes.py (4183 bytes)
@@ -111,14 +112,14 @@ src\services\__init__.py (0 bytes)
 src\services\depot_service.py (769 bytes)
 src\services\employee_service.py (399 bytes)
 src\services\record_service.py (12317 bytes)
-src\services\report_service.py (65725 bytes)
+src\services\report_service.py (26416 bytes)
 src\services\transport_service.py (609 bytes)
 src\utils\__init__.py (0 bytes)
 src\utils\api.py (2170 bytes)
 src\utils\cache.py (3913 bytes)
 src\utils\config.py (5107 bytes)
 src\utils\depot.py (3382 bytes)
-src\utils\larkbase.py (6822 bytes)
+src\utils\larkbase.py (8248 bytes)
 src\utils\transport_provider.py (3181 bytes)
 static\css\components.css (10454 bytes)
 static\css\dropdowns.css (3053 bytes)
@@ -126,8 +127,8 @@ static\css\forms.css (5425 bytes)
 static\css\main.css (5781 bytes)
 static\css\reports.css (8007 bytes)
 static\js\app.js (1516 bytes)
-static\js\bulk-form.js (40830 bytes)
-static\js\dropdown.js (15968 bytes)
+static\js\bulk-form.js (18939 bytes)
+static\js\dropdown.js (16458 bytes)
 static\js\validators.js (2170 bytes)
 templates\auth\login.html (3373 bytes)
 templates\auth\unauthorized.html (3976 bytes)
@@ -144,8 +145,9 @@ templates\components\forms\update.html (0 bytes)
 templates\pages\daily_report.html (22850 bytes)
 templates\pages\index.html (2404 bytes)
 templates\pages\view_only.html (2249 bytes)
+test_larkbase_data.py (4117 bytes)
 
-Tổng cộng: 58 file
+Tổng cộng: 59 file
 
 💻 NỘI DUNG TẤT CẢ FILE CODE
 ================================================================================
@@ -230,6 +232,7 @@ requests==2.31.0
 python-dateutil>=2.8.0
 pydantic==2.7.3
 openpyxl==3.1.2
+lark-oapi==1.3.6
 ============================================================
 
 ============================================================
@@ -1183,7 +1186,6 @@ def create_app():
 ============================================================
 FILE: src\core\dependencies.py
 ============================================================
-# src/core/dependencies.py - Dependency Injection
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
@@ -1191,23 +1193,35 @@ from src.services.record_service import RecordService
 from src.services.employee_service import EmployeeService
 from src.services.transport_service import TransportProviderService
 from src.services.depot_service import DepotService
+from src.services.report_service import ReportService 
 from src.utils.config import API_TOKENS, TABLE_IDS
+
+_record_service_instance = RecordService(API_TOKENS['MAIN_APP_TOKEN'], TABLE_IDS['MAIN_TABLE_ID'])
+_employee_service_instance = EmployeeService()
+_transport_service_instance = TransportProviderService(API_TOKENS['MAIN_APP_TOKEN'])
+_depot_service_instance = DepotService()
+_report_service_instance = ReportService(API_TOKENS['MAIN_APP_TOKEN'], TABLE_IDS['MAIN_TABLE_ID'])
+
 
 # Setup templates
 templates = Jinja2Templates(directory="templates")
 
-# Services
+# Services (các hàm get_* giờ chỉ trả về instance đã được tạo sẵn)
 def get_record_service() -> RecordService:
-    return RecordService(API_TOKENS['MAIN_APP_TOKEN'], TABLE_IDS['MAIN_TABLE_ID'])
+    return _record_service_instance
 
 def get_employee_service() -> EmployeeService:
-    return EmployeeService()
+    return _employee_service_instance
 
 def get_transport_service() -> TransportProviderService:
-    return TransportProviderService(API_TOKENS['MAIN_APP_TOKEN'])
+    return _transport_service_instance
 
 def get_depot_service() -> DepotService:
-    return DepotService()
+    return _depot_service_instance
+
+def get_report_service() -> ReportService:
+    return _report_service_instance
+
 
 # Helper function
 def get_current_user(request: Request) -> dict:
@@ -1216,7 +1230,6 @@ def get_current_user(request: Request) -> dict:
 
 # Template filters
 def get_employee_display(employee_id, employees):
-    """Tìm và trả về chuỗi 'Tên (ID)' từ danh sách nhân viên."""
     if not employee_id or not employees:
         return ""
     for emp in employees:
@@ -1225,7 +1238,6 @@ def get_employee_display(employee_id, employees):
     return employee_id
 
 def get_transport_provider_display(provider_id, transport_providers):
-    """Tìm và trả về tên nhà cung cấp từ ID."""
     if not provider_id or not transport_providers:
         return provider_id
     for provider in transport_providers:
@@ -1233,18 +1245,9 @@ def get_transport_provider_display(provider_id, transport_providers):
             return provider.get('name', provider_id)
     return provider_id
 
-
-# Thêm vào src/core/dependencies.py
-
-def get_report_service():
-    from src.services.report_service import ReportService
-    return ReportService(API_TOKENS['MAIN_APP_TOKEN'], TABLE_IDS['MAIN_TABLE_ID'])
-
-
 # Register template filters
 templates.env.filters['get_employee_display'] = get_employee_display
 templates.env.filters['get_transport_provider_display'] = get_transport_provider_display
-
 ============================================================
 
 ============================================================
@@ -2959,179 +2962,160 @@ class RecordService:
 ============================================================
 FILE: src\services\report_service.py
 ============================================================
-# src/services/report_service.py
+# FILE: src/services/report_service.py (CHỈ CẬP NHẬT HÀM get_daily_report)
 
 from datetime import datetime, timedelta
 from collections import defaultdict
-from src.utils.larkbase import larkbase_get_all
+# Sửa đổi import để sử dụng hàm search mới từ larkbase.py
+from src.utils.larkbase import larkbase_get_all, larkbase_search_records 
 import logging
 import json
-
+import time
 
 logger = logging.getLogger(__name__)
 
+def _get_text_from_lark_field(field_value, default='Không rõ'):
+    """
+    Trích xuất giá trị text từ một trường của Larkbase có thể là list hoặc string.
+    Ví dụ: [{'text': 'Tên Kho'}] -> 'Tên Kho'
+    """
+    if isinstance(field_value, list) and field_value:
+        # Nếu là list không rỗng, lấy text từ dict đầu tiên
+        first_item = field_value[0]
+        if isinstance(first_item, dict) and 'text' in first_item:
+            return first_item.get('text', default).strip()
+    elif isinstance(field_value, str):
+        # Nếu là string, trả về trực tiếp
+        return field_value.strip()
+    
+    # Trường hợp khác (None, rỗng,...) trả về giá trị mặc định
+    return str(field_value or default).strip()
 
 class ReportService:
     def __init__(self, app_token, table_id):
         self.app_token = app_token
         self.table_id = table_id
-
-
-
+        self._cache = {}
+        self.CACHE_TTL = 600  # 10 phút
 
 
     def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None, transport_provider_filter=None):
-        """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí và nhóm theo ngày"""
-        logger.info(f"🔍 Starting daily report generation with filters: employee={employee_filter}, from_depot={from_depot_filter}, to_depot={to_depot_filter}, transport={transport_provider_filter}")
-        
+        logger.info("🚀 Bắt đầu tạo báo cáo bằng Lark SDK...")
+        logger.info(f"   - Filters: employee={employee_filter}, from_depot={from_depot_filter}, to_depot={to_depot_filter}, transport={transport_provider_filter}")
+
         try:
-            # Tính toán timestamp range
-            if start_date_str and end_date_str:
-                start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-                end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-                start_timestamp = int(start_report_date.timestamp() * 1000)
-                end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
-                logger.info(f"📅 Date range filter: {start_date_str} to {end_date_str} (timestamps: {start_timestamp} - {end_timestamp})")
-            elif start_date_str:
-                report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-                start_timestamp = int(report_date.timestamp() * 1000)
-                end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
-                logger.info(f"📅 Single date filter: {start_date_str} (timestamps: {start_timestamp} - {end_timestamp})")
-            else:
-                start_timestamp = 0
-                end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
-                logger.info(f"📅 No date filter - using full range (timestamps: {start_timestamp} - {end_timestamp})")
+            conditions = []
+
+            if employee_filter and employee_filter.strip():
+                conditions.append({"field_name": "ID người bàn giao", "operator": "is", "value": [employee_filter.strip()]})
+            if from_depot_filter and from_depot_filter.strip():
+                # ✅ SỬA LỖI: Lọc trên trường text thay vì ID vì ID có thể không tồn tại
+                conditions.append({"field_name": "Kho đi", "operator": "contains", "value": [from_depot_filter.strip()]})
+            if to_depot_filter and to_depot_filter.strip():
+                conditions.append({"field_name": "Kho đến", "operator": "contains", "value": [to_depot_filter.strip()]})
+            if transport_provider_filter and transport_provider_filter.strip():
+                conditions.append({"field_name": "Đơn vị vận chuyển", "operator": "contains", "value": [transport_provider_filter.strip()]})
+
+            if start_date_str:
+                clean_start_date = start_date_str.strip()
+                start_date_obj = datetime.strptime(clean_start_date, '%Y-%m-%d')
+                start_timestamp = int(start_date_obj.timestamp() * 1000)
+                conditions.append({
+                    "field_name": "Ngày bàn giao", "operator": "isGreater", "value": ["ExactDate", str(start_timestamp)]
+                })
+                logger.info(f"   - Thêm bộ lọc ngày: >= {clean_start_date}")
+
+            if end_date_str:
+                clean_end_date = end_date_str.strip()
+                end_date_obj = datetime.strptime(clean_end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+                end_timestamp = int(end_date_obj.timestamp() * 1000)
+                conditions.append({
+                    "field_name": "Ngày bàn giao", "operator": "isLess", "value": ["ExactDate", str(end_timestamp)]
+                })
+                logger.info(f"   - Thêm bộ lọc ngày: <= {clean_end_date}")
+
+            filtered_records_raw = larkbase_search_records(
+                app_token=self.app_token, table_id=self.table_id, filter_conditions=conditions
+            )
             
-            logger.info(f"📊 Getting all records from data source...")
-            all_records = larkbase_get_all(self.app_token, self.table_id)
-            logger.info(f"📈 Retrieved {len(all_records)} total records from database")
-            
-            filtered_records = []
-            date_filtered_count = 0
-            employee_filtered_count = 0
-            from_depot_filtered_count = 0
-            to_depot_filtered_count = 0
-            transport_filtered_count = 0
-            
-            for record in all_records:
-                fields = record.get('fields', {})
-                
-                # Lọc theo khoảng ngày
-                if start_date_str or end_date_str:
-                    handover_date = fields.get('Ngày bàn giao')
-                    if handover_date:
-                        try:
-                            handover_timestamp = int(handover_date)
-                            if not (start_timestamp <= handover_timestamp < end_timestamp):
-                                date_filtered_count += 1
-                                continue
-                        except (ValueError, TypeError):
-                            date_filtered_count += 1
-                            continue
-                
-                # Các filter khác
-                if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
-                    employee_filtered_count += 1
-                    continue
-                if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
-                    from_depot_filtered_count += 1
-                    continue
-                if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
-                    to_depot_filtered_count += 1
-                    continue
-                
-                # Filter theo đơn vị vận chuyển
-                if transport_provider_filter and transport_provider_filter.strip():
-                    transport_provider_record = (fields.get('Đơn vị vận chuyển') or '').strip()
-                    if transport_provider_record != transport_provider_filter:
-                        transport_filtered_count += 1
-                        continue
-                
-                filtered_records.append(fields)
-            
-            # Log thống kê filter
-            logger.info(f"🎯 Filter statistics:")
-            logger.info(f"   - Date filtered out: {date_filtered_count} records")
-            logger.info(f"   - Employee filtered out: {employee_filtered_count} records")
-            logger.info(f"   - From depot filtered out: {from_depot_filtered_count} records")
-            logger.info(f"   - To depot filtered out: {to_depot_filtered_count} records")
-            logger.info(f"   - Transport provider filtered out: {transport_filtered_count} records")
-            logger.info(f"✅ Final result: {len(filtered_records)} records match all filters")
-            
-            if len(filtered_records) == 0:
-                logger.warning("⚠️ No records found matching the specified filters")
-            
-            logger.info(f"🔢 Processing filtered records for daily statistics calculation...")
+            logger.info(f"✅ SDK call hoàn tất. Tìm thấy {len(filtered_records_raw)} bản ghi khớp.")
+            if not filtered_records_raw:
+                return self._empty_report_data()
+
+            filtered_records = [record.get('fields', {}) for record in filtered_records_raw]
             result = self._calculate_daily_statistics_grouped_by_date(filtered_records)
-            logger.info(f"✅ Daily report generation completed successfully")
-            
             return result
             
+        except ValueError as ve:
+            logger.error(f"❌ Lỗi định dạng ngày tháng: {ve}. Dữ liệu nhận được: start='{start_date_str}', end='{end_date_str}'", exc_info=True)
+            return self._empty_report_data()
         except Exception as e:
-            logger.error(f"❌ Error getting daily report: {e}")
-            logger.error(f"   - Parameters: start_date={start_date_str}, end_date={end_date_str}")
-            logger.error(f"   - Filters: employee={employee_filter}, from_depot={from_depot_filter}, to_depot={to_depot_filter}, transport={transport_provider_filter}")
+            logger.error(f"❌ Lỗi nghiêm trọng trong quá trình tạo báo cáo: {e}", exc_info=True)
             return self._empty_report_data()
 
 
+    def _get_from_cache(self, key):
+        """Helper function để lấy dữ liệu từ cache nếu nó hợp lệ."""
+        if key in self._cache:
+            data, timestamp = self._cache[key]
+            if time.time() - timestamp < self.CACHE_TTL:
+                logger.info(f"CACHE HIT: Lấy dữ liệu '{key}' từ cache.")
+                return data
+        logger.info(f"CACHE MISS: Dữ liệu '{key}' không có trong cache hoặc đã hết hạn.")
+        return None
 
-    # def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None, transport_provider_filter=None):  # ✅ THÊM transport_provider_filter
-    #     """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí và nhóm theo ngày"""
-    #     try:
-    #         if start_date_str and end_date_str:
-    #             start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-    #             start_timestamp = int(start_report_date.timestamp() * 1000)
-    #             end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
-    #         elif start_date_str:
-    #             report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             start_timestamp = int(report_date.timestamp() * 1000)
-    #             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
-    #         else:
-    #             start_timestamp = 0
-    #             end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
-            
-    #         all_records = larkbase_get_all(self.app_token, self.table_id)
-            
-    #         filtered_records = []
-    #         for record in all_records:
-    #             fields = record.get('fields', {})
-                
-    #             # Lọc theo khoảng ngày
-    #             if start_date_str or end_date_str:
-    #                 handover_date = fields.get('Ngày bàn giao')
-    #                 if handover_date:
-    #                     try:
-    #                         handover_timestamp = int(handover_date)
-    #                         if not (start_timestamp <= handover_timestamp < end_timestamp):
-    #                             continue
-    #                     except (ValueError, TypeError):
-    #                         continue
-                
-    #             # Các filter khác
-    #             if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
-    #                 continue
-    #             if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
-    #                 continue
-    #             if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
-    #                 continue
-                
-    #             # ✅ THÊM: Filter theo đơn vị vận chuyển
-    #             if transport_provider_filter and transport_provider_filter.strip():
-    #                 transport_provider_record = fields.get('Đơn vị vận chuyển', '').strip()
-    #                 if transport_provider_record != transport_provider_filter:
-    #                     continue
-                
-    #             filtered_records.append(fields)
-            
-    #         logger.info(f"Found {len(filtered_records)} records after filtering")
-            
-    #         return self._calculate_daily_statistics_grouped_by_date(filtered_records)
-            
-    #     except Exception as e:
-    #         logger.error(f"Error getting daily report: {e}")
-    #         return self._empty_report_data()
+    def _set_to_cache(self, key, data):
+        """Helper function để lưu dữ liệu vào cache."""
+        logger.info(f"CACHE SET: Đang lưu dữ liệu '{key}' vào cache.")
+        self._cache[key] = (data, time.time())
 
+    def get_all_employees(self):
+        """Lấy danh sách tất cả nhân viên từ records, sử dụng cache."""
+        cached_data = self._get_from_cache('employees')
+        if cached_data is not None:
+            return cached_data
+
+        try:
+            all_records = larkbase_get_all(self.app_token, self.table_id)
+            employees = {}
+            for record in all_records:
+                fields = record.get('fields', {})
+                emp_id = fields.get('ID người bàn giao')
+                emp_name = fields.get('Người bàn giao')
+                if emp_id and emp_name and emp_id not in employees:
+                    employees[emp_id] = emp_name
+            
+            result = [{'id': emp_id, 'name': emp_name} for emp_id, emp_name in employees.items()]
+            self._set_to_cache('employees', result)
+            return result
+        except Exception as e:
+            logger.error(f"Error getting employees for cache: {e}")
+            return []
+
+    def get_all_depots(self):
+        """Lấy danh sách tất cả depots từ records, sử dụng cache."""
+        cached_data = self._get_from_cache('depots')
+        if cached_data is not None:
+            return cached_data
+
+        try:
+            all_records = larkbase_get_all(self.app_token, self.table_id)
+            depots = {}
+            for record in all_records:
+                fields = record.get('fields', {})
+                from_id, from_name = fields.get('ID kho đi'), fields.get('Kho đi')
+                if from_id and from_name and from_id not in depots:
+                    depots[from_id] = from_name
+                to_id, to_name = fields.get('ID kho đến'), fields.get('Kho đến')
+                if to_id and to_name and to_id not in depots:
+                    depots[to_id] = to_name
+
+            result = [{'id': depot_id, 'name': depot_name} for depot_id, depot_name in depots.items()]
+            self._set_to_cache('depots', result)
+            return result
+        except Exception as e:
+            logger.error(f"Error getting depots for cache: {e}")
+            return []
 
     def get_all_transport_providers(self):
         """Lấy danh sách tất cả đơn vị vận chuyển từ records"""
@@ -3147,59 +3131,6 @@ class ReportService:
         except Exception as e:
             logger.error(f"Error getting transport providers: {e}")
             return []
-
-
-    # def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None):
-    #     """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí và nhóm theo ngày"""
-    #     try:
-    #         if start_date_str and end_date_str:
-    #             start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-    #             start_timestamp = int(start_report_date.timestamp() * 1000)
-    #             end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
-    #         elif start_date_str:
-    #             report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             start_timestamp = int(report_date.timestamp() * 1000)
-    #             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
-    #         else:
-    #             start_timestamp = 0
-    #             end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
-            
-    #         all_records = larkbase_get_all(self.app_token, self.table_id)
-            
-    #         filtered_records = []
-    #         for record in all_records:
-    #             fields = record.get('fields', {})
-                
-    #             # Lọc theo khoảng ngày
-    #             if start_date_str or end_date_str:
-    #                 handover_date = fields.get('Ngày bàn giao')
-    #                 if handover_date:
-    #                     try:
-    #                         handover_timestamp = int(handover_date)
-    #                         if not (start_timestamp <= handover_timestamp < end_timestamp):
-    #                             continue
-    #                     except (ValueError, TypeError):
-    #                         continue
-                
-    #             # Các filter khác (employee, depot) giữ nguyên như cũ
-    #             if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
-    #                 continue
-    #             if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
-    #                 continue
-    #             if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
-    #                 continue
-                
-    #             filtered_records.append(fields)
-            
-    #         logger.info(f"Found {len(filtered_records)} records after filtering")
-            
-    #         # ✅ SỬA: Gọi hàm mới để tính toán nhóm theo ngày
-    #         return self._calculate_daily_statistics_grouped_by_date(filtered_records)
-            
-    #     except Exception as e:
-    #         logger.error(f"Error getting daily report: {e}")
-    #         return self._empty_report_data()
 
     def _calculate_daily_statistics_grouped_by_date(self, records):
         """Tính toán thống kê từ danh sách records với nhóm theo ngày bàn giao"""
@@ -3314,123 +3245,12 @@ class ReportService:
         return {
             'total_records': total_records,
             'total_quantity': total_quantity,
-            'route_summary': all_route_summary,  # ✅ SỬA: Có cột date
-            'transport_summary': all_transport_summary,  # ✅ SỬA: Có cột date
-            'daily_statistics': daily_statistics,  # ✅ THÊM: Thống kê theo từng ngày
-            'date_list': sorted([d for d in daily_statistics.keys() if d != 'Unknown'])  # ✅ THÊM: Danh sách ngày
+            'route_summary': all_route_summary,
+            'transport_summary': all_transport_summary,
+            'daily_statistics': daily_statistics,
+            'date_list': sorted([d for d in daily_statistics.keys() if d != 'Unknown'])
         }
 
-
-
-
-
-
-
-
-
-
-
-    # def get_daily_report(self, user_id=None, start_date_str=None, end_date_str=None, employee_filter=None, from_depot_filter=None, to_depot_filter=None):
-    #     """Lấy báo cáo hàng ngày - có thể lọc theo nhiều tiêu chí"""
-    #     try:
-    #         if start_date_str and end_date_str:
-    #             # Tính toán với khoảng thời gian từ start_date đến end_date
-    #             start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-                
-    #             # Timestamp bắt đầu từ 00:00:00 của ngày bắt đầu
-    #             start_timestamp = int(start_report_date.timestamp() * 1000)
-    #             # Timestamp kết thúc đến 00:00:00 của ngày tiếp theo sau end_date
-    #             end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
-    #         elif start_date_str:
-    #             # Nếu chỉ có start_date, dùng như ngày đơn lẻ
-    #             report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             start_timestamp = int(report_date.timestamp() * 1000)
-    #             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
-    #         else:
-    #             # Không có filter ngày - lấy tất cả
-    #             start_timestamp = 0
-    #             end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
-            
-    #         all_records = larkbase_get_all(self.app_token, self.table_id)
-            
-    #         filtered_records = []
-    #         for record in all_records:
-    #             fields = record.get('fields', {})
-                
-    #             # Lọc theo khoảng ngày nếu có start_date_str hoặc end_date_str
-    #             if start_date_str or end_date_str:
-    #                 handover_date = fields.get('Ngày bàn giao')
-    #                 if handover_date:
-    #                     try:
-    #                         handover_timestamp = int(handover_date)
-    #                         if not (start_timestamp <= handover_timestamp < end_timestamp):
-    #                             continue
-    #                     except (ValueError, TypeError):
-    #                         continue
-                
-    #             # Lọc theo nhân viên bàn giao
-    #             if employee_filter and employee_filter.strip() and fields.get('ID người bàn giao', '') != employee_filter:
-    #                 continue
-
-    #             # Lọc theo kho đi
-    #             if from_depot_filter and from_depot_filter.strip() and fields.get('ID kho đi', '') != from_depot_filter:
-    #                 continue
-
-    #             # Lọc theo kho đến
-    #             if to_depot_filter and to_depot_filter.strip() and fields.get('ID kho đến', '') != to_depot_filter:
-    #                 continue
-                
-    #             # Record đã pass tất cả filters, thêm vào kết quả
-    #             filtered_records.append(fields)
-            
-    #         logger.info(f"Found {len(filtered_records)} records after filtering")
-            
-    #         return self._calculate_daily_statistics(filtered_records)
-            
-    #     except Exception as e:
-    #         logger.error(f"Error getting daily report: {e}")
-    #         return self._empty_report_data()
-
-
-
-
-    def get_all_employees(self):
-        """Lấy danh sách tất cả nhân viên từ records"""
-        try:
-            all_records = larkbase_get_all(self.app_token, self.table_id)
-            employees = {}
-            for record in all_records:
-                fields = record.get('fields', {})
-                emp_id = fields.get('ID người bàn giao')
-                emp_name = fields.get('Người bàn giao')
-                if emp_id and emp_name and emp_id not in employees:
-                    employees[emp_id] = emp_name
-            return [{'id': emp_id, 'name': emp_name} for emp_id, emp_name in employees.items()]
-        except Exception as e:
-            logger.error(f"Error getting employees: {e}")
-            return []
-
-
-    def get_all_depots(self):
-        """Lấy danh sách tất cả depots từ records"""
-        try:
-            all_records = larkbase_get_all(self.app_token, self.table_id)
-            depots = {}
-            for record in all_records:
-                fields = record.get('fields', {})
-                from_id = fields.get('ID kho đi')
-                from_name = fields.get('Kho đi')
-                if from_id and from_name and from_id not in depots:
-                    depots[from_id] = from_name
-                to_id = fields.get('ID kho đến')
-                to_name = fields.get('Kho đến')
-                if to_id and to_name and to_id not in depots:
-                    depots[to_id] = to_name
-            return [{'id': depot_id, 'name': depot_name} for depot_id, depot_name in depots.items()]
-        except Exception as e:
-            logger.error(f"Error getting depots: {e}")
-            return []
 
     def _empty_report_data(self):
         """Trả về dữ liệu rỗng cho báo cáo"""
@@ -3536,375 +3356,119 @@ class ReportService:
 
 
     def _process_grouped_records(self, group_records, route_transport_stats, total_loads):
-        """Xử lý nhóm records có cùng Group ID - chỉ tính 'Số lượng bao' 1 lần"""
-        if not group_records:
-            return 0
-        
-        # Lấy thông tin chung từ record đầu tiên
-        first_record = group_records[0]
-        
-        # ✅ SỬA: Khởi tạo biến bags trước vòng lặp
-        total_bags = 0
-        
-        # Tính tổng bags từ tất cả records trong nhóm
+        if not group_records: return 0
+        first_record, total_bags = group_records[0], 0
         for fields in group_records:
-            try:
-                bags_field = fields.get('Số lượng túi', 0)
-                if isinstance(bags_field, str):
-                    bags = int(bags_field) if bags_field.isdigit() else 0
-                elif isinstance(bags_field, (int, float)):
-                    bags = int(bags_field)
-                else:
-                    bags = 0  # ✅ THÊM: Default value nếu không phải str/int/float
-                total_bags += bags
-            except (ValueError, TypeError):
-                # ✅ THÊM: Nếu có lỗi, tiếp tục với giá trị 0
-                continue
+            try: total_bags += int(fields.get('Số lượng túi', 0) or 0)
+            except (ValueError, TypeError): continue
+        try: loads = int(first_record.get('Số lượng bao', 0) or 0)
+        except (ValueError, TypeError): loads = 0
+
+        # ✅ SỬA LỖI: Dùng hàm helper để đọc dữ liệu
+        transport_provider = _get_text_from_lark_field(first_record.get('Đơn vị vận chuyển'))
+        from_depot = _get_text_from_lark_field(first_record.get('Kho đi'))
+        to_depot = _get_text_from_lark_field(first_record.get('Kho đến'))
         
-        # Chỉ lấy "Số lượng bao" từ record đầu tiên (đại diện cho cả nhóm)
-        loads = 0
-        try:
-            loads_field = first_record.get('Số lượng bao', first_record.get('Số lượng tải', first_record.get('Số lượng bao/tải giao', 0)))
-            if isinstance(loads_field, str):
-                loads = int(loads_field) if loads_field.isdigit() else 0
-            elif isinstance(loads_field, (int, float)):
-                loads = int(loads_field)
-            else:
-                loads = 0  # ✅ THÊM: Default value
-        except (ValueError, TypeError):
-            loads = 0  # ✅ THÊM: Default value nếu có lỗi
-        
-        # Tạo route key từ record đầu tiên
-        transport_provider = (first_record.get('Đơn vị vận chuyển') or 'Không rõ').strip()
-        from_depot = (first_record.get('Kho đi') or 'Không rõ').strip()
-        to_depot = (first_record.get('Kho đến') or 'Không rõ').strip()
         route_key = f"{from_depot} → {to_depot}"
         route_transport_key = f"{route_key}|{transport_provider}"
-        
-        # Cập nhật thống kê
         stats = route_transport_stats[route_transport_key]
-        stats['count'] += len(group_records)  # Đếm tất cả records trong nhóm
-        stats['bags'] += total_bags          # Tổng bags của cả nhóm
-        stats['loads'] += loads              # Chỉ tính loads 1 lần
-        
+        stats['count'] += len(group_records); stats['bags'] += total_bags; stats['loads'] += loads
         return loads
-
-
-
-
-
-    # def _process_grouped_records(self, group_records, route_transport_stats, total_loads):
-    #     """Xử lý nhóm records có cùng Group ID - chỉ tính 'Số lượng bao' 1 lần"""
-    #     if not group_records:
-    #         return 0
-        
-    #     # Lấy thông tin chung từ record đầu tiên
-    #     first_record = group_records[0]
-        
-    #     # Tính tổng bags từ tất cả records trong nhóm
-    #     total_bags = 0
-    #     for fields in group_records:
-    #         try:
-    #             bags_field = fields.get('Số lượng túi', 0)
-    #             if isinstance(bags_field, str):
-    #                 bags = int(bags_field) if bags_field.isdigit() else 0
-    #             elif isinstance(bags_field, (int, float)):
-    #                 bags = int(bags_field)
-    #             total_bags += bags
-    #         except (ValueError, TypeError):
-    #             pass
-        
-    #     # Chỉ lấy "Số lượng bao" từ record đầu tiên (đại diện cho cả nhóm)
-    #     loads = 0
-    #     try:
-    #         loads_field = first_record.get('Số lượng bao', first_record.get('Số lượng tải', first_record.get('Số lượng bao/tải giao', 0)))
-    #         if isinstance(loads_field, str):
-    #             loads = int(loads_field) if loads_field.isdigit() else 0
-    #         elif isinstance(loads_field, (int, float)):
-    #             loads = int(loads_field)
-    #     except (ValueError, TypeError):
-    #         pass
-        
-    #     # Tạo route key từ record đầu tiên
-    #     transport_provider = (first_record.get('Đơn vị vận chuyển') or 'Không rõ').strip()
-    #     from_depot = (first_record.get('Kho đi') or 'Không rõ').strip()
-    #     to_depot = (first_record.get('Kho đến') or 'Không rõ').strip()
-    #     route_key = f"{from_depot} → {to_depot}"
-    #     route_transport_key = f"{route_key}|{transport_provider}"
-        
-    #     # Cập nhật thống kê
-    #     stats = route_transport_stats[route_transport_key]
-    #     stats['count'] += len(group_records)  # Đếm tất cả records trong nhóm
-    #     stats['bags'] += total_bags          # Tổng bags của cả nhóm
-    #     stats['loads'] += loads              # Chỉ tính loads 1 lần
-        
-    #     return loads
 
     def _process_single_record(self, fields, route_transport_stats):
-        """Xử lý record đơn lẻ không có Group ID"""
-        bags = 0
-        try:
-            bags_field = fields.get('Số lượng túi', 0)
-            if isinstance(bags_field, str):
-                bags = int(bags_field) if bags_field.isdigit() else 0
-            elif isinstance(bags_field, (int, float)):
-                bags = int(bags_field)
-        except (ValueError, TypeError):
-            pass
-            
-        loads = 0
-        try:
-            loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
-            if isinstance(loads_field, str):
-                loads = int(loads_field) if loads_field.isdigit() else 0
-            elif isinstance(loads_field, (int, float)):
-                loads = int(loads_field)
-        except (ValueError, TypeError):
-            pass
-        
-        transport_provider = (fields.get('Đơn vị vận chuyển') or 'Không rõ').strip()
-        from_depot = (fields.get('Kho đi') or 'Không rõ').strip()
-        to_depot = (fields.get('Kho đến') or 'Không rõ').strip()
+        try: bags = int(fields.get('Số lượng túi', 0) or 0)
+        except (ValueError, TypeError): bags = 0
+        try: loads = int(fields.get('Số lượng bao', 0) or 0)
+        except (ValueError, TypeError): loads = 0
+
+        # ✅ SỬA LỖI: Dùng hàm helper để đọc dữ liệu
+        transport_provider = _get_text_from_lark_field(fields.get('Đơn vị vận chuyển'))
+        from_depot = _get_text_from_lark_field(fields.get('Kho đi'))
+        to_depot = _get_text_from_lark_field(fields.get('Kho đến'))
+
         route_key = f"{from_depot} → {to_depot}"
         route_transport_key = f"{route_key}|{transport_provider}"
-        
         stats = route_transport_stats[route_transport_key]
-        stats['count'] += 1
-        stats['bags'] += bags
-        stats['loads'] += loads
-        
+        stats['count'] += 1; stats['bags'] += bags; stats['loads'] += loads
         return loads
 
 
-
-    # def _calculate_daily_statistics(self, records):
-    #     """Tính toán thống kê từ danh sách records"""
-    #     if not records:
-    #         return self._empty_report_data()
-        
-    #     route_transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0})
-    #     total_loads = 0
-        
-    #     for fields in records:
-    #         bags = 0
-    #         try:
-    #             # SỬA LỖI 1: Lấy đúng dữ liệu cho "SL túi" từ cột "Số lượng túi"
-    #             bags_field = fields.get('Số lượng túi', 0)
-    #             if isinstance(bags_field, str):
-    #                 bags = int(bags_field) if bags_field.isdigit() else 0
-    #             elif isinstance(bags_field, (int, float)):
-    #                 bags = int(bags_field)
-    #         except (ValueError, TypeError):
-    #             pass
-                
-    #         loads = 0
-    #         try:
-    #             # SỬA LỖI 2: Lấy đúng dữ liệu cho "SL bao" từ cột "Số lượng bao"
-    #             loads_field = fields.get('Số lượng bao', fields.get('Số lượng tải', fields.get('Số lượng bao/tải giao', 0)))
-    #             if isinstance(loads_field, str):
-    #                 loads = int(loads_field) if loads_field.isdigit() else 0
-    #             elif isinstance(loads_field, (int, float)):
-    #                 loads = int(loads_field)
-    #             total_loads += loads
-    #         except (ValueError, TypeError):
-    #             pass
-            
-    #         transport_provider = (fields.get('Đơn vị vận chuyển') or 'Không rõ').strip()
-    #         from_depot = (fields.get('Kho đi') or 'Không rõ').strip()
-    #         to_depot = (fields.get('Kho đến') or 'Không rõ').strip()
-    #         route_key = f"{from_depot} → {to_depot}"
-    #         route_transport_key = f"{route_key}|{transport_provider}"
-            
-    #         stats = route_transport_stats[route_transport_key]
-    #         stats['count'] += 1
-    #         stats['bags'] += bags
-    #         stats['loads'] += loads
-        
-    #     # --- Tính toán cho Bảng Tuyến đường ---
-    #     route_summary = []
-    #     for route_transport_key, stats in route_transport_stats.items():
-    #         route_part, transport_part = route_transport_key.split('|', 1)
-    #         route_summary.append({
-    #             'route': route_part,
-    #             'transport_provider': transport_part,
-    #             'count': stats['count'],
-    #             'bags': stats['bags'],
-    #             'loads': stats['loads']
-    #         })
-        
-    #     route_summary.sort(key=lambda x: x['loads'], reverse=True)
-        
-    #     # === BỔ SUNG: TÍNH TOÁN CHO BẢNG ĐƠN VỊ VẬN CHUYỂN ===
-    #     transport_stats = defaultdict(lambda: {'count': 0, 'bags': 0, 'loads': 0, 'routes': set()})
-        
-    #     for item in route_summary:
-    #         provider = item['transport_provider']
-    #         stats = transport_stats[provider]
-            
-    #         stats['count'] += item['count']
-    #         stats['bags'] += item['bags']
-    #         stats['loads'] += item['loads']
-    #         stats['routes'].add(item['route'])
-
-    #     transport_summary = []
-    #     for provider, stats in transport_stats.items():
-    #         transport_summary.append({
-    #             'transport_provider': provider,
-    #             'count': stats['count'],
-    #             'bags': stats['bags'],
-    #             'loads': stats['loads'],
-    #             'route_count': len(stats['routes']) # Đếm số tuyến đường duy nhất
-    #         })
-            
-    #     transport_summary.sort(key=lambda x: x['loads'], reverse=True)
-    #     # === KẾT THÚC PHẦN BỔ SUNG ===
-        
-    #     return {
-    #         'total_records': len(records),
-    #         'total_quantity': total_loads,
-    #         'routes': dict(route_transport_stats),
-    #         'route_summary': route_summary,
-    #         'transport_providers': dict(transport_stats),
-    #         'transport_summary': transport_summary # Trả về dữ liệu đã được tính toán
-    #     }
-
-
-    def export_route_records_to_excel(self, from_depot, to_depot, start_date_str=None, end_date_str=None, employee_filter=None, transport_provider_filter=None):  # ✅ THÊM transport_provider_filter
-        """Xuất records của một tuyến đường cụ thể ra Excel với hỗ trợ date range"""
+    def export_route_records_to_excel(self, from_depot, to_depot, start_date_str=None, end_date_str=None, employee_filter=None, transport_provider_filter=None):
         try:
             from openpyxl import Workbook
             from openpyxl.styles import Font, PatternFill, Alignment
             import io
             
-            # Xử lý date range logic (giữ nguyên như cũ)
-            if start_date_str and end_date_str:
-                start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-                end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-                start_timestamp = int(start_report_date.timestamp() * 1000)
-                end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
-            elif start_date_str:
-                report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-                start_timestamp = int(report_date.timestamp() * 1000)
-                end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
-            else:
-                start_timestamp = 0
-                end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
-            
             all_records = larkbase_get_all(self.app_token, self.table_id)
-            
             route_records = []
+            
             for record in all_records:
                 fields = record.get('fields', {})
+                handover_date = fields.get('Ngày bàn giao')
                 
-                # Filter theo date range
-                if start_date_str or end_date_str:
-                    handover_date = fields.get('Ngày bàn giao')
-                    if handover_date:
-                        try:
-                            handover_timestamp = int(handover_date)
-                            if not (start_timestamp <= handover_timestamp < end_timestamp):
-                                continue
-                        except (ValueError, TypeError):
-                            continue
+                if start_date_str:
+                    start_dt = datetime.strptime(start_date_str, '%Y-%m-%d')
+                    if handover_date and datetime.fromtimestamp(handover_date/1000) < start_dt: continue
+                if end_date_str:
+                    end_dt = datetime.strptime(end_date_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+                    if handover_date and datetime.fromtimestamp(handover_date/1000) > end_dt: continue
                 
-                # Filter theo employee
-                if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
+                if employee_filter and _get_text_from_lark_field(fields.get('ID người bàn giao'), '') != employee_filter:
                     continue
-                
-                # ✅ THÊM: Filter theo transport provider
-                if transport_provider_filter and transport_provider_filter.strip():
-                    transport_provider_record = fields.get('Đơn vị vận chuyển', '').strip()
-                    if transport_provider_record != transport_provider_filter:
-                        continue
+
+                # ✅ SỬA LỖI: Dùng hàm helper để đọc và so sánh
+                record_transport = _get_text_from_lark_field(fields.get('Đơn vị vận chuyển'), '')
+                if transport_provider_filter and transport_provider_filter.strip() and record_transport != transport_provider_filter:
+                    continue
                     
-                # Filter theo route
-                if fields.get('Kho đi', '').strip() == from_depot and fields.get('Kho đến', '').strip() == to_depot:
+                record_from_depot = _get_text_from_lark_field(fields.get('Kho đi'), '')
+                record_to_depot = _get_text_from_lark_field(fields.get('Kho đến'), '')
+                if record_from_depot == from_depot and record_to_depot == to_depot:
                     route_records.append(fields)
             
-            # Logic tạo Excel file giữ nguyên như cũ...
-            if not route_records:
-                return None, 0
+            if not route_records: return None, 0
             
             grouped_records = self._group_records_for_export(route_records)
+            wb, ws = Workbook(), wb.active
             
-            wb = Workbook()
-            ws = wb.active
-            
-            # Cập nhật title để reflect transport provider filter nếu có
             title_parts = [f"{from_depot} → {to_depot}"]
-            if start_date_str and end_date_str and start_date_str != end_date_str:
-                title_parts.append(f"({start_date_str} to {end_date_str})")
-            elif start_date_str:
-                title_parts.append(f"({start_date_str})")
-            if transport_provider_filter:
-                title_parts.append(f"[{transport_provider_filter}]")
-                
-            ws.title = " ".join(title_parts)[:31]  # Excel limit 31 chars
+            if start_date_str and end_date_str and start_date_str != end_date_str: title_parts.append(f"({start_date_str} to {end_date_str})")
+            elif start_date_str: title_parts.append(f"({start_date_str})")
+            if transport_provider_filter: title_parts.append(f"[{transport_provider_filter}]")
+            ws.title = " ".join(title_parts)[:31]
             
-            # Phần tạo Excel table giữ nguyên như trong code cũ...
-            header_font = Font(bold=True, color="FFFFFF")
-            header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
-            header_alignment = Alignment(horizontal="center", vertical="center")
-            
+            header_font, header_fill = Font(bold=True, color="FFFFFF"), PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
             headers = ["ID", "Số lượng túi", "Số lượng bao", "Số lượng sản phẩm yêu cầu", "ID người bàn giao", "Người bàn giao"]
             for col, header in enumerate(headers, 1):
                 cell = ws.cell(row=1, column=col, value=header)
-                cell.font, cell.fill, cell.alignment = header_font, header_fill, header_alignment
+                cell.font, cell.fill = header_font, header_fill
+            
             current_row = 2
-            
             for group_key, group_records in grouped_records.items():
-                if len(group_records) > 1:
-                    # Nhóm có nhiều records - merge cột "Số lượng bao"
+                is_grouped = len(group_records) > 1
+                for i, record in enumerate(group_records):
+                    # ✅ SỬA LỖI: Dùng hàm helper để lấy giá trị text trước khi ghi vào cell
+                    ws.cell(row=current_row + i, column=1, value=_get_text_from_lark_field(record.get('ID'), ''))
+                    ws.cell(row=current_row + i, column=2, value=record.get('Số lượng túi', 0))
+                    ws.cell(row=current_row + i, column=4, value=record.get('Số lượng sản phẩm yêu cầu', 0))
+                    ws.cell(row=current_row + i, column=5, value=_get_text_from_lark_field(record.get('ID người bàn giao'), ''))
+                    ws.cell(row=current_row + i, column=6, value=_get_text_from_lark_field(record.get('Người bàn giao'), ''))
+                
+                if is_grouped:
                     first_record = group_records[0]
-                    
-                    # Ghi row đầu tiên
-                    ws.cell(row=current_row, column=1, value=first_record.get('ID', ''))
-                    ws.cell(row=current_row, column=2, value=first_record.get('Số lượng túi', 0))
                     ws.cell(row=current_row, column=3, value=first_record.get('Số lượng bao', 0))
-                    ws.cell(row=current_row, column=4, value=first_record.get('Số lượng sản phẩm yêu cầu', 0))
-                    ws.cell(row=current_row, column=5, value=first_record.get('ID người bàn giao', ''))
-                    ws.cell(row=current_row, column=6, value=first_record.get('Người bàn giao', ''))
-                    
-                    # Merge cột "Số lượng bao" vertically cho group
-                    if len(group_records) > 1:
-                        ws.merge_cells(
-                            start_row=current_row, start_column=3,
-                            end_row=current_row + len(group_records) - 1, end_column=3
-                        )
-                    
-                    # Ghi các rows còn lại
-                    for i, record in enumerate(group_records[1:], 1):
-                        ws.cell(row=current_row + i, column=1, value=record.get('ID', ''))
-                        ws.cell(row=current_row + i, column=2, value=record.get('Số lượng túi', 0))
-                        # Column 3 đã merge, không ghi gì
-                        ws.cell(row=current_row + i, column=4, value=record.get('Số lượng sản phẩm yêu cầu', 0))
-                        ws.cell(row=current_row + i, column=5, value=record.get('ID người bàn giao', ''))
-                        ws.cell(row=current_row + i, column=6, value=record.get('Người bàn giao', ''))
-                    
-                    current_row += len(group_records)
+                    ws.merge_cells(start_row=current_row, start_column=3, end_row=current_row + len(group_records) - 1, end_column=3)
                 else:
-                    # Single record - không merge
-                    record = group_records[0]
-                    ws.cell(row=current_row, column=1, value=record.get('ID', ''))
-                    ws.cell(row=current_row, column=2, value=record.get('Số lượng túi', 0))
-                    ws.cell(row=current_row, column=3, value=record.get('Số lượng bao', 0))
-                    ws.cell(row=current_row, column=4, value=record.get('Số lượng sản phẩm yêu cầu', 0))
-                    ws.cell(row=current_row, column=5, value=record.get('ID người bàn giao', ''))
-                    ws.cell(row=current_row, column=6, value=record.get('Người bàn giao', ''))
-                    current_row += 1
-            
-            # Auto adjust columns
+                    ws.cell(row=current_row, column=3, value=group_records[0].get('Số lượng bao', 0))
+                current_row += len(group_records)
+
             for column in ws.columns:
                 max_length = 0
-                column_letter = column[0].column_letter
                 for cell in column:
                     try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
-                    except: 
-                        pass
-                adjusted_width = min(max_length + 2, 50)
-                ws.column_dimensions[column_letter].width = adjusted_width
+                        if len(str(cell.value)) > max_length: max_length = len(str(cell.value))
+                    except: pass
+                ws.column_dimensions[column[0].column_letter].width = min(max_length + 2, 50)
             
             excel_buffer = io.BytesIO()
             wb.save(excel_buffer)
@@ -3912,328 +3476,21 @@ class ReportService:
             return excel_buffer, len(route_records)
             
         except Exception as e:
-            logger.error(f"Error creating route Excel export: {e}")
+            logger.error(f"Error creating route Excel export: {e}", exc_info=True)
             return None, 0
 
 
-    # def export_route_records_to_excel(self, from_depot, to_depot, start_date_str=None, end_date_str=None, employee_filter=None):
-    #     """Xuất records của một tuyến đường cụ thể ra Excel với hỗ trợ date range"""
-    #     try:
-    #         from openpyxl import Workbook
-    #         from openpyxl.styles import Font, PatternFill, Alignment
-    #         import io
-            
-    #         # ✅ SỬA: Xử lý date range thay vì single date
-    #         if start_date_str and end_date_str:
-    #             # Tính toán với khoảng thời gian từ start_date đến end_date
-    #             start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-                
-    #             # Timestamp bắt đầu từ 00:00:00 của ngày bắt đầu
-    #             start_timestamp = int(start_report_date.timestamp() * 1000)
-    #             # Timestamp kết thúc đến 00:00:00 của ngày tiếp theo sau end_date
-    #             end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
-    #         elif start_date_str:
-    #             # Nếu chỉ có start_date, dùng như ngày đơn lẻ
-    #             report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             start_timestamp = int(report_date.timestamp() * 1000)
-    #             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
-    #         else:
-    #             # Không có filter ngày - lấy tất cả
-    #             start_timestamp = 0
-    #             end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
-            
-    #         all_records = larkbase_get_all(self.app_token, self.table_id)
-            
-    #         route_records = []
-    #         for record in all_records:
-    #             fields = record.get('fields', {})
-                
-    #             # ✅ SỬA: Filter theo date range nếu có start_date_str hoặc end_date_str
-    #             if start_date_str or end_date_str:
-    #                 handover_date = fields.get('Ngày bàn giao')
-    #                 if handover_date:
-    #                     try:
-    #                         handover_timestamp = int(handover_date)
-    #                         if not (start_timestamp <= handover_timestamp < end_timestamp):
-    #                             continue
-    #                     except (ValueError, TypeError):
-    #                         continue
-                
-    #             # Filter theo employee
-    #             if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
-    #                 continue
-                    
-    #             # Filter theo route
-    #             if fields.get('Kho đi', '').strip() == from_depot and fields.get('Kho đến', '').strip() == to_depot:
-    #                 route_records.append(fields)
-            
-    #         if not route_records:
-    #             return None, 0
-            
-    #         grouped_records = self._group_records_for_export(route_records)
-            
-    #         wb = Workbook()
-    #         ws = wb.active
-            
-    #         # ✅ SỬA: Cập nhật title để reflect date range
-    #         if start_date_str and end_date_str and start_date_str != end_date_str:
-    #             ws.title = f"{from_depot} → {to_depot} ({start_date_str} to {end_date_str})"[:31]  # Excel limit 31 chars
-    #         elif start_date_str:
-    #             ws.title = f"{from_depot} → {to_depot} ({start_date_str})"[:31]
-    #         else:
-    #             ws.title = f"{from_depot} → {to_depot}"[:31]
-            
-    #         header_font = Font(bold=True, color="FFFFFF")
-    #         header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
-    #         header_alignment = Alignment(horizontal="center", vertical="center")
-            
-    #         # ✅ THÊM: Cột "Số lượng sản phẩm yêu cầu" vào headers
-    #         headers = ["ID", "Số lượng túi", "Số lượng bao", "Số lượng sản phẩm yêu cầu", "ID người bàn giao", "Người bàn giao"]
-    #         for col, header in enumerate(headers, 1):
-    #             cell = ws.cell(row=1, column=col, value=header)
-    #             cell.font, cell.fill, cell.alignment = header_font, header_fill, header_alignment
-    #         current_row = 2
-            
-    #         for group_key, group_records in grouped_records.items():
-    #             if len(group_records) > 1:
-    #                 # ✅ MERGE: Nhóm có nhiều records - merge cột "Số lượng bao"
-    #                 first_record = group_records[0]
-                    
-    #                 # Ghi row đầu tiên
-    #                 ws.cell(row=current_row, column=1, value=first_record.get('ID', ''))
-    #                 ws.cell(row=current_row, column=2, value=first_record.get('Số lượng túi', 0))
-    #                 ws.cell(row=current_row, column=3, value=first_record.get('Số lượng bao', 0))
-    #                 # ✅ THÊM: Cột "Số lượng sản phẩm yêu cầu"
-    #                 ws.cell(row=current_row, column=4, value=first_record.get('Số lượng sản phẩm yêu cầu', 0))
-    #                 ws.cell(row=current_row, column=5, value=first_record.get('ID người bàn giao', ''))
-    #                 ws.cell(row=current_row, column=6, value=first_record.get('Người bàn giao', ''))
-                    
-    #                 # Merge cột "Số lượng bao" vertically cho group
-    #                 if len(group_records) > 1:
-    #                     ws.merge_cells(
-    #                         start_row=current_row, start_column=3,
-    #                         end_row=current_row + len(group_records) - 1, end_column=3
-    #                     )
-                    
-    #                 # Ghi các rows còn lại
-    #                 for i, record in enumerate(group_records[1:], 1):
-    #                     ws.cell(row=current_row + i, column=1, value=record.get('ID', ''))
-    #                     ws.cell(row=current_row + i, column=2, value=record.get('Số lượng túi', 0))
-    #                     # Column 3 đã merge, không ghi gì
-    #                     # ✅ THÊM: Cột "Số lượng sản phẩm yêu cầu" cho các rows còn lại
-    #                     ws.cell(row=current_row + i, column=4, value=record.get('Số lượng sản phẩm yêu cầu', 0))
-    #                     ws.cell(row=current_row + i, column=5, value=record.get('ID người bàn giao', ''))
-    #                     ws.cell(row=current_row + i, column=6, value=record.get('Người bàn giao', ''))
-                    
-    #                 current_row += len(group_records)
-    #             else:
-    #                 # Single record - không merge
-    #                 record = group_records[0]
-    #                 ws.cell(row=current_row, column=1, value=record.get('ID', ''))
-    #                 ws.cell(row=current_row, column=2, value=record.get('Số lượng túi', 0))
-    #                 ws.cell(row=current_row, column=3, value=record.get('Số lượng bao', 0))
-    #                 # ✅ THÊM: Cột "Số lượng sản phẩm yêu cầu" cho single record
-    #                 ws.cell(row=current_row, column=4, value=record.get('Số lượng sản phẩm yêu cầu', 0))
-    #                 ws.cell(row=current_row, column=5, value=record.get('ID người bàn giao', ''))
-    #                 ws.cell(row=current_row, column=6, value=record.get('Người bàn giao', ''))
-    #                 current_row += 1
-            
-    #         # Auto adjust columns
-    #         for column in ws.columns:
-    #             max_length = 0
-    #             column_letter = column[0].column_letter
-    #             for cell in column:
-    #                 try:
-    #                     if len(str(cell.value)) > max_length:
-    #                         max_length = len(str(cell.value))
-    #                 except: 
-    #                     pass
-    #             adjusted_width = min(max_length + 2, 50)
-    #             ws.column_dimensions[column_letter].width = adjusted_width
-            
-    #         excel_buffer = io.BytesIO()
-    #         wb.save(excel_buffer)
-    #         excel_buffer.seek(0)
-    #         return excel_buffer, len(route_records)
-            
-    #     except Exception as e:
-    #         logger.error(f"Error creating route Excel export: {e}")
-    #         return None, 0
-
-
-
-    # def export_route_records_to_excel(self, from_depot, to_depot, start_date_str=None, end_date_str=None, employee_filter=None):
-    #     """Xuất records của một tuyến đường cụ thể ra Excel với hỗ trợ date range"""
-    #     try:
-    #         from openpyxl import Workbook
-    #         from openpyxl.styles import Font, PatternFill, Alignment
-    #         import io
-            
-    #         # ✅ SỬA: Xử lý date range thay vì single date
-    #         if start_date_str and end_date_str:
-    #             # Tính toán với khoảng thời gian từ start_date đến end_date
-    #             start_report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             end_report_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-                
-    #             # Timestamp bắt đầu từ 00:00:00 của ngày bắt đầu
-    #             start_timestamp = int(start_report_date.timestamp() * 1000)
-    #             # Timestamp kết thúc đến 00:00:00 của ngày tiếp theo sau end_date
-    #             end_timestamp = int((end_report_date + timedelta(days=1)).timestamp() * 1000)
-    #         elif start_date_str:
-    #             # Nếu chỉ có start_date, dùng như ngày đơn lẻ
-    #             report_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-    #             start_timestamp = int(report_date.timestamp() * 1000)
-    #             end_timestamp = int((report_date + timedelta(days=1)).timestamp() * 1000)
-    #         else:
-    #             # Không có filter ngày - lấy tất cả
-    #             start_timestamp = 0
-    #             end_timestamp = int(datetime.now().timestamp() * 1000) + 86400000
-            
-    #         all_records = larkbase_get_all(self.app_token, self.table_id)
-            
-    #         route_records = []
-    #         for record in all_records:
-    #             fields = record.get('fields', {})
-                
-    #             # ✅ SỬA: Filter theo date range nếu có start_date_str hoặc end_date_str
-    #             if start_date_str or end_date_str:
-    #                 handover_date = fields.get('Ngày bàn giao')
-    #                 if handover_date:
-    #                     try:
-    #                         handover_timestamp = int(handover_date)
-    #                         if not (start_timestamp <= handover_timestamp < end_timestamp):
-    #                             continue
-    #                     except (ValueError, TypeError):
-    #                         continue
-                
-    #             # Filter theo employee
-    #             if employee_filter and fields.get('ID người bàn giao', '') != employee_filter:
-    #                 continue
-                    
-    #             # Filter theo route
-    #             if fields.get('Kho đi', '').strip() == from_depot and fields.get('Kho đến', '').strip() == to_depot:
-    #                 route_records.append(fields)
-            
-    #         if not route_records:
-    #             return None, 0
-            
-    #         grouped_records = self._group_records_for_export(route_records)
-            
-    #         wb = Workbook()
-    #         ws = wb.active
-            
-    #         # ✅ SỬA: Cập nhật title để reflect date range
-    #         if start_date_str and end_date_str and start_date_str != end_date_str:
-    #             ws.title = f"{from_depot} → {to_depot} ({start_date_str} to {end_date_str})"[:31]  # Excel limit 31 chars
-    #         elif start_date_str:
-    #             ws.title = f"{from_depot} → {to_depot} ({start_date_str})"[:31]
-    #         else:
-    #             ws.title = f"{from_depot} → {to_depot}"[:31]
-            
-    #         header_font = Font(bold=True, color="FFFFFF")
-    #         header_fill = PatternFill(start_color="1976D2", end_color="1976D2", fill_type="solid")
-    #         header_alignment = Alignment(horizontal="center", vertical="center")
-            
-    #         headers = ["ID", "Số lượng túi", "Số lượng bao", "ID người bàn giao", "Người bàn giao"]
-    #         for col, header in enumerate(headers, 1):
-    #             cell = ws.cell(row=1, column=col, value=header)
-    #             cell.font, cell.fill, cell.alignment = header_font, header_fill, header_alignment
-    #         current_row = 2
-            
-    #         for group_key, group_records in grouped_records.items():
-    #             if len(group_records) > 1:
-    #                 # ✅ MERGE: Nhóm có nhiều records - merge cột "Số lượng bao"
-    #                 first_record = group_records[0]
-                    
-    #                 # Ghi row đầu tiên
-    #                 ws.cell(row=current_row, column=1, value=first_record.get('ID', ''))
-    #                 ws.cell(row=current_row, column=2, value=first_record.get('Số lượng túi', 0))
-    #                 ws.cell(row=current_row, column=3, value=first_record.get('Số lượng bao', 0))
-    #                 ws.cell(row=current_row, column=4, value=first_record.get('ID người bàn giao', ''))
-    #                 ws.cell(row=current_row, column=5, value=first_record.get('Người bàn giao', ''))
-                    
-    #                 # Merge cột "Số lượng bao" vertically cho group
-    #                 if len(group_records) > 1:
-    #                     ws.merge_cells(
-    #                         start_row=current_row, start_column=3,
-    #                         end_row=current_row + len(group_records) - 1, end_column=3
-    #                     )
-                    
-    #                 # Ghi các rows còn lại
-    #                 for i, record in enumerate(group_records[1:], 1):
-    #                     ws.cell(row=current_row + i, column=1, value=record.get('ID', ''))
-    #                     ws.cell(row=current_row + i, column=2, value=record.get('Số lượng túi', 0))
-    #                     # Column 3 đã merge, không ghi gì
-    #                     ws.cell(row=current_row + i, column=4, value=record.get('ID người bàn giao', ''))
-    #                     ws.cell(row=current_row + i, column=5, value=record.get('Người bàn giao', ''))
-                    
-    #                 current_row += len(group_records)
-    #             else:
-    #                 # Single record - không merge
-    #                 record = group_records[0]
-    #                 ws.cell(row=current_row, column=1, value=record.get('ID', ''))
-    #                 ws.cell(row=current_row, column=2, value=record.get('Số lượng túi', 0))
-    #                 ws.cell(row=current_row, column=3, value=record.get('Số lượng bao', 0))
-    #                 ws.cell(row=current_row, column=4, value=record.get('ID người bàn giao', ''))
-    #                 ws.cell(row=current_row, column=5, value=record.get('Người bàn giao', ''))
-    #                 current_row += 1
-            
-    #         # Auto adjust columns
-    #         for column in ws.columns:
-    #             max_length = 0
-    #             column_letter = column[0].column_letter
-    #             for cell in column:
-    #                 try:
-    #                     if len(str(cell.value)) > max_length:
-    #                         max_length = len(str(cell.value))
-    #                 except: 
-    #                     pass
-    #             adjusted_width = min(max_length + 2, 50)
-    #             ws.column_dimensions[column_letter].width = adjusted_width
-            
-    #         excel_buffer = io.BytesIO()
-    #         wb.save(excel_buffer)
-    #         excel_buffer.seek(0)
-    #         return excel_buffer, len(route_records)
-            
-    #     except Exception as e:
-    #         logger.error(f"Error creating route Excel export: {e}")
-    #         return None, 0
-
-
-
-
-
     def _group_records_for_export(self, records):
-        """
-        Nhóm các records theo Group ID để merge cells trong Excel
-        
-        Args:
-            records (list): Danh sách các field records
-            
-        Returns:
-            dict: {group_key: [list_of_records], ...}
-        """
-        grouped = {}
-        single_counter = 0
-        
+        grouped, single_counter = {}, 0
         for record in records:
-            group_id = record.get('Group ID')
-            
+            group_id = _get_text_from_lark_field(record.get('Group ID'), None)
             if group_id:
-                # Records có Group ID giống nhau sẽ được group lại
-                if group_id not in grouped:
-                    grouped[group_id] = []
+                if group_id not in grouped: grouped[group_id] = []
                 grouped[group_id].append(record)
             else:
-                # Records không có Group ID sẽ tạo key riêng
                 single_counter += 1
-                single_key = f"single_{single_counter}"
-                grouped[single_key] = [record]
-        
+                grouped[f"single_{single_counter}"] = [record]
         return grouped
-
 ============================================================
 
 ============================================================
@@ -4673,182 +3930,182 @@ def get_depots_from_file():
 ============================================================
 FILE: src\utils\larkbase.py
 ============================================================
-# FILE: src/utils/larkbase.py
+# FILE: src/utils/larkbase.py (ĐÃ SỬA LỖI TÌM KIẾM)
 
 import requests
 import logging
+import os
+import lark_oapi as lark
+from lark_oapi.api.bitable.v1 import *
 
-# Thiết lập logging cơ bản
 logging.basicConfig(level=logging.INFO)
-
 API_ENDPOINT = 'https://open.larksuite.com/open-apis'
 API_HOST = "https://open.larksuite.com/open-apis/bitable/v1/apps"
 
+LARK_APP_ID = os.getenv('LARK_APP_ID', 'cli_a7fab27260385010')
+LARK_APP_SECRET = os.getenv('LARK_APP_SECRET', 'Zg4MVcFfiOu0g09voTcpfd4WGDpA0Ly5')
+
+try:
+    client = lark.Client.builder() \
+        .app_id(LARK_APP_ID) \
+        .app_secret(LARK_APP_SECRET) \
+        .log_level(lark.LogLevel.INFO) \
+        .build()
+    logging.info("✅ Khởi tạo Lark SDK client thành công.")
+except Exception as e:
+    client = None
+    logging.error(f"❌ Lỗi khi khởi tạo Lark SDK client: {e}")
+
 def larkbase_get_token(app_id=None, app_secret=None, endpoint=API_ENDPOINT):
-    APP_ID = app_id or 'cli_a7fab27260385010'
-    APP_SECRET = app_secret or 'Zg4MVcFfiOu0g09voTcpfd4WGDpA0Ly5'
+    APP_ID = app_id or LARK_APP_ID
+    APP_SECRET = app_secret or LARK_APP_SECRET
     url = f"{endpoint}/auth/v3/tenant_access_token/internal"
     try:
         resp = requests.post(url, json={'app_id': APP_ID, 'app_secret': APP_SECRET})
-        if resp.status_code == 200:
-            data = resp.json()
-            if data.get('code') == 0:
-                return data['tenant_access_token']
+        if resp.status_code == 200 and resp.json().get('code') == 0:
+            return resp.json()['tenant_access_token']
     except Exception as e:
         logging.error(f"Lỗi khi lấy token: {e}")
     return None
 
 def get_headers(token):
-    return {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
+    return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    
 def larkbase_get_all(app_token, table_id):
     token = larkbase_get_token()
     if not token:
         logging.error("Không xác thực được với Larkbase.")
         return []
-
-    all_records = []
-    page_token = ""
+    all_records, page_token = [], ""
     while True:
         try:
             url = f"{API_HOST}/{app_token}/tables/{table_id}/records?page_size=500"
-            if page_token:
-                url += f"&page_token={page_token}"
+            if page_token: url += f"&page_token={page_token}"
             
             resp = requests.get(url, headers=get_headers(token))
-            if resp.status_code != 200:
-                logging.error(f"API trả về status code: {resp.status_code}")
-                break
+            if resp.status_code != 200: break
             
             res_data = resp.json()
-            if res_data.get("code") != 0:
-                logging.error(f"API trả về code: {res_data.get('code')}, msg: {res_data.get('msg', '')}")
-                break
-
+            if res_data.get("code") != 0: break
             data = res_data.get("data")
-            if not data:  # ✅ Kiểm tra data trước
-                break
-                
-            items = data.get("items", [])
-            if not items:  # ✅ Kiểm tra items trước
-                break
-                
-            all_records.extend(items)
-            
+            if not data or not data.get("items"): break
+            all_records.extend(data["items"])
             page_token = data.get("page_token", "")
-            if not page_token:
-                break
-                
+            if not page_token: break
         except Exception as e:
-            logging.error(f"Lỗi khi lấy dữ liệu: {e}")
-            break
+            logging.error(f"Lỗi khi lấy dữ liệu: {e}"); break
     return all_records
 
 def larkbase_find_by_field(app_token, table_id, field, value):
+    """
+    Tìm kiếm record theo trường và giá trị.
+    ✅ SỬA LỖI: Tự động xử lý trường có kiểu list (Lookup, Link, Formula-as-text).
+    """
     all_records = larkbase_get_all(app_token, table_id)
     if not all_records:
-        # Trả về tuple (trạng thái, dữ liệu)
         return False, None
     for record in all_records:
         fields = record.get('fields', {})
-        if str(fields.get(field, '')).strip() == str(value).strip():
-            # Tìm thấy, trả về (True, record)
+        field_value = fields.get(field)
+
+        # Trích xuất giá trị text nếu field_value là list
+        if isinstance(field_value, list) and field_value:
+            first_item = field_value[0]
+            if isinstance(first_item, dict) and 'text' in first_item:
+                value_to_compare = first_item.get('text', '')
+            else:
+                 # Nếu list chứa thứ khác, chuyển thành string để so sánh
+                value_to_compare = str(field_value)
+        else:
+            value_to_compare = field_value
+
+        # So sánh sau khi đã chuẩn hóa
+        if str(value_to_compare or '').strip() == str(value or '').strip():
             return True, record
-    # Không tìm thấy sau khi duyệt hết, trả về (False, None)
+            
     return False, None
 
 def larkbase_write_data(app_token, table_id, data):
-    """Ghi dữ liệu mới và trả về (bool, message)"""
     token = larkbase_get_token()
-    if not token:
-        return False, "Không thể xác thực với Larkbase."
+    if not token: return False, "Không thể xác thực với Larkbase."
     try:
         url = f"{API_HOST}/{app_token}/tables/{table_id}/records"
         resp = requests.post(url, headers=get_headers(token), json={"fields": data})
         res_json = resp.json()
         if resp.status_code == 200 and res_json.get('code') == 0:
             return True, "Thêm mới thành công"
-        else:
-            error_msg = res_json.get('msg', resp.text)
-            logging.error(f"Lỗi API khi ghi: {error_msg}")
-            return False, error_msg
-    except Exception as e:
-        logging.error(f"Lỗi ngoại lệ khi ghi dữ liệu: {e}")
-        return False, str(e)
+        return False, res_json.get('msg', resp.text)
+    except Exception as e: return False, str(e)
 
 def larkbase_update_data(app_token, table_id, record_id, data):
-    """Cập nhật dữ liệu và trả về (bool, message)"""
     token = larkbase_get_token()
-    if not token:
-        return False, "Không thể xác thực với Larkbase."
+    if not token: return False, "Không thể xác thực với Larkbase."
     try:
         url = f"{API_HOST}/{app_token}/tables/{table_id}/records/{record_id}"
         resp = requests.put(url, headers=get_headers(token), json={"fields": data})
         res_json = resp.json()
         if resp.status_code == 200 and res_json.get('code') == 0:
             return True, "Cập nhật thành công"
-        else:
-            error_msg = res_json.get('msg', resp.text)
-            logging.error(f"Lỗi API khi cập nhật: {error_msg}")
-            return False, error_msg
-    except Exception as e:
-        logging.error(f"Lỗi ngoại lệ khi cập nhật: {e}")
-        return False, str(e)
+        return False, res_json.get('msg', resp.text)
+    except Exception as e: return False, str(e)
 
 def larkbase_delete_record(app_token, table_id, record_id):
-    """Xóa một bản ghi và trả về (bool, message)"""
     token = larkbase_get_token()
-    if not token:
-        return False, "Không thể xác thực với Larkbase."
+    if not token: return False, "Không thể xác thực với Larkbase."
     try:
         url = f"{API_HOST}/{app_token}/tables/{table_id}/records/{record_id}"
         resp = requests.delete(url, headers=get_headers(token))
         res_json = resp.json()
         if resp.status_code == 200 and res_json.get('code') == 0:
             return True, "Xóa thành công"
-        else:
-            error_msg = res_json.get('msg', resp.text)
-            logging.error(f"Lỗi API khi xóa: {error_msg}")
-            return False, error_msg
-    except Exception as e:
-        logging.error(f"Lỗi ngoại lệ khi xóa: {e}")
-        return False, str(e)
-
-# src/utils/larkbase.py
+        return False, res_json.get('msg', resp.text)
+    except Exception as e: return False, str(e)
+        
 def larkbase_batch_write_data(app_token, table_id, records_data):
-    """Ghi nhiều records cùng lúc"""
     token = larkbase_get_token()
-    if not token:
-        return False, "Không thể xác thực với Larkbase."
-    
+    if not token: return False, "Không thể xác thực với Larkbase."
     try:
         url = f"{API_HOST}/{app_token}/tables/{table_id}/records/batch_create"
-        
-        # Chuyển đổi format cho batch API
         records = [{"fields": record} for record in records_data]
-        
-        resp = requests.post(
-            url, 
-            headers=get_headers(token), 
-            json={"records": records}
-        )
-        
+        resp = requests.post(url, headers=get_headers(token), json={"records": records})
         res_json = resp.json()
         if resp.status_code == 200 and res_json.get('code') == 0:
             created_count = len(res_json.get('data', {}).get('records', []))
             return True, f"Thêm thành công {created_count} bản ghi"
-        else:
-            error_msg = res_json.get('msg', resp.text)
-            logging.error(f"Lỗi API batch create: {error_msg}")
-            return False, error_msg
-            
-    except Exception as e:
-        logging.error(f"Lỗi batch create: {e}")
-        return False, str(e)
+        return False, res_json.get('msg', resp.text)
+    except Exception as e: return False, str(e)
 
+def larkbase_search_records(app_token, table_id, filter_conditions=None, page_size=500):
+    if not client:
+        logging.error("Lark SDK client chưa được khởi tạo.")
+        return []
+    all_records_as_dicts, page_token, page_count = [], None, 0
+    sdk_conditions = []
+    if filter_conditions:
+        for cond in filter_conditions:
+            sdk_conditions.append(Condition.builder().field_name(cond.get('field_name')).operator(cond.get('operator')).value(cond.get('value')).build())
+    logging.info(f"Bắt đầu tìm kiếm SDK với {len(sdk_conditions)} điều kiện.")
+    while page_count < 20:
+        page_count += 1
+        try:
+            request_builder = SearchAppTableRecordRequest.builder().app_token(app_token).table_id(table_id).page_size(page_size)
+            if page_token: request_builder.page_token(page_token)
+            request_body_builder = SearchAppTableRecordRequestBody.builder()
+            if sdk_conditions:
+                request_body_builder.filter(FilterInfo.builder().conjunction("and").conditions(sdk_conditions).build())
+            request = request_builder.request_body(request_body_builder.build()).build()
+            response = client.bitable.v1.app_table_record.search(request)
+            if not response.success():
+                logging.error(f"Lỗi khi gọi SDK (trang {page_count}): {response.code} - {response.msg}"); break
+            data, items = response.data, data.items or []
+            if not items: break
+            for item in items: all_records_as_dicts.append({'record_id': item.record_id, 'fields': item.fields})
+            if not data.has_more: break
+            page_token = data.page_token
+        except Exception as e:
+            logging.error(f"Lỗi ngoại lệ trong quá trình tìm kiếm với SDK: {e}", exc_info=True); break
+    logging.info(f"✅ Hoàn tất tìm kiếm SDK. Tổng cộng {len(all_records_as_dicts)} bản ghi.")
+    return all_records_as_dicts
 ============================================================
 
 ============================================================
@@ -6608,553 +5865,77 @@ document.addEventListener('DOMContentLoaded', () => {
 ============================================================
 FILE: static\js\bulk-form.js
 ============================================================
-// // static/js/bulk-form.js
-// import { showValidationError } from './validators.js';
-
-// class BulkFormManager {
-//     constructor() {
-//         this.rowCounter = 0;
-//         this.groupCounter = 0;
-//         this.lastFromDepotValue = '';
-//         this.lastToDepotValue = '';
-//         this.revalidateTimeout = null;
-
-//         this.bindGlobalMethods();
-//         this.setupCommonFieldsWatcher();
-//     }
-    
-//     bindGlobalMethods() {
-//         // Gắn các phương thức vào window để HTML có thể gọi qua onclick
-//         window.addSingleBillRow = this.addSingleBillRow.bind(this);
-//         window.showGroupedBillModal = this.showGroupedBillModal.bind(this);
-//         window.closeGroupedBillModal = this.closeGroupedBillModal.bind(this);
-//         window.addGroupedBillRows = this.addGroupedBillRows.bind(this);
-//         window.removeBillRow = this.removeBillRow.bind(this);
-//         window.removeGroupedRows = this.removeGroupedRows.bind(this);
-//         window.validateBillId = this.validateBillId.bind(this);
-//         window.submitBulkForm = this.submitBulkForm.bind(this);
-//         window.updateTotalSummary = this.updateTotalSummary.bind(this);
-
-//         // Các phương thức của Modal
-//         window.addModalBillRow = this.addModalBillRow.bind(this);
-//         window.removeModalBillRow = this.removeModalBillRow.bind(this);
-//         window.validateModalBillId = this.validateModalBillId.bind(this);
-//     }
-
-//     setupCommonFieldsWatcher() {
-//         const depotInputs = document.querySelectorAll('.depot-hidden-input');
-//         const fromDepotInput = depotInputs[0];
-//         const toDepotInput = depotInputs[1];
-//         this.lastFromDepotValue = fromDepotInput ? fromDepotInput.value : '';
-//         this.lastToDepotValue = toDepotInput ? toDepotInput.value : '';
-
-//         setInterval(() => this.checkForValueChanges(), 800);
-//     }
-
-//     checkForValueChanges() {
-//         const depotInputs = document.querySelectorAll('.depot-hidden-input');
-//         const fromDepotInput = depotInputs[0];
-//         const toDepotInput = depotInputs[1];
-
-//         if (fromDepotInput && fromDepotInput.value !== this.lastFromDepotValue) {
-//             this.lastFromDepotValue = fromDepotInput.value;
-//             this.debounceRevalidate();
-//         }
-//         if (toDepotInput && toDepotInput.value !== this.lastToDepotValue) {
-//             this.lastToDepotValue = toDepotInput.value;
-//             this.debounceRevalidate();
-//         }
-//     }
-
-//     debounceRevalidate() {
-//         clearTimeout(this.revalidateTimeout);
-//         this.revalidateTimeout = setTimeout(() => this.revalidateAllBillIds(), 500);
-//     }
-
-//     async revalidateAllBillIds() {
-//         const billIdInputs = document.querySelectorAll('.bill-id-input');
-//         for (const input of billIdInputs) {
-//             if (input.value.trim()) {
-//                 await this.validateBillId(input);
-//             }
-//         }
-//     }
-
-//     addSingleBillRow() {
-//         const tbody = document.querySelector('#billTable tbody');
-//         if (!tbody) return;
-//         this.rowCounter++;
-//         const row = document.createElement('tr');
-//         row.id = `row-${this.rowCounter}`;
-//         row.classList.add('single-row');
-//         // ========================================================
-//         // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
-//         // ========================================================
-//         row.innerHTML = `
-//             <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
-//             <td><input type="number" class="form-control quantity-input" placeholder="SL bao" min="1" required oninput="updateTotalSummary()"></td>
-//             <td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>
-//             <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
-//             <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
-//         `;
-//         tbody.appendChild(row);
-//         this.updateTotalSummary();
-//     }
-
-//     addModalBillRow() {
-//         const modalTbody = document.getElementById('modalBillTbody');
-//         if (!modalTbody) return;
-        
-//         const newRow = modalTbody.insertRow();
-//         newRow.innerHTML = `
-//             <td><input type="text" class="form-control modal-bill-id-input" placeholder="ID" onblur="validateModalBillId(this)"></td>
-//             <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
-//             <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeModalBillRow(this)">🗑️</button></td>
-//         `;
-//         const newInput = newRow.querySelector('input');
-//         if (newInput) {
-//             newInput.focus();
-//         }
-//     }
-
-//     removeModalBillRow(button) {
-//         const row = button.closest('tr');
-//         if (row) {
-//             row.remove();
-//         }
-//     }
-
-//     async validateModalBillId(input) {
-//         const billId = input.value.trim();
-//         const row = input.closest('tr');
-//         const statusCell = row.querySelector('.status-cell');
-        
-//         if (!billId) {
-//             statusCell.innerHTML = '<span class="status-pending">⏳ Chưa kiểm tra</span>';
-//             return;
-//         }
-
-//         const depotInputs = document.querySelectorAll('.depot-hidden-input');
-//         const fromDepot = depotInputs[0]?.value || '';
-//         const toDepot = depotInputs[1]?.value || '';
-        
-//         if (!fromDepot || !toDepot) {
-//             statusCell.innerHTML = '<span class="status-invalid" title="Vui lòng chọn Kho đi và Kho đến ở form chính trước.">❌ Chọn kho trước</span>';
-//             return;
-//         }
-
-//         statusCell.innerHTML = '<span class="status-checking">🔄 Đang KT...</span>';
-        
-//         try {
-//             const response = await fetch('/validate-bill-id', {
-//                 method: 'POST',
-//                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-//                 body: `bill_id=${billId}&from_depot=${fromDepot}&to_depot=${toDepot}`
-//             });
-//             const result = await response.json();
-            
-//             if (result.valid) {
-//                 statusCell.innerHTML = '<span class="status-valid">✅ Hợp lệ</span>';
-//             } else {
-//                 statusCell.innerHTML = `<span class="status-invalid" title="${result.message}">❌ ${result.message}</span>`;
-//             }
-//         } catch (error) {
-//             statusCell.innerHTML = '<span class="status-error" title="Lỗi kết nối máy chủ.">⚠️ Lỗi</span>';
-//         }
-//     }
-
-//     showGroupedBillModal() {
-//         const modal = document.getElementById('groupedBillModal');
-//         const modalTbody = document.getElementById('modalBillTbody');
-        
-//         if (!modal) return;
-
-//         if (modalTbody) {
-//             modalTbody.innerHTML = ''; 
-//             this.addModalBillRow();
-//             this.addModalBillRow();
-//         }
-
-//         modal.classList.add('show');
-        
-//         setTimeout(() => {
-//             const firstInput = modalTbody?.querySelector('input');
-//             if (firstInput) firstInput.focus();
-//         }, 100);
-//     }
-
-//     closeGroupedBillModal() {
-//         const modal = document.getElementById('groupedBillModal');
-//         if (modal) modal.classList.remove('show');
-//     }
-
-//     addGroupedBillRows() {
-//         const modalInputs = document.querySelectorAll('#modalBillTbody .modal-bill-id-input');
-//         const billIds = Array.from(modalInputs).map(input => input.value.trim()).filter(id => id);
-
-//         if (billIds.length < 2) {
-//             alert('Vui lòng nhập ít nhất 2 Bill ID để gộp thành một tải.');
-//             return;
-//         }
-
-//         const invalidBill = Array.from(modalInputs).find(input => {
-//             const row = input.closest('tr');
-//             return row && row.querySelector('.status-invalid');
-//         });
-        
-//         if (invalidBill) {
-//             alert('Tồn tại Bill ID không hợp lệ trong danh sách. Vui lòng kiểm tra lại.');
-//             return;
-//         }
-        
-//         const tbody = document.querySelector('#billTable tbody');
-//         if (!tbody) return;
-
-//         this.groupCounter++;
-//         const groupId = `group-${this.groupCounter}`;
-//         const groupQuantity = 1;
-
-//         billIds.forEach((billId, index) => {
-//             this.rowCounter++;
-//             const row = document.createElement('tr');
-//             row.id = `row-${this.rowCounter}`;
-//             row.classList.add('grouped-row');
-//             row.dataset.groupId = groupId;
-            
-//             let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" onblur="validateBillId(this)" readonly></td>`;
-            
-//             // ========================================================
-//             // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
-//             // ========================================================
-//             if (index === 0) {
-//                 rowHtml += `
-//                     <td rowspan="${billIds.length}" class="grouped-quantity-cell">
-//                         <input type="number" class="form-control quantity-input" value="${groupQuantity}" min="1" required oninput="updateTotalSummary()">
-//                         <small class="text-muted">${billIds.length} ID</small>
-//                     </td>
-//                 `;
-//             }
-
-//             rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>`;
-            
-//             rowHtml += `<td class="status-cell"><span class="status-valid">✅ Hợp lệ</span></td>`;
-            
-//             if (index === 0) {
-//                 rowHtml += `<td rowspan="${billIds.length}" class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeGroupedRows('${groupId}')" title="Xóa nhóm">🗑️</button></td>`;
-//             }
-            
-//             row.innerHTML = rowHtml;
-//             tbody.appendChild(row);
-//         });
-
-//         this.closeGroupedBillModal();
-//         this.updateTotalSummary();
-//     }
-
-//     removeBillRow(rowId) {
-//         const row = document.getElementById(rowId);
-//         if (row) {
-//             row.remove();
-//             this.updateTotalSummary();
-//         }
-//     }
-
-//     removeGroupedRows(groupId) {
-//         document.querySelectorAll(`tr[data-group-id="${groupId}"]`).forEach(row => row.remove());
-//         this.updateTotalSummary();
-//     }
-
-//     async validateBillId(input) {
-//         await this.validateModalBillId(input);
-//     }
-
-//     updateTotalSummary() {
-//         let totalBills = 0;
-//         let totalBags = 0;
-//         let totalLoads = 0;
-        
-//         document.querySelectorAll('#billTable tbody tr').forEach(row => {
-//             if (row.querySelector('.bill-id-input')?.value.trim()) {
-//                 totalBills++;
-//             }
-
-//             const bagInput = row.querySelector('.bag-quantity-input');
-//             if (bagInput) {
-//                 totalBags += parseInt(bagInput.value, 10) || 0;
-//             }
-
-//             if (row.querySelector('.quantity-input')) {
-//                 const quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
-//                 totalLoads += quantity;
-//             }
-//         });
-        
-//         const totalBillsSpan = document.getElementById('totalBills');
-//         const totalBagsSpan = document.getElementById('totalBags');
-//         const totalLoadsSpan = document.getElementById('totalLoads');
-
-//         if(totalBillsSpan) totalBillsSpan.textContent = totalBills;
-//         if(totalBagsSpan) totalBagsSpan.textContent = totalBags;
-//         if(totalLoadsSpan) totalLoadsSpan.textContent = totalLoads;
-//     }
-
-//     hasInvalidIds() {
-//         return document.querySelectorAll('#billTable .status-invalid').length > 0;
-//     }
-
-//     validateRequiredFields() {
-//         const depotInputs = document.querySelectorAll('.depot-hidden-input');
-//         const fromDepot = depotInputs[0]?.value || '';
-//         const toDepot = depotInputs[1]?.value || '';
-        
-//         const handoverPersonInput = document.querySelector('.employee-hidden-input');
-//         const transportProviderInput = document.querySelector('.transport-hidden-input');
-        
-//         if (!fromDepot) {
-//             return { valid: false, message: `❌ Vui lòng chọn Kho đi.` };
-//         }
-//         if (!toDepot) {
-//             return { valid: false, message: `❌ Vui lòng chọn Kho đến.` };
-//         }
-//         if (!handoverPersonInput?.value) {
-//             return { valid: false, message: `❌ Vui lòng chọn Người bàn giao.` };
-//         }
-//         if (!transportProviderInput?.value) {
-//             return { valid: false, message: `❌ Vui lòng chọn Đơn vị vận chuyển.` };
-//         }
-        
-//         return { valid: true };
-//     }
-
-//     validateQuantityRequirement() {
-//         for (const row of document.querySelectorAll('#billTable tbody tr')) {
-//             const billIdInput = row.querySelector('.bill-id-input');
-//             const quantityInput = row.querySelector('.quantity-input');
-            
-//             if (billIdInput?.value.trim() && quantityInput) {
-//                  const quantity = parseInt(quantityInput.value, 10);
-//                  if (isNaN(quantity) || quantity <= 0) {
-//                      // ========================================================
-//                      // === ✅ ĐÃ CHỈNH SỬA TẠI ĐÂY ===
-//                      // ========================================================
-//                      return { valid: false, message: `❌ Bill ID "${billIdInput.value}" phải có số lượng bao lớn hơn 0.` };
-//                  }
-//             }
-//         }
-//         return { valid: true };
-//     }
-
-//     generateGroupId(billIds) {
-//         return billIds.join('_');
-//     }
-
-//     async submitBulkForm() {
-//         const resultContainer = document.getElementById('bulk-result-container');
-//         const submitBtn = document.getElementById('submitBtn');
-//         if (!resultContainer || !submitBtn) return;
-
-//         resultContainer.innerHTML = '';
-        
-//         if (this.hasInvalidIds()) {
-//             resultContainer.innerHTML = '<div class="error">Vui lòng sửa các Bill ID không hợp lệ trước khi lưu.</div>';
-//             return;
-//         }
-
-//         const requiredValidation = this.validateRequiredFields();
-//         if (!requiredValidation.valid) {
-//             resultContainer.innerHTML = `<div class="error">${requiredValidation.message}</div>`;
-//             return;
-//         }
-
-//         const quantityValidation = this.validateQuantityRequirement();
-//         if (!quantityValidation.valid) {
-//             resultContainer.innerHTML = `<div class="error">${quantityValidation.message}</div>`;
-//             return;
-//         }
-        
-//         const billData = [];
-//         const groupQuantities = {};
-//         const groupBillIds = {}; 
-//         const processedGroups = new Set();
-
-//         document.querySelectorAll('tr.grouped-row .quantity-input').forEach(input => {
-//             const row = input.closest('tr');
-//             const groupId = row.dataset.groupId;
-//             groupQuantities[groupId] = parseInt(input.value, 10) || 0;
-//         });
-
-//         document.querySelectorAll('#billTable tbody tr.grouped-row').forEach(row => {
-//             const billId = row.querySelector('.bill-id-input')?.value.trim();
-//             if (billId) {
-//                 const groupId = row.dataset.groupId;
-//                 if (!groupBillIds[groupId]) {
-//                     groupBillIds[groupId] = [];
-//                 }
-//                 groupBillIds[groupId].push(billId);
-//             }
-//         });
-
-//         document.querySelectorAll('#billTable tbody tr').forEach(row => {
-//             const billId = row.querySelector('.bill-id-input')?.value.trim();
-//             if (billId) {
-//                 const bagQuantity = parseInt(row.querySelector('.bag-quantity-input')?.value, 10) || 0;
-//                 let quantity = 0;
-//                 let groupId = null;
-
-//                 if (row.classList.contains('single-row')) {
-//                     quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
-//                 } else if (row.classList.contains('grouped-row')) {
-//                     const rowGroupId = row.dataset.groupId;
-//                     quantity = groupQuantities[rowGroupId] || 0;
-                    
-//                     if (groupBillIds[rowGroupId] && groupBillIds[rowGroupId].length > 0) {
-//                         groupId = groupBillIds[rowGroupId].join('_');
-//                     }
-//                 }
-
-//                 billData.push({ 
-//                     bill_id: billId, 
-//                     bag_quantity: bagQuantity,
-//                     quantity,
-//                     group_id: groupId
-//                 });
-//             }
-//         });
-
-//         if (billData.length === 0) {
-//             resultContainer.innerHTML = '<div class="error">Vui lòng nhập ít nhất một Bill ID.</div>';
-//             return;
-//         }
-        
-//         submitBtn.classList.add('htmx-request');
-//         resultContainer.innerHTML = '<div class="info">🔄 Đang xử lý, vui lòng chờ...</div>';
-        
-//         const depotInputs = document.querySelectorAll('.depot-hidden-input');
-//         const handoverPersonInput = document.querySelector('.employee-hidden-input');
-//         const transportProviderInput = document.querySelector('.transport-hidden-input');
-        
-//         const payload = {
-//             from_depot: depotInputs[0]?.value || '',
-//             to_depot: depotInputs[1]?.value || '',
-//             handover_person: handoverPersonInput?.value || '',
-//             transport_provider: transportProviderInput?.value || '',
-//             bill_data: billData
-//         };
-        
-//         try {
-//             const response = await fetch('/bulk-create-records', {
-//                 method: 'POST',
-//                 headers: {'Content-Type': 'application/json'},
-//                 body: JSON.stringify(payload)
-//             });
-//             const resultHTML = await response.text();
-//             resultContainer.innerHTML = resultHTML;
-            
-//             if (response.ok && resultHTML.includes('success')) {
-//                 const tbody = document.querySelector('#billTable tbody');
-//                 if (tbody) tbody.innerHTML = '';
-//                 this.addSingleBillRow();
-//             }
-//         } catch (error) {
-//             resultContainer.innerHTML = `<div class="error">Lỗi kết nối đến máy chủ: ${error.message}</div>`;
-//         } finally {
-//             submitBtn.classList.remove('htmx-request');
-//         }
-//     }
-// }
-
-// export default BulkFormManager;
-
-
-
-// static/js/bulk-form.js
 import { showValidationError } from './validators.js';
+
+// --- HÀM HELPER CHO DEBOUNCE VÀ THROTTLE ---
+function debounce(func, delay = 500) {
+    let timeoutId;
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+
+function throttle(func, limit = 250) {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
 
 
 class BulkFormManager {
     constructor() {
         this.rowCounter = 0;
         this.groupCounter = 0;
-        // ❌ BỎ: Không cần theo dõi "Kho đi" nữa
-        // this.lastFromDepotValue = ''; 
-        this.lastToDepotValue = '';
-        this.revalidateTimeout = null;
-
+        
+        // --- BƯỚC 2.2 & 2.3: KHỞI TẠO CÁC HÀM ĐÃ TỐI ƯU HÓA ---
+        this.throttledUpdateSummary = throttle(this.updateTotalSummary.bind(this), 250);
+        this.debouncedValidateBillId = debounce(this.validateBillId.bind(this), 400);
 
         this.bindGlobalMethods();
-        this.setupCommonFieldsWatcher();
+        this.setupEventListeners();
     }
     
     bindGlobalMethods() {
-        // Gắn các phương thức vào window để HTML có thể gọi qua onclick
         window.addSingleBillRow = this.addSingleBillRow.bind(this);
         window.showGroupedBillModal = this.showGroupedBillModal.bind(this);
         window.closeGroupedBillModal = this.closeGroupedBillModal.bind(this);
         window.addGroupedBillRows = this.addGroupedBillRows.bind(this);
         window.removeBillRow = this.removeBillRow.bind(this);
         window.removeGroupedRows = this.removeGroupedRows.bind(this);
-        window.validateBillId = this.validateBillId.bind(this);
+        // validateBillId và updateTotalSummary không cần public nữa vì được gọi qua debounce/throttle
         window.submitBulkForm = this.submitBulkForm.bind(this);
-        window.updateTotalSummary = this.updateTotalSummary.bind(this);
 
-
-        // Các phương thức của Modal
         window.addModalBillRow = this.addModalBillRow.bind(this);
         window.removeModalBillRow = this.removeModalBillRow.bind(this);
+        // Chúng ta vẫn cần hàm này cho modal
         window.validateModalBillId = this.validateModalBillId.bind(this);
     }
 
-
-    setupCommonFieldsWatcher() {
-        const depotInputs = document.querySelectorAll('.depot-hidden-input');
-        // ✅ SỬA: Chỉ lấy "Kho đến" (input thứ hai)
-        const toDepotInput = depotInputs[0];
-        // ❌ BỎ: Không cần "Kho đi"
-        // this.lastFromDepotValue = fromDepotInput ? fromDepotInput.value : ''; 
-        this.lastToDepotValue = toDepotInput ? toDepotInput.value : '';
-
-
-        setInterval(() => this.checkForValueChanges(), 800);
+    setupEventListeners() {
+        document.body.addEventListener('depotChanged', () => {
+            this.revalidateAllBillIds();
+        });
     }
-
-
-    checkForValueChanges() {
-        const depotInputs = document.querySelectorAll('.depot-hidden-input');
-        // ✅ SỬA: Chỉ lấy "Kho đến"
-        const toDepotInput = depotInputs[0];
-
-
-        // ❌ BỎ: Toàn bộ khối if cho "Kho đi"
-        // if (fromDepotInput && fromDepotInput.value !== this.lastFromDepotValue) {
-        //     this.lastFromDepotValue = fromDepotInput.value;
-        //     this.debounceRevalidate();
-        // }
-
-
-        // ✅ SỬA: Giữ lại logic cho "Kho đến"
-        if (toDepotInput && toDepotInput.value !== this.lastToDepotValue) {
-            this.lastToDepotValue = toDepotInput.value;
-            this.debounceRevalidate();
-        }
-    }
-
-
-    debounceRevalidate() {
-        clearTimeout(this.revalidateTimeout);
-        this.revalidateTimeout = setTimeout(() => this.revalidateAllBillIds(), 500);
-    }
-
 
     async revalidateAllBillIds() {
         const billIdInputs = document.querySelectorAll('.bill-id-input');
         for (const input of billIdInputs) {
             if (input.value.trim()) {
-                await this.validateBillId(input);
+                await new Promise(resolve => setTimeout(resolve, 50)); 
+                await this.validateBillId(input); // Gọi trực tiếp ở đây
             }
         }
     }
-
-
+    
+    // --- THAY ĐỔI LỚN: XÓA onblur, oninput và GẮN SỰ KIỆN BẰNG JS ---
     addSingleBillRow() {
         const tbody = document.querySelector('#billTable tbody');
         if (!tbody) return;
@@ -7162,17 +5943,41 @@ class BulkFormManager {
         const row = document.createElement('tr');
         row.id = `row-${this.rowCounter}`;
         row.classList.add('single-row');
-        row.innerHTML = `
-            <td><input type="text" class="form-control bill-id-input" placeholder="ID" onblur="validateBillId(this)"></td>
-            <td><input type="number" class="form-control quantity-input" placeholder="SL bao" min="1" required oninput="updateTotalSummary()"></td>
-            <td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>
-            <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
-            <td class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeBillRow('${row.id}')">🗑️</button></td>
-        `;
-        tbody.appendChild(row);
-        this.updateTotalSummary();
-    }
 
+        // Xóa onblur và oninput khỏi HTML
+        row.innerHTML = `
+            <td><input type="text" class="form-control bill-id-input" placeholder="ID"></td>
+            <td><input type="number" class="form-control quantity-input" placeholder="SL bao" min="1" required></td>
+            <td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0"></td>
+            <td class="status-cell"><span class="status-pending">⏳ Chưa kiểm tra</span></td>
+            <td class="action-cell"><button type="button" class="btn btn-danger btn-small">🗑️</button></td>
+        `;
+
+        // Gắn sự kiện bằng JavaScript
+        const billIdInput = row.querySelector('.bill-id-input');
+        const quantityInput = row.querySelector('.quantity-input');
+        const bagQuantityInput = row.querySelector('.bag-quantity-input');
+        const removeButton = row.querySelector('.btn-danger');
+
+        billIdInput.addEventListener('input', (event) => {
+            this.debouncedValidateBillId(event.target);
+        });
+
+        quantityInput.addEventListener('input', () => {
+            this.throttledUpdateSummary();
+        });
+
+        bagQuantityInput.addEventListener('input', () => {
+            this.throttledUpdateSummary();
+        });
+
+        removeButton.addEventListener('click', () => {
+            this.removeBillRow(row.id);
+        });
+
+        tbody.appendChild(row);
+        this.throttledUpdateSummary(); // Cập nhật tổng khi thêm dòng mới
+    }
 
     addModalBillRow() {
         const modalTbody = document.getElementById('modalBillTbody');
@@ -7190,7 +5995,6 @@ class BulkFormManager {
         }
     }
 
-
     removeModalBillRow(button) {
         const row = button.closest('tr');
         if (row) {
@@ -7198,10 +6002,11 @@ class BulkFormManager {
         }
     }
 
-
-    async validateModalBillId(input) {
-        const billId = input.value.trim();
-        const row = input.closest('tr');
+    // validateModalBillId và validateBillId có thể gộp lại
+    async validateBillId(inputElement) {
+        const billId = inputElement.value.trim();
+        const row = inputElement.closest('tr');
+        if (!row) return;
         const statusCell = row.querySelector('.status-cell');
         
         if (!billId) {
@@ -7209,11 +6014,7 @@ class BulkFormManager {
             return;
         }
 
-        // ✅ Đơn giản hóa: Chỉ lấy depot input theo 1 cách duy nhất
         const toDepot = document.querySelector('.depot-hidden-input')?.value || '';
-        
-        console.log('🔍 Found toDepot:', toDepot); // Debug log
-        
         if (!toDepot) {
             statusCell.innerHTML = '<span class="status-invalid" title="Vui lòng chọn Kho đến ở form chính trước.">❌ Chọn kho đến</span>';
             return;
@@ -7238,109 +6039,54 @@ class BulkFormManager {
             statusCell.innerHTML = '<span class="status-error" title="Lỗi kết nối máy chủ.">⚠️ Lỗi</span>';
         }
     }
-
-    // async validateModalBillId(input) {
-    //     const billId = input.value.trim();
-    //     const row = input.closest('tr');
-    //     const statusCell = row.querySelector('.status-cell');
-        
-    //     if (!billId) {
-    //         statusCell.innerHTML = '<span class="status-pending">⏳ Chưa kiểm tra</span>';
-    //         return;
-    //     }
-
-
-    //     const depotInputs = document.querySelectorAll('.depot-hidden-input');
-    //     // ✅ SỬA: Chỉ lấy "Kho đến" (input thứ hai)
-    //     const toDepot = depotInputs[1]?.value || '';
-        
-    //     // ✅ SỬA: Chỉ kiểm tra "Kho đến"
-    //     if (!toDepot) {
-    //         statusCell.innerHTML = '<span class="status-invalid" title="Vui lòng chọn Kho đến ở form chính trước.">❌ Chọn kho đến</span>';
-    //         return;
-    //     }
-
-
-    //     statusCell.innerHTML = '<span class="status-checking">🔄 Đang KT...</span>';
-        
-    //     try {
-    //         const response = await fetch('/validate-bill-id', {
-    //             method: 'POST',
-    //             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    //             // ✅ SỬA: Xóa from_depot khỏi body request
-    //             body: `bill_id=${billId}&to_depot=${toDepot}`
-    //         });
-    //         const result = await response.json();
-            
-    //         if (result.valid) {
-    //             statusCell.innerHTML = '<span class="status-valid">✅ Hợp lệ</span>';
-    //         } else {
-    //             statusCell.innerHTML = `<span class="status-invalid" title="${result.message}">❌ ${result.message}</span>`;
-    //         }
-    //     } catch (error) {
-    //         statusCell.innerHTML = '<span class="status-error" title="Lỗi kết nối máy chủ.">⚠️ Lỗi</span>';
-    //     }
-    // }
-
+    
+    async validateModalBillId(input) {
+        // Hàm này vẫn dùng onblur cho đơn giản bên trong modal
+        await this.validateBillId(input);
+    }
 
     showGroupedBillModal() {
         const modal = document.getElementById('groupedBillModal');
         const modalTbody = document.getElementById('modalBillTbody');
-        
         if (!modal) return;
-
-
         if (modalTbody) {
             modalTbody.innerHTML = ''; 
             this.addModalBillRow();
             this.addModalBillRow();
         }
-
-
         modal.classList.add('show');
-        
         setTimeout(() => {
             const firstInput = modalTbody?.querySelector('input');
             if (firstInput) firstInput.focus();
         }, 100);
     }
 
-
     closeGroupedBillModal() {
         const modal = document.getElementById('groupedBillModal');
         if (modal) modal.classList.remove('show');
     }
 
-
     addGroupedBillRows() {
         const modalInputs = document.querySelectorAll('#modalBillTbody .modal-bill-id-input');
         const billIds = Array.from(modalInputs).map(input => input.value.trim()).filter(id => id);
-
-
         if (billIds.length < 2) {
             alert('Vui lòng nhập ít nhất 2 Bill ID để gộp thành một tải.');
             return;
         }
-
-
         const invalidBill = Array.from(modalInputs).find(input => {
             const row = input.closest('tr');
             return row && row.querySelector('.status-invalid');
         });
-        
         if (invalidBill) {
             alert('Tồn tại Bill ID không hợp lệ trong danh sách. Vui lòng kiểm tra lại.');
             return;
         }
-        
         const tbody = document.querySelector('#billTable tbody');
         if (!tbody) return;
-
 
         this.groupCounter++;
         const groupId = `group-${this.groupCounter}`;
         const groupQuantity = 1;
-
 
         billIds.forEach((billId, index) => {
             this.rowCounter++;
@@ -7349,57 +6095,51 @@ class BulkFormManager {
             row.classList.add('grouped-row');
             row.dataset.groupId = groupId;
             
-            let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" onblur="validateBillId(this)" readonly></td>`;
-            
+            let rowHtml = `<td><input type="text" class="form-control bill-id-input" value="${billId}" readonly></td>`;
             if (index === 0) {
                 rowHtml += `
                     <td rowspan="${billIds.length}" class="grouped-quantity-cell">
-                        <input type="number" class="form-control quantity-input" value="${groupQuantity}" min="1" required oninput="updateTotalSummary()">
+                        <input type="number" class="form-control quantity-input" value="${groupQuantity}" min="1" required>
                         <small class="text-muted">${billIds.length} ID</small>
                     </td>
                 `;
             }
-
-
-            rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0" oninput="updateTotalSummary()"></td>`;
-            
+            rowHtml += `<td><input type="number" class="form-control bag-quantity-input" placeholder="SL túi" min="0"></td>`;
             rowHtml += `<td class="status-cell"><span class="status-valid">✅ Hợp lệ</span></td>`;
-            
             if (index === 0) {
-                rowHtml += `<td rowspan="${billIds.length}" class="action-cell"><button type="button" class="btn btn-danger btn-small" onclick="removeGroupedRows('${groupId}')" title="Xóa nhóm">🗑️</button></td>`;
+                rowHtml += `<td rowspan="${billIds.length}" class="action-cell"><button type="button" class="btn btn-danger btn-small" title="Xóa nhóm">🗑️</button></td>`;
             }
-            
             row.innerHTML = rowHtml;
+
+            // Gắn sự kiện cho các input và button của grouped row
+            row.querySelectorAll('.quantity-input, .bag-quantity-input').forEach(input => {
+                input.addEventListener('input', () => this.throttledUpdateSummary());
+            });
+            row.querySelector('.bill-id-input')?.addEventListener('input', (e) => this.debouncedValidateBillId(e.target));
+            row.querySelector('.btn-danger')?.addEventListener('click', () => this.removeGroupedRows(groupId));
+
             tbody.appendChild(row);
         });
 
-
         this.closeGroupedBillModal();
-        this.updateTotalSummary();
+        this.throttledUpdateSummary();
     }
-
 
     removeBillRow(rowId) {
         const row = document.getElementById(rowId);
         if (row) {
             row.remove();
-            this.updateTotalSummary();
+            this.throttledUpdateSummary();
         }
     }
 
-
     removeGroupedRows(groupId) {
         document.querySelectorAll(`tr[data-group-id="${groupId}"]`).forEach(row => row.remove());
-        this.updateTotalSummary();
+        this.throttledUpdateSummary();
     }
-
-
-    async validateBillId(input) {
-        await this.validateModalBillId(input);
-    }
-
 
     updateTotalSummary() {
+        console.log("Updating summary..."); // Để kiểm tra throttle
         let totalBills = 0;
         let totalBags = 0;
         let totalLoads = 0;
@@ -7408,14 +6148,10 @@ class BulkFormManager {
             if (row.querySelector('.bill-id-input')?.value.trim()) {
                 totalBills++;
             }
-
-
             const bagInput = row.querySelector('.bag-quantity-input');
             if (bagInput) {
                 totalBags += parseInt(bagInput.value, 10) || 0;
             }
-
-
             if (row.querySelector('.quantity-input')) {
                 const quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
                 totalLoads += quantity;
@@ -7426,30 +6162,20 @@ class BulkFormManager {
         const totalBagsSpan = document.getElementById('totalBags');
         const totalLoadsSpan = document.getElementById('totalLoads');
 
-
         if(totalBillsSpan) totalBillsSpan.textContent = totalBills;
         if(totalBagsSpan) totalBagsSpan.textContent = totalBags;
         if(totalLoadsSpan) totalLoadsSpan.textContent = totalLoads;
     }
 
-
     hasInvalidIds() {
         return document.querySelectorAll('#billTable .status-invalid').length > 0;
     }
 
-
     validateRequiredFields() {
-        const depotInputs = document.querySelectorAll('.depot-hidden-input');
-        // ✅ SỬA: Chỉ lấy "Kho đến"
-        const toDepot = depotInputs[0]?.value || '';
-        
+        const toDepot = document.querySelector('.depot-hidden-input')?.value || '';
         const handoverPersonInput = document.querySelector('.employee-hidden-input');
         const transportProviderInput = document.querySelector('.transport-hidden-input');
         
-        // ❌ BỎ: Kiểm tra "Kho đi"
-        // if (!fromDepot) {
-        //     return { valid: false, message: `❌ Vui lòng chọn Kho đi.` };
-        // }
         if (!toDepot) {
             return { valid: false, message: `❌ Vui lòng chọn Kho đến.` };
         }
@@ -7459,10 +6185,8 @@ class BulkFormManager {
         if (!transportProviderInput?.value) {
             return { valid: false, message: `❌ Vui lòng chọn Đơn vị vận chuyển.` };
         }
-        
         return { valid: true };
     }
-
 
     validateQuantityRequirement() {
         for (const row of document.querySelectorAll('#billTable tbody tr')) {
@@ -7478,18 +6202,13 @@ class BulkFormManager {
         }
         return { valid: true };
     }
-
-
-    generateGroupId(billIds) {
-        return billIds.join('_');
-    }
-
-
+    
+    // ... các hàm còn lại giữ nguyên ...
     async submitBulkForm() {
+        // Nội dung hàm này không thay đổi
         const resultContainer = document.getElementById('bulk-result-container');
         const submitBtn = document.getElementById('submitBtn');
         if (!resultContainer || !submitBtn) return;
-
 
         resultContainer.innerHTML = '';
         
@@ -7498,13 +6217,11 @@ class BulkFormManager {
             return;
         }
 
-
         const requiredValidation = this.validateRequiredFields();
         if (!requiredValidation.valid) {
             resultContainer.innerHTML = `<div class="error">${requiredValidation.message}</div>`;
             return;
         }
-
 
         const quantityValidation = this.validateQuantityRequirement();
         if (!quantityValidation.valid) {
@@ -7515,15 +6232,12 @@ class BulkFormManager {
         const billData = [];
         const groupQuantities = {};
         const groupBillIds = {}; 
-        const processedGroups = new Set();
-
-
+        
         document.querySelectorAll('tr.grouped-row .quantity-input').forEach(input => {
             const row = input.closest('tr');
             const groupId = row.dataset.groupId;
             groupQuantities[groupId] = parseInt(input.value, 10) || 0;
         });
-
 
         document.querySelectorAll('#billTable tbody tr.grouped-row').forEach(row => {
             const billId = row.querySelector('.bill-id-input')?.value.trim();
@@ -7536,14 +6250,12 @@ class BulkFormManager {
             }
         });
 
-
         document.querySelectorAll('#billTable tbody tr').forEach(row => {
             const billId = row.querySelector('.bill-id-input')?.value.trim();
             if (billId) {
                 const bagQuantity = parseInt(row.querySelector('.bag-quantity-input')?.value, 10) || 0;
                 let quantity = 0;
                 let groupId = null;
-
 
                 if (row.classList.contains('single-row')) {
                     quantity = parseInt(row.querySelector('.quantity-input').value, 10) || 0;
@@ -7556,7 +6268,6 @@ class BulkFormManager {
                     }
                 }
 
-
                 billData.push({ 
                     bill_id: billId, 
                     bag_quantity: bagQuantity,
@@ -7565,7 +6276,6 @@ class BulkFormManager {
                 });
             }
         });
-
 
         if (billData.length === 0) {
             resultContainer.innerHTML = '<div class="error">Vui lòng nhập ít nhất một Bill ID.</div>';
@@ -7580,8 +6290,6 @@ class BulkFormManager {
         const transportProviderInput = document.querySelector('.transport-hidden-input');
         
         const payload = {
-            // ❌ BỎ: Không gửi from_depot nữa
-            // from_depot: depotInputs[0]?.value || '', 
             to_depot: depotInputs[0]?.value || '',
             handover_person: handoverPersonInput?.value || '',
             transport_provider: transportProviderInput?.value || '',
@@ -7610,9 +6318,7 @@ class BulkFormManager {
     }
 }
 
-
 export default BulkFormManager;
-
 ============================================================
 
 ============================================================
@@ -7830,7 +6536,8 @@ class DropdownManager {
             }
         });
     }
-    
+
+
     initDepotDropdown(component) {
         const searchInput = component.querySelector('.depot-search-input');
         const hiddenInput = component.querySelector('.depot-hidden-input');
@@ -7842,7 +6549,6 @@ class DropdownManager {
         
         dropdown.style.display = 'none';
         
-        // ✅ SỬA: Show existing value khi focus lại  
         if (hiddenInput.value) {
             const selectedOption = dropdown.querySelector(`[data-value="${hiddenInput.value}"]`);
             if (selectedOption) {
@@ -7864,7 +6570,6 @@ class DropdownManager {
             this.filterDepots(query, options, infoDiv);
         });
 
-        // ✅ SỬA: Ngăn người dùng nhập tự do
         searchInput.addEventListener('blur', () => {
             setTimeout(() => {
                 if (searchInput.value.trim() && !hiddenInput.value) {
@@ -7875,7 +6580,6 @@ class DropdownManager {
             }, 200);
         });
 
-        // ✅ SỬA: Show giá trị đã chọn khi focus lại
         searchInput.addEventListener('focus', () => {
             if (hiddenInput.value) {
                 dropdown.style.display = 'block';
@@ -7894,6 +6598,7 @@ class DropdownManager {
             if (option) {
                 const depotId = option.dataset.value;
                 const depotName = option.dataset.name;
+                const previousValue = hiddenInput.value;
 
                 searchInput.value = depotName;
                 hiddenInput.value = depotId;
@@ -7901,10 +6606,23 @@ class DropdownManager {
 
                 options.forEach(opt => opt.classList.remove('selected'));
                 option.classList.add('selected');
+
+                // --- THAY ĐỔI QUAN TRỌNG ---
+                // Chỉ phát sự kiện nếu giá trị thực sự thay đổi.
+                if (previousValue !== depotId) {
+                    console.log(`Depot changed to: ${depotId}. Firing depotChanged event.`);
+                    const depotChangedEvent = new CustomEvent('depotChanged', {
+                        detail: {
+                            depotId: depotId,
+                            depotName: depotName
+                        }
+                    });
+                    document.body.dispatchEvent(depotChangedEvent);
+                }
+                // --- KẾT THÚC THAY ĐỔI ---
             }
         });
 
-        // ✅ SỬA: Ngăn người dùng typing sau khi đã chọn
         searchInput.addEventListener('keydown', (e) => {
             if (hiddenInput.value && e.key !== 'Tab' && e.key !== 'Enter') {
                 if (e.key === 'Backspace' || e.key === 'Delete' || e.key.length === 1) {
@@ -7914,6 +6632,7 @@ class DropdownManager {
             }
         });
     }
+
     
     filterEmployees(query, options, infoDiv) {
         let visibleCount = 0;
@@ -8094,15 +6813,123 @@ export function showRefreshNotification(message, type = 'success', duration = 30
 }
 ============================================================
 
+============================================================
+FILE: test_larkbase_data.py
+============================================================
+# FILE: test_larkbase_data.py (Nâng cấp để kiểm tra nhiều cột)
+import os
+import lark_oapi as lark
+from lark_oapi.api.bitable.v1 import *
+import logging
+from dotenv import load_dotenv
+
+# --- CẤU HÌNH ---
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+load_dotenv() # Tải các biến từ file .env
+
+# Lấy thông tin từ biến môi trường
+LARK_APP_ID = os.getenv('LARK_APP_ID')
+LARK_APP_SECRET = os.getenv('LARK_APP_SECRET')
+APP_TOKEN = os.getenv('MAIN_APP_TOKEN')
+TABLE_ID = os.getenv('MAIN_TABLE_ID')
+
+# ==============================================================================
+# ✅ THAY ĐỔI CHÍNH: CHỈ CẦN SỬA DANH SÁCH DƯỚI ĐÂY ĐỂ KIỂM TRA CÁC CỘT BẠN MUỐN
+# ==============================================================================
+FIELDS_TO_INSPECT = [
+    "ID",
+    "Kho đi",               # Cột có khả năng gây lỗi
+    "Kho đến",              # Cột có khả năng gây lỗi
+    "Đơn vị vận chuyển",    # Cột đã được sửa
+    "Người bàn giao",       # Cột Person
+    "Số lượng bao",         # Cột Number
+    "Ngày bàn giao",        # Cột Date/Timestamp
+    "Group ID"              # Cột Text
+]
+# ==============================================================================
+
+def inspect_larkbase_fields():
+    """
+    Kết nối đến Larkbase, lấy một vài bản ghi và in ra giá trị cũng như
+    kiểu dữ liệu của TẤT CẢ các cột được định nghĩa trong FIELDS_TO_INSPECT.
+    """
+    if not all([LARK_APP_ID, LARK_APP_SECRET, APP_TOKEN, TABLE_ID]):
+        logging.error("Lỗi: Vui lòng kiểm tra lại các biến môi trường trong file .env")
+        return
+
+    # Khởi tạo Lark SDK client
+    try:
+        client = lark.Client.builder() \
+            .app_id(LARK_APP_ID) \
+            .app_secret(LARK_APP_SECRET) \
+            .log_level(lark.LogLevel.ERROR) \
+            .build()
+    except Exception as e:
+        logging.error(f"Lỗi khi khởi tạo Lark SDK client: {e}")
+        return
+
+    logging.info(f"Đang tiến hành lấy 5 bản ghi từ bảng ID: {TABLE_ID}...")
+
+    try:
+        request_body = SearchAppTableRecordRequestBody.builder().build()
+        request = SearchAppTableRecordRequest.builder() \
+            .app_token(APP_TOKEN) \
+            .table_id(TABLE_ID) \
+            .page_size(5) \
+            .request_body(request_body) \
+            .build()
+
+        response = client.bitable.v1.app_table_record.search(request)
+
+        if not response.success():
+            logging.error(f"Lỗi API: {response.code} - {response.msg}")
+            return
+
+        items = response.data.items or []
+        if not items:
+            logging.warning("Không tìm thấy bản ghi nào để kiểm tra.")
+            return
+
+        # ✅ THAY ĐỔI: In kết quả cho nhiều cột
+        print("\n" + "="*80)
+        print(f"KẾT QUẢ KIỂM TRA CÁC CỘT: {', '.join(FIELDS_TO_INSPECT)}")
+        print("="*80)
+
+        # Duyệt qua từng bản ghi
+        for i, item in enumerate(items):
+            fields = item.fields
+            record_id = item.record_id
+
+            print(f"\n[Bản ghi #{i+1}] - Record ID: {record_id}")
+            
+            # ✅ THAY ĐỔI: Duyệt qua từng cột trong danh sách cần kiểm tra
+            for field_name in FIELDS_TO_INSPECT:
+                field_value = fields.get(field_name) # Dùng .get() để tránh lỗi nếu cột không tồn tại
+
+                print(f"  --- Cột: '{field_name}' ---")
+                print(f"      - Giá trị: {field_value}")
+                print(f"      - Kiểu dữ liệu: {type(field_value)}")
+        
+        print("\n" + "="*80)
+        logging.info("Kiểm tra hoàn tất.")
+
+    except Exception as e:
+        logging.error(f"Lỗi ngoại lệ trong quá trình kiểm tra: {e}", exc_info=True)
+
+
+if __name__ == "__main__":
+    inspect_larkbase_fields()
+============================================================
+
 
 📊 THỐNG KÊ
 ------------------------------
-Tổng số file: 58
-File code: 40
+Tổng số file: 59
+File code: 41
 Các loại file code:
   .css: 5 file
   .js: 4 file
   .md: 1 file
-  .py: 27 file
+  .py: 28 file
   .txt: 2 file
   .yml: 1 file
