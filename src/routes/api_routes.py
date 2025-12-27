@@ -90,7 +90,11 @@ async def validate_bill_id(
         #     })
         
         # ✅ GIỮ LẠI: Vẫn kiểm tra kho đến
-        if example_item.get("toDepotId", "") != to_depot:
+        # Convert về string để so sánh (API trả về số, form gửi string)
+        api_to_depot_id = str(example_item.get("toDepotId", ""))
+        form_to_depot = str(to_depot).strip()
+        
+        if api_to_depot_id != form_to_depot:
             return JSONResponse({
                 "valid": False,
                 "message": "Không đúng kho đến"
@@ -283,7 +287,11 @@ async def bulk_create_records(
             #     continue
             
             # ✅ GIỮ: Vẫn check kho đến
-            if example_item.get("toDepotId", "") != to_depot:
+            # Convert về string để so sánh (API trả về số, form gửi string)
+            api_to_depot_id = str(example_item.get("toDepotId", ""))
+            form_to_depot = str(to_depot).strip()
+            
+            if api_to_depot_id != form_to_depot:
                 error_count += 1
                 if len(error_samples) < 3:
                     error_samples.append(f"{bill_id}: Không đúng kho đến")
