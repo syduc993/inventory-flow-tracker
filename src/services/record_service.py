@@ -57,8 +57,12 @@ class RecordService:
                     else:
                         new_record["Người bàn giao"] = value  # Fallback về ID nếu không tìm thấy tên
                 continue
-            elif value and key not in ["Người bàn giao_hidden"]:  
-                new_record[key] = value
+            elif value and key not in ["Người bàn giao_hidden"]:
+                # ✅ FIX: Ép kiểu string cho các trường text để tránh lỗi TextFieldConvFail
+                if key in ["ID", "ID kho đi", "ID kho đến", "ID người bàn giao", "Kho đi", "Kho đến", "Đơn vị vận chuyển"]:
+                     new_record[key] = str(value)
+                else:
+                     new_record[key] = value
         
         new_record["Ngày bàn giao"] = int(time.time() * 1000)
         
@@ -109,10 +113,14 @@ class RecordService:
                 elif key == "group_id":
                     # ✅ THÊM: Xử lý Group ID
                     if value:
-                        processed_record["Group ID"] = value
+                        processed_record["Group ID"] = str(value) # ✅ FIX: Ép kiểu string
                     continue
                 elif value and key not in ["Người bàn giao_hidden", "group_id"]:
-                    processed_record[key] = value
+                    # ✅ FIX: Ép kiểu string cho các trường text để tránh lỗi TextFieldConvFail
+                    if key in ["ID", "ID kho đi", "ID kho đến", "ID người bàn giao", "Kho đi", "Kho đến", "Đơn vị vận chuyển"]:
+                        processed_record[key] = str(value)
+                    else:
+                        processed_record[key] = value
             
             processed_record["Ngày bàn giao"] = int(time.time() * 1000)
             processed_records.append(processed_record)
